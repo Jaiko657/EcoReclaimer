@@ -1,6 +1,7 @@
 #include "modules/core/cmp_print.h"
 
 #include "modules/core/logger.h"
+#include <stdio.h>
 
 static const char* facing_short(facing_t d)
 {
@@ -62,6 +63,16 @@ static const char* indent_or_empty(const char* indent)
     return indent ? indent : "";
 }
 
+static const char* debug_resource_name(resource_type_t type)
+{
+    static const char* const names[] = {
+        [RESOURCE_TYPE_PLASTIC] = "plastic",
+        [RESOURCE_TYPE_METAL] = "metal",
+    };
+    if (type < 0 || type >= RESOURCE_TYPE_COUNT) return "resource";
+    const char* name = names[type];
+    return name ? name : "resource";
+}
 void cmp_print_position(const char* indent, const cmp_position_t* p)
 {
     const char* prefix = indent_or_empty(indent);
@@ -166,10 +177,53 @@ void cmp_print_player(const char* indent)
     LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sPLAYER()", prefix);
 }
 
-void cmp_print_storage(const char* indent, int plastic, int capacity)
+void cmp_print_storage(const char* indent, const int counts[RESOURCE_TYPE_COUNT], int capacity)
 {
     const char* prefix = indent_or_empty(indent);
-    LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sSTORAGE(plastic=%d, capacity=%d)", prefix, plastic, capacity);
+    if (!counts) {
+        LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sSTORAGE(capacity=%d)", prefix, capacity);
+        return;
+    }
+
+    char counts_buf[128];
+    counts_buf[0] = '\0';
+    size_t offset = 0;
+    for (int type = 0; type < RESOURCE_TYPE_COUNT; ++type) {
+        const char* type_label = debug_resource_name((resource_type_t)type);
+
+        if (offset > 0) {
+            size_t rem = sizeof(counts_buf) - offset;
+            if (rem == 0) break;
+            int wrote = snprintf(counts_buf + offset, rem, ", ");
+            if (wrote < 0) break;
+            if ((size_t)wrote >= rem) {
+                offset = sizeof(counts_buf) - 1;
+                counts_buf[offset] = '\0';
+                break;
+            }
+            offset += (size_t)wrote;
+        }
+
+        size_t rem = sizeof(counts_buf) - offset;
+        if (rem == 0) break;
+        int wrote = snprintf(counts_buf + offset, rem, "%s=%d", type_label, counts[type]);
+        if (wrote < 0) break;
+        if ((size_t)wrote >= rem) {
+            offset = sizeof(counts_buf) - 1;
+            counts_buf[offset] = '\0';
+            break;
+        }
+        offset += (size_t)wrote;
+    }
+
+    LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sSTORAGE(%s, capacity=%d)", prefix, counts_buf, capacity);
+}
+
+void cmp_print_resource(const char* indent, resource_type_t type)
+{
+    const char* prefix = indent_or_empty(indent);
+    const char* type_label = debug_resource_name(type);
+    LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sRESOURCE(type=%s)", prefix, type_label);
 }
 
 void cmp_print_follow(const char* indent, const cmp_follow_t* f)
@@ -216,6 +270,29 @@ void cmp_print_collider(const char* indent, const cmp_collider_t* c)
     LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sCOL(hx=%.2f, hy=%.2f)", prefix, c->hx, c->hy);
 }
 
+void cmp_print_liftable(const char* indent, const cmp_liftable_t* g)
+{
+    const char* prefix = indent_or_empty(indent);
+    if (!g) {
+        LOGC(LOGCAT_ECS, LOG_LVL_INFO, "%sLIFTABLE(null)", prefix);
+        return;
+    }
+    LOGC(
+        LOGCAT_ECS,
+        LOG_LVL_INFO,
+        "%sLIFTABLE(state=%s, holder=%u, drop=%d, follow=%.2f, max=%.1f, break=%.1f, hold_v=(%.1f,%.1f))",
+        prefix,
+        grav_gun_state_short(g->state),
+        g->holder.idx,
+        g->just_dropped ? 1 : 0,
+        g->follow_gain,
+        g->max_speed,
+        g->breakoff_distance,
+        g->hold_vel_x,
+        g->hold_vel_y
+    );
+}
+
 void cmp_print_grav_gun(const char* indent, const cmp_grav_gun_t* g)
 {
     const char* prefix = indent_or_empty(indent);
@@ -226,16 +303,14 @@ void cmp_print_grav_gun(const char* indent, const cmp_grav_gun_t* g)
     LOGC(
         LOGCAT_ECS,
         LOG_LVL_INFO,
-        "%sGRAV_GUN(state=%s, holder=%u, drop=%d, follow=%.2f, max=%.1f, break=%.1f, hold_v=(%.1f,%.1f))",
+        "%sGRAV_GUN(held=%d, holder=%u, charge=%.2f/%.2f, drain=%.2f, regen=%.2f)",
         prefix,
-        grav_gun_state_short(g->state),
+        g->held ? 1 : 0,
         g->holder.idx,
-        g->just_dropped ? 1 : 0,
-        g->follow_gain,
-        g->max_speed,
-        g->breakoff_distance,
-        g->hold_vel_x,
-        g->hold_vel_y
+        g->charge,
+        g->max_charge,
+        g->drain_rate,
+        g->regen_rate
     );
 }
 

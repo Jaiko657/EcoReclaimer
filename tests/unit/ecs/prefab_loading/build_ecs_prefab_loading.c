@@ -88,6 +88,9 @@ int main(int argc, char **argv)
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
     nob_da_append(&sources, "src/modules/ecs/ecs_prefab_loading.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_resource.c");
+    nob_da_append(&sources, "src/modules/prefab/prefab_cmp_common.c");
+    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_resource.c");
     nob_da_append(&sources, "tests/unit/ecs/prefab_loading/ecs_prefab_loading_stubs.c");
     nob_da_append(&sources, "tests/unit/ecs/prefab_loading/test_ecs_prefab_loading.c");
     nob_da_append(&sources, runner_path);

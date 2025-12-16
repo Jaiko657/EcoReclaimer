@@ -10,6 +10,7 @@ static void sys_effects_tick_begin_impl(void)
         if (!ecs_alive_idx(i)) continue;
         if ((ecs_mask[i] & CMP_SPR) == 0) continue;
         cmp_spr[i].fx.highlighted = false;
+        cmp_spr[i].fx.front = false;
     }
 }
 

@@ -15,6 +15,8 @@ void setUp(void)
     memset(ecs_gen, 0, sizeof(ecs_gen));
     memset(cmp_pos, 0, sizeof(cmp_pos));
     memset(cmp_vel, 0, sizeof(cmp_vel));
+    memset(cmp_player, 0, sizeof(cmp_player));
+    memset(cmp_liftable, 0, sizeof(cmp_liftable));
     memset(cmp_grav_gun, 0, sizeof(cmp_grav_gun));
     memset(cmp_phys_body, 0, sizeof(cmp_phys_body));
     memset(cmp_col, 0, sizeof(cmp_col));
@@ -32,13 +34,21 @@ void test_grav_gun_grab_and_release(void)
     cmp_phys_body[0].category_bits = PHYS_CAT_PLAYER;
 
     ecs_gen[1] = 1;
-    ecs_mask[1] = CMP_POS | CMP_PHYS_BODY | CMP_COL | CMP_GRAV_GUN;
+    ecs_mask[1] = CMP_POS | CMP_PHYS_BODY | CMP_COL | CMP_LIFTABLE;
     cmp_pos[1] = (cmp_position_t){ 10.0f, 0.0f };
     cmp_col[1] = (cmp_collider_t){ 3.0f, 3.0f };
     cmp_phys_body[1].type = PHYS_DYNAMIC;
-    cmp_grav_gun[1].state = GRAV_GUN_STATE_FREE;
-    cmp_grav_gun[1].pickup_distance = 20.0f;
-    cmp_grav_gun[1].pickup_radius = 5.0f;
+    cmp_liftable[1].state = GRAV_GUN_STATE_FREE;
+    cmp_liftable[1].pickup_distance = 20.0f;
+    cmp_liftable[1].pickup_radius = 5.0f;
+
+    ecs_gen[2] = 1;
+    ecs_mask[2] = CMP_GRAV_GUN;
+    cmp_grav_gun[2].held = true;
+    cmp_grav_gun[2].holder = (ecs_entity_t){0, 1};
+    cmp_grav_gun[2].charge = 1.0f;
+    cmp_grav_gun[2].max_charge = 1.0f;
+    cmp_player[0].held_gun = (ecs_entity_t){2, 1};
 
     grav_gun_stub_set_player((ecs_entity_t){0, 1});
 
@@ -49,16 +59,16 @@ void test_grav_gun_grab_and_release(void)
     in.mouse.y = 0.0f;
     sys_grav_gun_input_adapt(0.0f, &in);
 
-    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_HELD, cmp_grav_gun[1].state);
-    TEST_ASSERT_EQUAL_UINT32(0u, cmp_grav_gun[1].holder.idx);
-    TEST_ASSERT_TRUE(cmp_grav_gun[1].saved_mask_valid);
+    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_HELD, cmp_liftable[1].state);
+    TEST_ASSERT_EQUAL_UINT32(0u, cmp_liftable[1].holder.idx);
+    TEST_ASSERT_TRUE(cmp_liftable[1].saved_mask_valid);
     TEST_ASSERT_EQUAL_UINT32(0xFFFFFFFFu & ~PHYS_CAT_PLAYER, cmp_phys_body[1].mask_bits);
 
     input_t release = {0};
     sys_grav_gun_input_adapt(0.0f, &release);
 
-    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_FREE, cmp_grav_gun[1].state);
-    TEST_ASSERT_FALSE(cmp_grav_gun[1].saved_mask_valid);
+    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_FREE, cmp_liftable[1].state);
+    TEST_ASSERT_FALSE(cmp_liftable[1].saved_mask_valid);
     TEST_ASSERT_EQUAL_UINT32(0u, cmp_phys_body[1].mask_bits);
 }
 
@@ -69,15 +79,23 @@ void test_grav_gun_motion_updates_velocity(void)
     cmp_pos[0] = (cmp_position_t){ 0.0f, 0.0f };
 
     ecs_gen[1] = 1;
-    ecs_mask[1] = CMP_POS | CMP_PHYS_BODY | CMP_GRAV_GUN;
+    ecs_mask[1] = CMP_POS | CMP_PHYS_BODY | CMP_LIFTABLE;
     cmp_pos[1] = (cmp_position_t){ 0.0f, 0.0f };
     cmp_phys_body[1].type = PHYS_DYNAMIC;
-    cmp_grav_gun[1].state = GRAV_GUN_STATE_HELD;
-    cmp_grav_gun[1].holder = (ecs_entity_t){0, 1};
-    cmp_grav_gun[1].max_hold_distance = 50.0f;
-    cmp_grav_gun[1].follow_gain = 5.0f;
-    cmp_grav_gun[1].max_speed = 100.0f;
-    cmp_grav_gun[1].damping = 1.0f;
+    cmp_liftable[1].state = GRAV_GUN_STATE_HELD;
+    cmp_liftable[1].holder = (ecs_entity_t){0, 1};
+    cmp_liftable[1].max_hold_distance = 50.0f;
+    cmp_liftable[1].follow_gain = 5.0f;
+    cmp_liftable[1].max_speed = 100.0f;
+    cmp_liftable[1].damping = 1.0f;
+
+    ecs_gen[2] = 1;
+    ecs_mask[2] = CMP_GRAV_GUN;
+    cmp_grav_gun[2].held = true;
+    cmp_grav_gun[2].holder = (ecs_entity_t){0, 1};
+    cmp_grav_gun[2].charge = 1.0f;
+    cmp_grav_gun[2].max_charge = 1.0f;
+    cmp_player[0].held_gun = (ecs_entity_t){2, 1};
 
     input_t in = {0};
     in.down = (1ull << BTN_MOUSE_L);
@@ -87,5 +105,5 @@ void test_grav_gun_motion_updates_velocity(void)
 
     TEST_ASSERT_TRUE((ecs_mask[1] & CMP_VEL) != 0);
     TEST_ASSERT_TRUE(cmp_vel[1].x > 0.0f);
-    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_HELD, cmp_grav_gun[1].state);
+    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_HELD, cmp_liftable[1].state);
 }

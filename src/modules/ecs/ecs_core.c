@@ -11,12 +11,15 @@ cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
 cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
+cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
+cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
+cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 // ========== O(1) create/delete ==========
@@ -252,6 +255,10 @@ void cmp_add_player(ecs_entity_t e)
 {
     int i = ent_index_checked(e);
     if (i < 0) return;
+    cmp_player[i] = (cmp_player_t){
+        .held_gun = ecs_null(),
+        .held_liftable = ecs_null()
+    };
     ecs_mask[i] |= CMP_PLAYER;
     if (ecs_mask[i] & CMP_PHYS_BODY) {
         cmp_phys_body[i].category_bits |= PHYS_CAT_PLAYER;
@@ -313,11 +320,11 @@ void cmp_add_size(ecs_entity_t e, float hx, float hy)
     try_create_phys_body(i);
 }
 
-void cmp_add_grav_gun(ecs_entity_t e)
+void cmp_add_liftable(ecs_entity_t e)
 {
     int i = ent_index_checked(e);
     if (i < 0) return;
-    cmp_grav_gun[i] = (cmp_grav_gun_t){
+    cmp_liftable[i] = (cmp_liftable_t){
         .state              = GRAV_GUN_STATE_FREE,
         .holder             = ecs_null(),
         .pickup_distance    = 0.0f,
@@ -335,7 +342,35 @@ void cmp_add_grav_gun(ecs_entity_t e)
         .saved_mask_valid   = false,
         .just_dropped       = false
     };
+    ecs_mask[i] |= CMP_LIFTABLE;
+}
+
+void cmp_add_grav_gun(ecs_entity_t e)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_grav_gun[i] = (cmp_grav_gun_t){
+        .held = false,
+        .holder = ecs_null(),
+        .charge = 1.0f,
+        .max_charge = 1.0f,
+        .drain_rate = 0.15f,
+        .regen_rate = 0.25f,
+        .eject_timer = 0.0f,
+        .toast_pending = false
+    };
     ecs_mask[i] |= CMP_GRAV_GUN;
+}
+
+void cmp_add_gun_charger(ecs_entity_t e)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_gun_charger[i] = (cmp_gun_charger_t){
+        .stored_gun = ecs_null(),
+        .flash_timer = 0.0f
+    };
+    ecs_mask[i] |= CMP_GUN_CHARGER;
 }
 
 void cmp_add_phys_body(ecs_entity_t e, PhysicsType type, float mass)

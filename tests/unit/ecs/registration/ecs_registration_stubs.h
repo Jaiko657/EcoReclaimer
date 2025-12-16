@@ -15,6 +15,8 @@ extern int g_systems_registration_call_count;
 extern int g_systems_init_seq;
 extern int g_ecs_render_hooks_seq;
 extern int g_ecs_physics_hooks_seq;
+extern int g_ecs_grav_gun_hooks_seq;
+extern int g_ecs_liftable_hooks_seq;
 extern int g_ecs_game_hooks_seq;
 extern int g_ecs_door_hooks_seq;
 

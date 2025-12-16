@@ -14,6 +14,7 @@ bool ecs_sprites_next(ecs_sprite_iter_t* it, ecs_sprite_view_t* out)
     for (int i = it->i + 1; i < ECS_MAX_ENTITIES; ++i) {
         if (!ecs_alive_idx(i)) continue;
         if ((ecs_mask[i] & (CMP_POS | CMP_SPR)) != (CMP_POS | CMP_SPR)) continue;
+        if ((ecs_mask[i] & CMP_GRAV_GUN) && cmp_grav_gun[i].held) continue;
 
         it->i = i;
 
@@ -26,6 +27,7 @@ bool ecs_sprites_next(ecs_sprite_iter_t* it, ecs_sprite_view_t* out)
             .oy  = cmp_spr[i].oy,
             .highlighted = cmp_spr[i].fx.highlighted,
             .highlight_color = cmp_spr[i].fx.highlight_color,
+            .front = cmp_spr[i].fx.front,
             .highlight_thickness = cmp_spr[i].fx.highlight_thickness,
         };
         return true;

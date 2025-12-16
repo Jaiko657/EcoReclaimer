@@ -108,10 +108,53 @@ static void sys_proximity_build_view_impl(void)
     }
 }
 
-static bool plastic_held_for_storage(int idx)
+static bool resource_held_for_storage(int idx)
 {
-    if ((ecs_mask[idx] & (CMP_PLASTIC | CMP_GRAV_GUN)) != (CMP_PLASTIC | CMP_GRAV_GUN)) return false;
-    return cmp_grav_gun[idx].state == GRAV_GUN_STATE_HELD;
+    if ((ecs_mask[idx] & (CMP_RESOURCE | CMP_LIFTABLE)) != (CMP_RESOURCE | CMP_LIFTABLE)) return false;
+    return cmp_liftable[idx].state == GRAV_GUN_STATE_HELD;
+}
+
+static bool player_has_grav_gun(ecs_entity_t player)
+{
+    int player_idx = ent_index_checked(player);
+    if (player_idx < 0 || (ecs_mask[player_idx] & CMP_PLAYER) == 0) return false;
+
+    ecs_entity_t gun = cmp_player[player_idx].held_gun;
+    int gun_idx = ent_index_checked(gun);
+    if (gun_idx < 0 || (ecs_mask[gun_idx] & CMP_GRAV_GUN) == 0) {
+        cmp_player[player_idx].held_gun = ecs_null();
+        return false;
+    }
+    if (!cmp_grav_gun[gun_idx].held ||
+        cmp_grav_gun[gun_idx].holder.idx != player.idx ||
+        cmp_grav_gun[gun_idx].holder.gen != player.gen) {
+        cmp_player[player_idx].held_gun = ecs_null();
+        return false;
+    }
+    return true;
+}
+
+static bool charger_available(int idx)
+{
+    if ((ecs_mask[idx] & CMP_GUN_CHARGER) == 0) return false;
+    ecs_entity_t stored = cmp_gun_charger[idx].stored_gun;
+    return !ecs_alive_handle(stored);
+}
+
+static bool billboard_should_activate(int trigger_idx, int matched_idx)
+{
+    if (trigger_idx < 0 || matched_idx < 0) return false;
+    if ((ecs_mask[trigger_idx] & CMP_TRIGGER) == 0) return false;
+
+    if ((cmp_trigger[trigger_idx].target_mask & CMP_PLAYER) != 0) {
+        if ((ecs_mask[matched_idx] & CMP_PLAYER) == 0) return false;
+        if (ecs_mask[trigger_idx] & CMP_GUN_CHARGER) {
+            return player_has_grav_gun(handle_from_index(matched_idx)) && charger_available(trigger_idx);
+        }
+        return true;
+    }
+
+    return resource_held_for_storage(matched_idx);
 }
 
 static void sys_billboards_impl(float dt)
@@ -130,7 +173,8 @@ static void sys_billboards_impl(float dt)
         int matched_idx = ent_index_checked(v.matched_entity);
         if (trigger_idx < 0 || matched_idx < 0) continue;
         if ((ecs_mask[trigger_idx] & CMP_BILLBOARD) == 0) continue;
-        if (!plastic_held_for_storage(matched_idx)) continue;
+        if ((ecs_mask[trigger_idx] & CMP_GRAV_GUN) && cmp_grav_gun[trigger_idx].held) continue;
+        if (!billboard_should_activate(trigger_idx, matched_idx)) continue;
 
         cmp_billboard[trigger_idx].state = BILLBOARD_ACTIVE;
         float timer = cmp_billboard[trigger_idx].linger;

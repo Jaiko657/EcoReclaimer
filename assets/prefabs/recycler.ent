@@ -2,5 +2,5 @@
 <prefab name="recycler">
   <component type="RECYCLER"/>
   <component type="COL" hx="5" hy="5"/>
-  <component type="TRIGGER" pad="1" target_mask="PLASTIC|COL"/>
+  <component type="TRIGGER" pad="1" target_mask="RESOURCE|COL"/>
 </prefab>

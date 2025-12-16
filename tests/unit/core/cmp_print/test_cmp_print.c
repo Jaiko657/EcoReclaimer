@@ -6,6 +6,7 @@
 
 #include "modules/core/cmp_print.h"
 #include "modules/ecs/ecs_internal.h"
+#include "modules/ecs/ecs_resource.h"
 #include "modules/core/logger.h"
 
 static char s_last_log[512];
@@ -61,6 +62,9 @@ void test_cmp_print_handles_nulls(void)
 
     cmp_print_collider(NULL, NULL);
     assert_last_log("COL(null)");
+
+    cmp_print_liftable(NULL, NULL);
+    assert_last_log("LIFTABLE(null)");
 
     cmp_print_grav_gun(NULL, NULL);
     assert_last_log("GRAV_GUN(null)");
@@ -140,8 +144,23 @@ void test_cmp_print_storage_format(void)
     cmp_print_player(NULL);
     assert_last_log("PLAYER()");
 
-    cmp_print_storage(NULL, 3, 10);
-    assert_last_log("STORAGE(plastic=3, capacity=10)");
+    int counts[RESOURCE_TYPE_COUNT] = {0};
+    counts[RESOURCE_TYPE_PLASTIC] = 3;
+    counts[RESOURCE_TYPE_METAL] = 1;
+    cmp_print_storage(NULL, counts, 10);
+    assert_last_log("STORAGE(plastic=3, metal=1, capacity=10)");
+
+    cmp_print_storage(NULL, NULL, 5);
+    assert_last_log("STORAGE(capacity=5)");
+}
+
+void test_cmp_print_resource_format(void)
+{
+    cmp_print_resource(NULL, RESOURCE_TYPE_PLASTIC);
+    assert_last_log("RESOURCE(type=plastic)");
+
+    cmp_print_resource(NULL, RESOURCE_TYPE_METAL);
+    assert_last_log("RESOURCE(type=metal)");
 }
 
 void test_cmp_print_follow_collider_and_misc(void)
@@ -168,15 +187,27 @@ void test_cmp_print_follow_collider_and_misc(void)
     cmp_print_collider(NULL, &col);
     assert_last_log("COL(hx=2.25, hy=1.75)");
 
-    cmp_grav_gun_t grav = {0};
-    grav.state = GRAV_GUN_STATE_HELD;
-    grav.holder.idx = 9;
-    grav.follow_gain = 2.0f;
-    grav.max_speed = 50.0f;
-    grav.hold_vel_x = 0.25f;
-    grav.hold_vel_y = -0.75f;
-    cmp_print_grav_gun(NULL, &grav);
-    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "GRAV_GUN(state=HELD"));
+    cmp_liftable_t liftable = {0};
+    liftable.state = GRAV_GUN_STATE_HELD;
+    liftable.holder.idx = 9;
+    liftable.follow_gain = 2.0f;
+    liftable.max_speed = 50.0f;
+    liftable.hold_vel_x = 0.25f;
+    liftable.hold_vel_y = -0.75f;
+    cmp_print_liftable(NULL, &liftable);
+    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "LIFTABLE(state=HELD"));
+    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "holder=9"));
+    TEST_ASSERT_EQUAL_INT(LOG_LVL_INFO, s_last_level);
+
+    cmp_grav_gun_t gun = {0};
+    gun.held = true;
+    gun.holder.idx = 9;
+    gun.charge = 0.5f;
+    gun.max_charge = 1.0f;
+    gun.drain_rate = 0.25f;
+    gun.regen_rate = 0.5f;
+    cmp_print_grav_gun(NULL, &gun);
+    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "GRAV_GUN(held=1"));
     TEST_ASSERT_NOT_NULL(strstr(s_last_log, "holder=9"));
     TEST_ASSERT_EQUAL_INT(LOG_LVL_INFO, s_last_level);
 

@@ -95,7 +95,9 @@ void cmp_add_follow   (ecs_entity_t e, ecs_entity_t target, float desired_distan
 void cmp_add_trigger  (ecs_entity_t e, float pad, uint32_t target_mask);
 void cmp_add_billboard(ecs_entity_t e, const char* text, float y_off, float linger, billboard_state_t state);
 void cmp_add_size     (ecs_entity_t e, float hx, float hy); // AABB half-extents
+void cmp_add_liftable (ecs_entity_t e);
 void cmp_add_grav_gun (ecs_entity_t e);
+void cmp_add_gun_charger(ecs_entity_t e);
 void cmp_add_phys_body(ecs_entity_t e, PhysicsType type, float mass);
 
 // ====== HUD helpers ======

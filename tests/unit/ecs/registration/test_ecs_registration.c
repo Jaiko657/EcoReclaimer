@@ -27,14 +27,18 @@ void test_systems_registration_orders_and_hooks(void)
     TEST_ASSERT_TRUE(g_systems_init_seq > 0);
     TEST_ASSERT_TRUE(g_ecs_render_hooks_seq > 0);
     TEST_ASSERT_TRUE(g_ecs_physics_hooks_seq > 0);
+    TEST_ASSERT_TRUE(g_ecs_grav_gun_hooks_seq > 0);
+    TEST_ASSERT_TRUE(g_ecs_liftable_hooks_seq > 0);
     TEST_ASSERT_TRUE(g_ecs_game_hooks_seq > 0);
     TEST_ASSERT_TRUE(g_ecs_door_hooks_seq > 0);
 
-    TEST_ASSERT_EQUAL_INT(24, g_systems_registration_call_count);
+    TEST_ASSERT_EQUAL_INT(26, g_systems_registration_call_count);
 
     TEST_ASSERT_TRUE(g_systems_init_seq < g_ecs_render_hooks_seq);
     TEST_ASSERT_TRUE(g_ecs_render_hooks_seq < g_ecs_physics_hooks_seq);
-    TEST_ASSERT_TRUE(g_ecs_physics_hooks_seq < g_systems_registration_calls[0].seq);
+    TEST_ASSERT_TRUE(g_ecs_physics_hooks_seq < g_ecs_grav_gun_hooks_seq);
+    TEST_ASSERT_TRUE(g_ecs_grav_gun_hooks_seq < g_ecs_liftable_hooks_seq);
+    TEST_ASSERT_TRUE(g_ecs_liftable_hooks_seq < g_systems_registration_calls[0].seq);
 
     {
         int last_seq = g_systems_registration_calls[g_systems_registration_call_count - 1].seq;
@@ -50,20 +54,22 @@ void test_systems_registration_orders_and_hooks(void)
     assert_registration(5, PHASE_PHYSICS, 90, "grav_gun_motion");
     assert_registration(6, PHASE_PHYSICS, 100, "physics");
     assert_registration(7, PHASE_SIM_POST, 100, "proximity_view");
-    assert_registration(8, PHASE_SIM_POST, 200, "billboards");
-    assert_registration(9, PHASE_SIM_POST, 250, "grav_gun_fx");
-    assert_registration(10, PHASE_SIM_POST, 900, "world_apply_edits");
-    assert_registration(11, PHASE_PRESENT, 10, "toast_update");
-    assert_registration(12, PHASE_PRESENT, 20, "camera_tick");
-    assert_registration(13, PHASE_PRESENT, 100, "sprite_anim");
-    assert_registration(14, PHASE_RENDER, 10, "render_begin");
-    assert_registration(15, PHASE_RENDER, 20, "render_world_prepare");
-    assert_registration(16, PHASE_RENDER, 30, "render_world_base");
-    assert_registration(17, PHASE_RENDER, 40, "render_world_fx");
-    assert_registration(18, PHASE_RENDER, 50, "render_world_sprites");
-    assert_registration(19, PHASE_RENDER, 60, "render_world_overlays");
-    assert_registration(20, PHASE_RENDER, 70, "render_world_end");
-    assert_registration(21, PHASE_RENDER, 80, "render_ui");
-    assert_registration(22, PHASE_RENDER, 90, "render_end");
-    assert_registration(23, PHASE_RENDER, 1000, "asset_collect");
+    assert_registration(8, PHASE_SIM_POST, 150, "grav_gun_tool");
+    assert_registration(9, PHASE_SIM_POST, 175, "grav_gun_charger");
+    assert_registration(10, PHASE_SIM_POST, 200, "billboards");
+    assert_registration(11, PHASE_SIM_POST, 250, "grav_gun_fx");
+    assert_registration(12, PHASE_SIM_POST, 900, "world_apply_edits");
+    assert_registration(13, PHASE_PRESENT, 10, "toast_update");
+    assert_registration(14, PHASE_PRESENT, 20, "camera_tick");
+    assert_registration(15, PHASE_PRESENT, 100, "sprite_anim");
+    assert_registration(16, PHASE_RENDER, 10, "render_begin");
+    assert_registration(17, PHASE_RENDER, 20, "render_world_prepare");
+    assert_registration(18, PHASE_RENDER, 30, "render_world_base");
+    assert_registration(19, PHASE_RENDER, 40, "render_world_fx");
+    assert_registration(20, PHASE_RENDER, 50, "render_world_sprites");
+    assert_registration(21, PHASE_RENDER, 60, "render_world_overlays");
+    assert_registration(22, PHASE_RENDER, 70, "render_world_end");
+    assert_registration(23, PHASE_RENDER, 80, "render_ui");
+    assert_registration(24, PHASE_RENDER, 90, "render_end");
+    assert_registration(25, PHASE_RENDER, 1000, "asset_collect");
 }

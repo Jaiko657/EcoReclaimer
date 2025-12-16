@@ -88,6 +88,8 @@ int main(int argc, char **argv)
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
     nob_da_append(&sources, "src/modules/systems/systems_registration.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_core.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_resource.c");
     nob_da_append(&sources, "tests/unit/ecs/registration/ecs_registration_stubs.c");
     nob_da_append(&sources, "tests/unit/ecs/registration/test_ecs_registration.c");
     nob_da_append(&sources, runner_path);

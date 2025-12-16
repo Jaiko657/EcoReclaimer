@@ -11,6 +11,7 @@ typedef struct {
     float ox, oy; // origin
     bool highlighted;
     colorf highlight_color;
+    bool front;
     int highlight_thickness;
 } ecs_sprite_view_t;
 

@@ -38,9 +38,9 @@ void test_ecs_create_destroy_reuses_slot_and_gen(void)
 void test_ecs_init_registers_systems_and_tick_runs_phases(void)
 {
 #if DEBUG_BUILD
-    const int expected_registers = 24;
+    const int expected_registers = 25;
 #else
-    const int expected_registers = 23;
+    const int expected_registers = 24;
 #endif
     TEST_ASSERT_EQUAL_INT(expected_registers, g_ecs_register_system_calls);
 
@@ -123,17 +123,31 @@ void test_cmp_add_billboard_warns_without_trigger(void)
     TEST_ASSERT_EQUAL_INT(1, g_log_warn_calls);
 }
 
-void test_cmp_add_grav_gun_initializes_empty(void)
+void test_cmp_add_liftable_initializes_empty(void)
+{
+    ecs_entity_t e = ecs_create();
+    cmp_add_liftable(e);
+
+    int idx = ent_index_checked(e);
+    TEST_ASSERT_TRUE(idx >= 0);
+    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_FREE, cmp_liftable[idx].state);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_liftable[idx].pickup_distance);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_liftable[idx].pickup_radius);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_liftable[idx].max_hold_distance);
+}
+
+void test_cmp_add_grav_gun_initializes_charge(void)
 {
     ecs_entity_t e = ecs_create();
     cmp_add_grav_gun(e);
 
     int idx = ent_index_checked(e);
     TEST_ASSERT_TRUE(idx >= 0);
-    TEST_ASSERT_EQUAL_INT(GRAV_GUN_STATE_FREE, cmp_grav_gun[idx].state);
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_grav_gun[idx].pickup_distance);
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_grav_gun[idx].pickup_radius);
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_grav_gun[idx].max_hold_distance);
+    TEST_ASSERT_FALSE(cmp_grav_gun[idx].held);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 1.0f, cmp_grav_gun[idx].charge);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 1.0f, cmp_grav_gun[idx].max_charge);
+    TEST_ASSERT_TRUE(cmp_grav_gun[idx].drain_rate > 0.0f);
+    TEST_ASSERT_TRUE(cmp_grav_gun[idx].regen_rate > 0.0f);
 }
 
 void test_ecs_destroy_releases_resources(void)

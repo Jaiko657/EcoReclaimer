@@ -20,7 +20,7 @@ void test_prefab_cmp_grav_gun_build_sets_present_overrides(void)
         { .name = "pickup_distance", .value = "12" },
         { .name = "damping", .value = "0.5" },
     };
-    prefab_component_t comp = make_comp("GRAV_GUN", props, 2);
+    prefab_component_t comp = make_comp("LIFTABLE", props, 2);
 
     prefab_cmp_grav_gun_t out = {0};
     TEST_ASSERT_TRUE(prefab_cmp_grav_gun_build(&comp, NULL, &out));

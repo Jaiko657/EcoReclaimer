@@ -8,6 +8,7 @@
 #include "modules/ecs/ecs_doors.h"
 #include "modules/ecs/ecs_render.h"
 #include "modules/core/logger.h"
+#include "modules/ecs/ecs_resource.h"
 #include "modules/prefab/prefab_cmp.h"
 #include "modules/tiled/tiled.h"
 
@@ -23,7 +24,9 @@ cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
+cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
+cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 static ecs_entity_t g_player = {0, 0};
@@ -129,11 +132,6 @@ void cmp_add_player(ecs_entity_t e)
     (void)e;
 }
 
-void cmp_add_plastic(ecs_entity_t e)
-{
-    (void)e;
-}
-
 void cmp_add_storage(ecs_entity_t e, int capacity)
 {
     (void)e; (void)capacity;
@@ -153,11 +151,25 @@ void cmp_add_follow(ecs_entity_t e, ecs_entity_t target, float desired_distance,
     ecs_mask[idx] |= CMP_FOLLOW;
 }
 
+void cmp_add_liftable(ecs_entity_t e)
+{
+    int idx = ent_index_checked(e);
+    if (idx < 0) return;
+    ecs_mask[idx] |= CMP_LIFTABLE;
+}
+
 void cmp_add_grav_gun(ecs_entity_t e)
 {
     int idx = ent_index_checked(e);
     if (idx < 0) return;
     ecs_mask[idx] |= CMP_GRAV_GUN;
+}
+
+void cmp_add_gun_charger(ecs_entity_t e)
+{
+    int idx = ent_index_checked(e);
+    if (idx < 0) return;
+    ecs_mask[idx] |= CMP_GUN_CHARGER;
 }
 
 void cmp_add_trigger(ecs_entity_t e, float pad, uint32_t target_mask)
@@ -281,19 +293,6 @@ void prefab_cmp_door_free(prefab_cmp_door_t* out_door)
     (void)out_door;
 }
 
-v2f prefab_object_position_default(const tiled_object_t* obj)
-{
-    if (!obj) return v2f_make(0.0f, 0.0f);
-    return v2f_make(obj->x, obj->y);
-}
-
-bool prefab_parse_float(const char* s, float* out)
-{
-    if (!s || !out) return false;
-    *out = (float)atof(s);
-    return true;
-}
-
 bool log_would_log(log_level_t lvl)
 {
     (void)lvl;
@@ -305,3 +304,23 @@ void log_msg(log_level_t lvl, const log_cat_t* cat, const char* fmt, ...)
     (void)cat; (void)fmt;
     if (lvl == LOG_LVL_WARN) g_log_warn_calls++;
 }
+
+void ecs_register_component_destroy_hook(ComponentEnum comp, ecs_component_hook_fn fn)
+{
+    (void)comp;
+    (void)fn;
+}
+
+void ecs_register_phys_body_create_hook(ecs_component_hook_fn fn)
+{
+    (void)fn;
+}
+
+void ecs_register_render_component_hooks(void) {}
+void ecs_register_physics_component_hooks(void) {}
+void ecs_register_grav_gun_component_hooks(void) {}
+void ecs_register_liftable_component_hooks(void) {}
+void ecs_register_door_component_hooks(void) {}
+
+void ecs_anim_reset_allocator(void) {}
+void ecs_anim_shutdown_allocator(void) {}

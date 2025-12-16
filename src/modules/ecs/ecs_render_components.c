@@ -30,6 +30,8 @@ void cmp_add_sprite_handle(ecs_entity_t e, tex_handle_t h, rectf src, float ox, 
         .fx = {
             .highlighted = false,
             .highlight_color = (colorf){ 0.470588f, 0.784314f, 1.0f, 1.0f },
+            .highlight_base_color = (colorf){ 0.470588f, 0.784314f, 1.0f, 1.0f },
+            .front = false,
             .highlight_thickness = 1,
         },
     };

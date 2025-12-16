@@ -21,12 +21,15 @@ cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
 cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
+cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
+cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
+cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 static ecs_entity_t g_player = {0, 0};
@@ -54,6 +57,7 @@ void ecs_game_stub_reset(void)
     memset(ecs_mask, 0, sizeof(ecs_mask));
     memset(ecs_gen, 0, sizeof(ecs_gen));
     memset(cmp_pos, 0, sizeof(cmp_pos));
+    memset(cmp_player, 0, sizeof(cmp_player));
     memset(cmp_col, 0, sizeof(cmp_col));
     memset(cmp_billboard, 0, sizeof(cmp_billboard));
     g_player = (ecs_entity_t){0, 0};
@@ -117,6 +121,12 @@ ecs_entity_t handle_from_index(int i)
     if (i < 0 || i >= ECS_MAX_ENTITIES) return ecs_null();
     if (ecs_gen[i] == 0) return ecs_null();
     return (ecs_entity_t){ (uint32_t)i, ecs_gen[i] };
+}
+
+void ecs_register_component_destroy_hook(ComponentEnum comp, ecs_component_hook_fn fn)
+{
+    (void)comp;
+    (void)fn;
 }
 
 void ecs_destroy(ecs_entity_t e)

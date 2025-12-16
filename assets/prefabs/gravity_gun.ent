@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefab name="gravity_gun">
+  <component type="SPR" path="assets/images/gravity gun.png" src="0,0,14,7" ox="7" oy="3.5"/>
+  <component type="COL" hx="7" hy="3.5"/>
+  <component type="TRIGGER" pad="6" target_mask="PLAYER"/>
+  <component type="BILLBOARD" text="E to pick up" y_offset="-10" linger="0.10" state="inactive"/>
+  <component type="GRAV_GUN"/>
+</prefab>

@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+static const float FRONT_KEY_BIAS = 1000000.0f;
+
 void enqueue_ecs_sprites(const render_view_t* view, painter_queue_ctx_t* painter_ctx)
 {
     if (!view || !painter_ctx || !painter_ctx->queue) return;
@@ -14,7 +16,9 @@ void enqueue_ecs_sprites(const render_view_t* view, painter_queue_ctx_t* painter
 
         // depth: screen-space "feet"
         float feetY = v.y - v.oy + fabsf(v.src.h);
-        Item item = { .v = v, .key = feetY, .seq = (int)painter_ctx->queue->size };
+        float key = feetY;
+        if (v.front) key += FRONT_KEY_BIAS;
+        Item item = { .v = v, .key = key, .seq = (int)painter_ctx->queue->size };
         painter_queue_push(painter_ctx, item);
     }
 }

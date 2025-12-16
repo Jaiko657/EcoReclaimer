@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="1" nextlayerid="9" nextobjectid="57">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="1" nextlayerid="9" nextobjectid="76">
  <tileset firstgid="1" source="../tilesets/textures.tsx"/>
  <tileset firstgid="852" source="../tilesets/props.tsx"/>
  <layer id="1" name="background" width="20" height="20">
@@ -11,7 +11,7 @@
 0,72,72,72,72,72,72,72,72,0,0,0,0,0,0,0,
 0,72,72,72,72,72,72,72,72,0,0,0,0,0,0,0,
 0,71,107,70,107,71,72,72,72,0,0,0,0,0,0,0,
-0,73,74,72,74,73,107,107,0,0,0,0,0,0,0,0,
+0,74,74,72,74,72,107,107,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -36,8 +36,8 @@
 0,76,0,45,0,0,0,0,84,0,0,0,0,0,0,0,
 0,76,0,0,0,0,0,0,84,0,0,0,0,0,0,0,
 0,76,0,0,0,0,0,0,84,0,0,0,0,0,0,0,
-0,76,0,0,0,342,1212,1213,343,0,0,0,0,0,0,0,
-0,373,376,376,376,343,0,0,0,0,0,0,0,0,0,0,
+0,76,0,0,0,39,1212,1213,343,0,0,0,0,0,0,0,
+0,373,376,376,376,40,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -56,9 +56,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,447,0,453,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,1092,0,1046,0,0,0,0,0,0,0,0,0,0,0,
-0,0,1116,0,1070,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,395,0,0,0,0,0,0,0,
+0,0,1092,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,1116,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,317,0,0,395,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -90,10 +90,10 @@
   <object id="48" gid="1007" x="124" y="44" width="32" height="32"/>
   <object id="49" gid="901" x="157" y="114" width="32" height="32"/>
   <object id="50" gid="1009" x="251" y="82" width="32" height="32"/>
-  <object id="51" gid="1008" x="241" y="91" width="32" height="32"/>
   <object id="52" gid="1009" x="225" y="82" width="32" height="32"/>
   <object id="53" gid="1032" x="239" y="140" width="32" height="32"/>
   <object id="54" gid="908" x="242" y="152" width="32" height="32"/>
+  <object id="71" gid="1007" x="238" y="91" width="32" height="32"/>
  </objectgroup>
  <objectgroup id="7" name="entities">
   <object id="19" name="single_door" gid="1309" x="64" y="96" width="32" height="32">
@@ -112,19 +112,74 @@
     <property name="proximity_radius" type="int" value="8"/>
    </properties>
   </object>
-  <object id="26" name="player" x="72" y="40" width="16" height="16">
+  <object id="26" name="player" x="105" y="40" width="16" height="16">
    <properties>
     <property name="entityprefab" value="../prefabs/player.ent"/>
    </properties>
   </object>
-  <object id="55" name="tardas" x="96" y="193" width="32" height="32">
+  <object id="55" name="tardas" x="130" y="138" width="30" height="14">
    <properties>
     <property name="entityprefab" value="../prefabs/tardas.ent"/>
    </properties>
   </object>
-  <object id="56" name="plastic" x="168" y="136" width="16" height="16">
+  <object id="56" name="plastic" x="200" y="109" width="16" height="16">
    <properties>
     <property name="entityprefab" value="../prefabs/plastic.ent"/>
+   </properties>
+  </object>
+  <object id="57" name="metal" x="249" y="150" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/metal.ent"/>
+   </properties>
+  </object>
+  <object id="58" name="gravity_gun" x="21" y="48" width="14" height="7">
+   <properties>
+    <property name="entityprefab" value="../prefabs/gravity_gun.ent"/>
+   </properties>
+  </object>
+  <object id="61" name="plastic" x="249" y="99" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/plastic.ent"/>
+   </properties>
+  </object>
+  <object id="62" name="metal" x="232" y="120" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/metal.ent"/>
+   </properties>
+  </object>
+  <object id="63" name="plastic" x="228" y="140" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/plastic.ent"/>
+   </properties>
+  </object>
+  <object id="64" name="metal" x="218" y="97" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/metal.ent"/>
+   </properties>
+  </object>
+  <object id="65" name="plastic" x="228" y="140" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/plastic.ent"/>
+   </properties>
+  </object>
+  <object id="66" name="metal" x="172" y="112" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/metal.ent"/>
+   </properties>
+  </object>
+  <object id="67" name="plastic" x="208" y="140" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/plastic.ent"/>
+   </properties>
+  </object>
+  <object id="68" name="metal" x="176" y="150" width="16" height="16">
+   <properties>
+    <property name="entityprefab" value="../prefabs/metal.ent"/>
+   </properties>
+  </object>
+  <object id="70" name="gravity_gun_charger" x="74" y="159" width="14" height="7">
+   <properties>
+    <property name="entityprefab" value="../prefabs/gravity_gun_charger.ent"/>
    </properties>
   </object>
  </objectgroup>

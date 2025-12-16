@@ -8,6 +8,7 @@
 
 #include "modules/common/dynarray.h"
 #include "modules/ecs/ecs.h"
+#include "modules/ecs/ecs_resource.h"
 #include "modules/world/door_tiles.h"
 #include "modules/prefab/prefab.h"
 #include "modules/tiled/tiled.h"
@@ -47,6 +48,11 @@ typedef struct {
     float ox, oy;
 } prefab_cmp_spr_t;
 bool prefab_cmp_spr_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_spr_t* out_spr);
+
+typedef struct {
+    resource_type_t type;
+} prefab_cmp_resource_t;
+bool prefab_cmp_resource_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_resource_t* out_resource);
 
 typedef struct {
     int frame_w;

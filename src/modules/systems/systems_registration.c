@@ -1,6 +1,7 @@
 #include "modules/systems/systems.h"
 #include "modules/systems/systems_registration.h"
 #include "modules/ecs/ecs_game.h"
+#include "modules/ecs/ecs_resource.h"
 #include "modules/ecs/ecs_internal.h"
 #include "modules/renderer/renderer.h"
 
@@ -14,7 +15,9 @@ void sys_anim_sprite_adapt(float dt, const input_t* in);
 void sys_prox_build_adapt(float dt, const input_t* in);
 void sys_billboards_adapt(float dt, const input_t* in);
 void sys_grav_gun_input_adapt(float dt, const input_t* in);
+void sys_grav_gun_tool_adapt(float dt, const input_t* in);
 void sys_grav_gun_motion_adapt(float dt, const input_t* in);
+void sys_grav_gun_charger_adapt(float dt, const input_t* in);
 void sys_effects_tick_begin_adapt(float dt, const input_t* in);
 void sys_grav_gun_fx_adapt(float dt, const input_t* in);
 void sys_render_begin_adapt(float dt, const input_t* in);
@@ -40,6 +43,9 @@ void systems_registration_init(void)
     systems_init();
     ecs_register_render_component_hooks();
     ecs_register_physics_component_hooks();
+    ecs_register_grav_gun_component_hooks();
+    ecs_register_liftable_component_hooks();
+    ecs_register_resource_component_hooks();
 
     // Pipeline mapping: Input -> Intent -> Physics -> Post-Sim -> Present -> Render -> GC.
     systems_register(PHASE_INPUT, -100, sys_effects_tick_begin_adapt, "effects_tick_begin");
@@ -53,6 +59,8 @@ void systems_registration_init(void)
     systems_register(PHASE_PHYSICS, 100, sys_physics_adapt, "physics");
 
     systems_register(PHASE_SIM_POST, 100, sys_prox_build_adapt, "proximity_view");
+    systems_register(PHASE_SIM_POST, 150, sys_grav_gun_tool_adapt, "grav_gun_tool");
+    systems_register(PHASE_SIM_POST, 175, sys_grav_gun_charger_adapt, "grav_gun_charger");
     systems_register(PHASE_SIM_POST, 200, sys_billboards_adapt, "billboards");
     systems_register(PHASE_SIM_POST, 250, sys_grav_gun_fx_adapt, "grav_gun_fx");
     systems_register(PHASE_SIM_POST, 900, sys_world_apply_edits_adapt, "world_apply_edits");

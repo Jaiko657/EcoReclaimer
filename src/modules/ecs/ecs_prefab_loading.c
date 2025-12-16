@@ -49,7 +49,8 @@ typedef struct prefab_built_entity_t {
     bool has_anim;
     prefab_cmp_anim_t anim;
 
-    bool has_plastic;
+    bool has_resource;
+    prefab_cmp_resource_t resource;
     bool has_storage;
 
     bool has_follow;
@@ -58,8 +59,11 @@ typedef struct prefab_built_entity_t {
     bool has_col;
     prefab_cmp_col_t col;
 
+    bool has_liftable;
+    prefab_cmp_grav_gun_t liftable;
+
     bool has_grav_gun;
-    prefab_cmp_grav_gun_t grav_gun;
+    bool has_gun_charger;
 
     bool has_trigger;
     prefab_cmp_trigger_t trigger;
@@ -98,11 +102,13 @@ static prefab_built_entity_t prefab_build_entity_components(const prefab_t* pref
             case ENUM_SPR:       built.has_spr = prefab_cmp_spr_build(comp, obj, &built.spr); break;
             case ENUM_ANIM:      built.has_anim = prefab_cmp_anim_build(comp, obj, &built.anim); break;
             case ENUM_PLAYER:    built.has_player = true; break;
-            case ENUM_PLASTIC:   built.has_plastic = true; break;
+            case ENUM_RESOURCE:  built.has_resource = prefab_cmp_resource_build(comp, obj, &built.resource); break;
             case ENUM_STORAGE:   built.has_storage = true; break;
             case ENUM_FOLLOW:    built.has_follow = prefab_cmp_follow_build(comp, obj, &built.follow); break;
             case ENUM_COL:       built.has_col = prefab_cmp_col_build(comp, obj, &built.col); break;
-            case ENUM_GRAV_GUN:  built.has_grav_gun = prefab_cmp_grav_gun_build(comp, obj, &built.grav_gun); break;
+            case ENUM_LIFTABLE:  built.has_liftable = prefab_cmp_grav_gun_build(comp, obj, &built.liftable); break;
+            case ENUM_GRAV_GUN:  built.has_grav_gun = true; break;
+            case ENUM_GUN_CHARGER: built.has_gun_charger = true; break;
             case ENUM_TRIGGER:   built.has_trigger = prefab_cmp_trigger_build(comp, obj, &built.trigger); break;
             case ENUM_BILLBOARD: built.has_billboard = prefab_cmp_billboard_build(comp, obj, &built.billboard); break;
             case ENUM_DOOR:
@@ -173,7 +179,7 @@ static void prefab_add_to_ecs(ecs_entity_t e, const prefab_built_entity_t* built
     }
 
     if (built->has_player) cmp_add_player(e);
-    if (built->has_plastic) cmp_add_plastic(e);
+    if (built->has_resource) cmp_add_resource(e, built->resource.type);
     if (built->has_storage) cmp_add_storage(e, 0);
 
     if (built->has_follow) {
@@ -193,19 +199,22 @@ static void prefab_add_to_ecs(ecs_entity_t e, const prefab_built_entity_t* built
         }
     }
 
-    if (built->has_grav_gun) {
-        cmp_add_grav_gun(e);
+    if (built->has_liftable) {
+        cmp_add_liftable(e);
         int idx = ent_index_checked(e);
-        if (idx >= 0 && (ecs_mask[idx] & CMP_GRAV_GUN)) {
-            if (built->grav_gun.has_pickup_distance) cmp_grav_gun[idx].pickup_distance = built->grav_gun.pickup_distance;
-            if (built->grav_gun.has_pickup_radius) cmp_grav_gun[idx].pickup_radius = built->grav_gun.pickup_radius;
-            if (built->grav_gun.has_max_hold_distance) cmp_grav_gun[idx].max_hold_distance = built->grav_gun.max_hold_distance;
-            if (built->grav_gun.has_breakoff_distance) cmp_grav_gun[idx].breakoff_distance = built->grav_gun.breakoff_distance;
-            if (built->grav_gun.has_follow_gain) cmp_grav_gun[idx].follow_gain = built->grav_gun.follow_gain;
-            if (built->grav_gun.has_max_speed) cmp_grav_gun[idx].max_speed = built->grav_gun.max_speed;
-            if (built->grav_gun.has_damping) cmp_grav_gun[idx].damping = built->grav_gun.damping;
+        if (idx >= 0 && (ecs_mask[idx] & CMP_LIFTABLE)) {
+            if (built->liftable.has_pickup_distance) cmp_liftable[idx].pickup_distance = built->liftable.pickup_distance;
+            if (built->liftable.has_pickup_radius) cmp_liftable[idx].pickup_radius = built->liftable.pickup_radius;
+            if (built->liftable.has_max_hold_distance) cmp_liftable[idx].max_hold_distance = built->liftable.max_hold_distance;
+            if (built->liftable.has_breakoff_distance) cmp_liftable[idx].breakoff_distance = built->liftable.breakoff_distance;
+            if (built->liftable.has_follow_gain) cmp_liftable[idx].follow_gain = built->liftable.follow_gain;
+            if (built->liftable.has_max_speed) cmp_liftable[idx].max_speed = built->liftable.max_speed;
+            if (built->liftable.has_damping) cmp_liftable[idx].damping = built->liftable.damping;
         }
     }
+
+    if (built->has_grav_gun) cmp_add_grav_gun(e);
+    if (built->has_gun_charger) cmp_add_gun_charger(e);
 
     if (built->has_trigger) cmp_add_trigger(e, built->trigger.pad, built->trigger.target_mask);
     if (built->has_billboard) cmp_add_billboard(e, built->billboard.text, built->billboard.y_offset, built->billboard.linger, built->billboard.state);
@@ -274,7 +283,13 @@ size_t ecs_prefab_spawn_from_map(const world_map_t* map, const char* tmx_path)
     for (size_t i = 0; i < map->object_count; ++i) {
         const tiled_object_t* obj = &map->objects[i];
         const char* prefab_rel = tiled_object_get_property_value(obj, "entityprefab");
-        if (!prefab_rel) continue;
+        if (!prefab_rel) {
+            if (obj && obj->name && strcmp(obj->name, "gravity_gun_charger") == 0) {
+                prefab_rel = "../prefabs/gravity_gun_charger.ent";
+            } else {
+                continue;
+            }
+        }
 
         char* resolved = join_relative_path(tmx_path, prefab_rel);
         const char* path = resolved ? resolved : prefab_rel;

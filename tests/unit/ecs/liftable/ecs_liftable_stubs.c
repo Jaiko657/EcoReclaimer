@@ -1,6 +1,9 @@
 #include "modules/ecs/ecs_internal.h"
+#include "modules/ecs/ecs_proximity.h"
 #include "modules/renderer/renderer.h"
 #include "modules/world/world.h"
+#include "modules/asset/asset.h"
+#include "modules/core/toast.h"
 
 uint32_t        ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];
@@ -9,12 +12,15 @@ cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
 cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
+cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
+cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
+cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 static ecs_entity_t g_player = {0, 0};
@@ -22,6 +28,11 @@ static ecs_entity_t g_player = {0, 0};
 bool ecs_alive_idx(int i)
 {
     return ecs_gen[i] != 0;
+}
+
+bool ecs_alive_handle(ecs_entity_t e)
+{
+    return ent_index_checked(e) >= 0;
 }
 
 int ent_index_checked(ecs_entity_t e)
@@ -63,6 +74,27 @@ void cmp_add_velocity(ecs_entity_t e, float x, float y, facing_t direction)
     ecs_mask[i] |= CMP_VEL;
 }
 
+void cmp_add_position(ecs_entity_t e, float x, float y)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_pos[i] = (cmp_position_t){ x, y };
+    ecs_mask[i] |= CMP_POS;
+}
+
+void cmp_add_sprite_handle(ecs_entity_t e, tex_handle_t h, rectf src, float ox, float oy)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_spr[i] = (cmp_sprite_t){
+        .tex = h,
+        .src = src,
+        .ox = ox,
+        .oy = oy
+    };
+    ecs_mask[i] |= CMP_SPR;
+}
+
 bool renderer_screen_to_world(float screen_x, float screen_y, float* out_x, float* out_y)
 {
     if (out_x) *out_x = screen_x;
@@ -85,4 +117,49 @@ bool world_is_walkable_subtile(int sx, int sy)
 {
     (void)sx; (void)sy;
     return true;
+}
+
+tex_handle_t asset_acquire_texture(const char* path)
+{
+    (void)path;
+    return (tex_handle_t){ 1, 1 };
+}
+
+void asset_release_texture(tex_handle_t h)
+{
+    (void)h;
+}
+
+bool asset_texture_valid(tex_handle_t h)
+{
+    return h.idx != 0;
+}
+
+ecs_prox_iter_t ecs_prox_stay_begin(void)
+{
+    return (ecs_prox_iter_t){ .i = -1 };
+}
+
+bool ecs_prox_stay_next(ecs_prox_iter_t* it, ecs_prox_view_t* out)
+{
+    (void)it;
+    (void)out;
+    return false;
+}
+
+void ecs_register_component_destroy_hook(ComponentEnum comp, ecs_component_hook_fn fn)
+{
+    (void)comp;
+    (void)fn;
+}
+
+void ui_toast_update(float dt)
+{
+    (void)dt;
+}
+
+void ui_toast(float secs, const char* fmt, ...)
+{
+    (void)secs;
+    (void)fmt;
 }

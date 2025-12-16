@@ -150,6 +150,8 @@ void systems_registration_init(void)
     ecs_register_component_destroy_hook(ENUM_PHYS_BODY, ecs_phys_body_destroy_for_entity);
     ecs_register_phys_body_create_hook(ecs_phys_body_create_for_entity);
     ecs_register_render_component_hooks();
+    ecs_register_grav_gun_component_hooks();
+    ecs_register_liftable_component_hooks();
     ecs_register_door_component_hooks();
     systems_register(PHASE_INPUT,    -100, NULL, "effects_tick_begin");
     systems_register(PHASE_INPUT,    0,   NULL, "input");
@@ -162,6 +164,7 @@ void systems_registration_init(void)
     systems_register(PHASE_PHYSICS,  100, NULL, "physics");
 
     systems_register(PHASE_SIM_POST, 100, NULL, "proximity_view");
+    systems_register(PHASE_SIM_POST, 175, NULL, "grav_gun_charger");
     systems_register(PHASE_SIM_POST, 200, NULL, "billboards");
     systems_register(PHASE_SIM_POST, 250, NULL, "grav_gun_fx");
     systems_register(PHASE_SIM_POST, 900, NULL, "world_apply_edits");
@@ -182,6 +185,14 @@ void systems_registration_init(void)
 #if DEBUG_BUILD
     systems_register(PHASE_DEBUG,    100, NULL, "debug_binds");
 #endif
+}
+
+void ecs_register_grav_gun_component_hooks(void)
+{
+}
+
+void ecs_register_liftable_component_hooks(void)
+{
 }
 
 void sys_debug_binds(const input_t* in)

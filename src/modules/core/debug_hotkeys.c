@@ -8,6 +8,7 @@
 #include "modules/core/input.h"
 #include "modules/core/camera.h"
 #include "modules/core/logger.h"
+#include "modules/ecs/ecs_resource.h"
 #include "modules/core/cmp_print.h"
 #include "modules/core/debug_hotkeys.h"
 #include "modules/ecs/ecs_internal.h"
@@ -136,10 +137,15 @@ void sys_debug_binds(const input_t* in)
                 cmp_print_player(cmp_indent);
             }
             if (mask & CMP_STORAGE) {
-                int plastic = 0;
+                int counts[RESOURCE_TYPE_COUNT] = {0};
                 int capacity = 0;
-                ecs_game_get_storage(h, &plastic, &capacity);
-                cmp_print_storage(cmp_indent, plastic, capacity);
+                if (ecs_game_get_storage(h, counts, &capacity)) {
+                    cmp_print_storage(cmp_indent, counts, capacity);
+                }
+            }
+            if (mask & CMP_RESOURCE) {
+                resource_type_t type = cmp_resource_type_from_index(best);
+                cmp_print_resource(cmp_indent, type);
             }
             if (mask & CMP_FOLLOW) {
                 cmp_print_follow(cmp_indent, &cmp_follow[best]);
@@ -149,6 +155,9 @@ void sys_debug_binds(const input_t* in)
             }
             if (mask & CMP_BILLBOARD) {
                 cmp_print_billboard(cmp_indent, &cmp_billboard[best]);
+            }
+            if (mask & CMP_LIFTABLE) {
+                cmp_print_liftable(cmp_indent, &cmp_liftable[best]);
             }
             if (mask & CMP_GRAV_GUN) {
                 cmp_print_grav_gun(cmp_indent, &cmp_grav_gun[best]);

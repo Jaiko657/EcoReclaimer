@@ -21,6 +21,8 @@ typedef struct {
 typedef struct {
     bool highlighted;
     colorf highlight_color;
+    colorf highlight_base_color;
+    bool front;
     int highlight_thickness;
 } cmp_sprite_fx_t;
 
@@ -45,6 +47,11 @@ typedef struct {
     float frame_duration;
     float current_time;
 } cmp_anim_t;
+
+typedef struct {
+    ecs_entity_t held_gun;
+    ecs_entity_t held_liftable;
+} cmp_player_t;
 
 typedef struct { float hx, hy; } cmp_collider_t;
 
@@ -78,7 +85,23 @@ typedef struct {
     unsigned int saved_mask_bits;
     bool saved_mask_valid;
     bool just_dropped;
+} cmp_liftable_t;
+
+typedef struct {
+    bool held;
+    ecs_entity_t holder;
+    float charge;
+    float max_charge;
+    float drain_rate;
+    float regen_rate;
+    float eject_timer;
+    bool toast_pending;
 } cmp_grav_gun_t;
+
+typedef struct {
+    ecs_entity_t stored_gun;
+    float flash_timer;
+} cmp_gun_charger_t;
 
 typedef struct {
     float prox_radius;
@@ -96,12 +119,15 @@ extern cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 extern cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
 extern cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 extern cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
+extern cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 extern cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 extern cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 extern cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
 extern cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 extern cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
+extern cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 extern cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
+extern cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 extern cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 // ===== Internal helpers =====
@@ -127,4 +153,6 @@ void ecs_register_component_destroy_hook(ComponentEnum comp, ecs_component_hook_
 void ecs_register_phys_body_create_hook(ecs_component_hook_fn fn);
 void ecs_register_render_component_hooks(void);
 void ecs_register_physics_component_hooks(void);
+void ecs_register_grav_gun_component_hooks(void);
+void ecs_register_liftable_component_hooks(void);
 void ecs_register_door_component_hooks(void);

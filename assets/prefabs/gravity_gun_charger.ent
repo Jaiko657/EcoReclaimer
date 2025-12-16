@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefab name="gravity_gun_charger">
+  <component type="COL" hx="7" hy="3.5"/>
+  <component type="TRIGGER" pad="6" target_mask="PLAYER"/>
+  <component type="BILLBOARD" text="E to place gun in charger" y_offset="-12" linger="0.10" state="inactive"/>
+  <component type="GUN_CHARGER"/>
+</prefab>

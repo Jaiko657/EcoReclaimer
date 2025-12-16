@@ -88,6 +88,7 @@ int main(int argc, char **argv)
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
     nob_da_append(&sources, "src/modules/core/cmp_print.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_resource.c");
     nob_da_append(&sources, "src/modules/core/debug_hotkeys.c");
     nob_da_append(&sources, "tests/unit/core/debug_hotkeys/raylib_stubs.c");
     nob_da_append(&sources, "tests/unit/core/debug_hotkeys/debug_hotkeys_stubs.c");

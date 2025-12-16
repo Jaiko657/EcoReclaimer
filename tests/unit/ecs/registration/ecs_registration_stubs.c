@@ -1,12 +1,15 @@
 #include "ecs_registration_stubs.h"
 
 #include <string.h>
+#include "modules/core/logger.h"
 
 systems_registration_call_t g_systems_registration_calls[32];
 int g_systems_registration_call_count = 0;
 int g_systems_init_seq = 0;
 int g_ecs_render_hooks_seq = 0;
 int g_ecs_physics_hooks_seq = 0;
+int g_ecs_grav_gun_hooks_seq = 0;
+int g_ecs_liftable_hooks_seq = 0;
 int g_ecs_game_hooks_seq = 0;
 int g_ecs_door_hooks_seq = 0;
 
@@ -19,6 +22,8 @@ void ecs_registration_stubs_reset(void)
     g_systems_init_seq = 0;
     g_ecs_render_hooks_seq = 0;
     g_ecs_physics_hooks_seq = 0;
+    g_ecs_grav_gun_hooks_seq = 0;
+    g_ecs_liftable_hooks_seq = 0;
     g_ecs_game_hooks_seq = 0;
     g_ecs_door_hooks_seq = 0;
     g_call_seq = 0;
@@ -54,6 +59,16 @@ void ecs_register_render_component_hooks(void)
 void ecs_register_physics_component_hooks(void)
 {
     g_ecs_physics_hooks_seq = ++g_call_seq;
+}
+
+void ecs_register_grav_gun_component_hooks(void)
+{
+    g_ecs_grav_gun_hooks_seq = ++g_call_seq;
+}
+
+void ecs_register_liftable_component_hooks(void)
+{
+    g_ecs_liftable_hooks_seq = ++g_call_seq;
 }
 
 void ecs_register_game_systems(void)
@@ -130,7 +145,19 @@ void sys_grav_gun_input_adapt(float dt, const input_t* in)
     (void)in;
 }
 
+void sys_grav_gun_tool_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
 void sys_grav_gun_motion_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
+void sys_grav_gun_charger_adapt(float dt, const input_t* in)
 {
     (void)dt;
     (void)in;
@@ -233,3 +260,19 @@ void sys_debug_binds_adapt(float dt, const input_t* in)
     (void)in;
 }
 #endif
+
+bool log_would_log(log_level_t lvl)
+{
+    (void)lvl;
+    return true;
+}
+
+void log_msg(log_level_t lvl, const log_cat_t* cat, const char* fmt, ...)
+{
+    (void)lvl;
+    (void)cat;
+    (void)fmt;
+}
+
+void ecs_anim_reset_allocator(void) {}
+void ecs_anim_shutdown_allocator(void) {}

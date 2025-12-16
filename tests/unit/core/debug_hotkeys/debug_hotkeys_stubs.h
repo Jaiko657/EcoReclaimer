@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "modules/ecs/ecs.h"
+#include "modules/ecs/ecs_resource.h"
 
 extern int g_asset_reload_calls;
 extern int g_asset_log_calls;
@@ -18,7 +19,7 @@ extern bool g_engine_reload_world_result;
 extern int g_world_tiles_w;
 extern int g_world_tiles_h;
 extern bool g_ecs_alive[ECS_MAX_ENTITIES];
-extern int g_game_storage_plastic;
+extern int g_game_storage_counts[RESOURCE_TYPE_COUNT];
 extern int g_game_storage_capacity;
 
 void debug_hotkeys_stub_reset(void);
