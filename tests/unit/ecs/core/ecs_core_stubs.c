@@ -152,7 +152,6 @@ void systems_registration_init(void)
     ecs_register_render_component_hooks();
     ecs_register_grav_gun_component_hooks();
     ecs_register_liftable_component_hooks();
-    ecs_register_door_component_hooks();
     systems_register(PHASE_INPUT,    -100, NULL, "effects_tick_begin");
     systems_register(PHASE_INPUT,    0,   NULL, "input");
     systems_register(PHASE_INPUT,    50,  NULL, "grav_gun_input");
@@ -185,6 +184,8 @@ void systems_registration_init(void)
 #if DEBUG_BUILD
     systems_register(PHASE_DEBUG,    100, NULL, "debug_binds");
 #endif
+
+    ecs_register_component_destroy_hook(ENUM_DOOR, ecs_door_on_destroy);
 }
 
 void ecs_register_grav_gun_component_hooks(void)
@@ -194,6 +195,15 @@ void ecs_register_grav_gun_component_hooks(void)
 void ecs_register_liftable_component_hooks(void)
 {
 }
+
+void ecs_register_render_component_hooks(void) __attribute__((weak));
+void ecs_register_render_component_hooks(void) {}
+
+void ecs_register_physics_component_hooks(void) __attribute__((weak));
+void ecs_register_physics_component_hooks(void) {}
+
+void ecs_register_resource_component_hooks(void) __attribute__((weak));
+void ecs_register_resource_component_hooks(void) {}
 
 void sys_debug_binds(const input_t* in)
 {

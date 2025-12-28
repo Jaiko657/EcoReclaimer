@@ -58,7 +58,27 @@ typedef struct { float hx, hy; } cmp_collider_t;
 typedef struct {
     float    pad;
     uint32_t target_mask;
+    trigger_match_t match;
 } cmp_trigger_t;
+
+typedef struct {
+    facing_t direction;
+    float speed;
+    bool block_player_input;
+} cmp_conveyor_t;
+
+typedef struct {
+    int active_count;
+    PhysicsType saved_type;
+    float saved_mass;
+    float saved_inv_mass;
+    unsigned int saved_category_bits;
+    unsigned int saved_mask_bits;
+    bool saved_valid;
+    float vel_x;
+    float vel_y;
+    bool block_player_input;
+} cmp_conveyor_rider_t;
 
 typedef struct {
     char text[64];
@@ -85,6 +105,8 @@ typedef struct {
     unsigned int saved_mask_bits;
     bool saved_mask_valid;
     bool just_dropped;
+    bool recycle_active;
+    float recycle_target_y;
 } cmp_liftable_t;
 
 typedef struct {
@@ -123,6 +145,8 @@ extern cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 extern cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 extern cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 extern cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
+extern cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
+extern cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
 extern cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 extern cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 extern cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
@@ -155,4 +179,3 @@ void ecs_register_render_component_hooks(void);
 void ecs_register_physics_component_hooks(void);
 void ecs_register_grav_gun_component_hooks(void);
 void ecs_register_liftable_component_hooks(void);
-void ecs_register_door_component_hooks(void);

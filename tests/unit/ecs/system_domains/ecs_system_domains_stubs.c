@@ -14,6 +14,8 @@ cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
+cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
+cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
@@ -38,6 +40,8 @@ void ecs_system_domains_stub_reset(void)
     memset(cmp_vel, 0, sizeof(cmp_vel));
     memset(cmp_follow, 0, sizeof(cmp_follow));
     memset(cmp_col, 0, sizeof(cmp_col));
+    memset(cmp_conveyor, 0, sizeof(cmp_conveyor));
+    memset(cmp_conveyor_rider, 0, sizeof(cmp_conveyor_rider));
     memset(cmp_phys_body, 0, sizeof(cmp_phys_body));
     g_world_has_map = true;
     g_world_subtile = 0;

@@ -1,9 +1,5 @@
 #include "modules/systems/systems.h"
 #include "modules/systems/systems_registration.h"
-#include "modules/ecs/ecs_game.h"
-#include "modules/ecs/ecs_resource.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/renderer/renderer.h"
 
 // Find wrapper definitions via `SYSTEMS_ADAPT_*(sys_*_adapt`.
 // The definitions are in their respective modules.
@@ -20,6 +16,8 @@ void sys_grav_gun_motion_adapt(float dt, const input_t* in);
 void sys_grav_gun_charger_adapt(float dt, const input_t* in);
 void sys_effects_tick_begin_adapt(float dt, const input_t* in);
 void sys_grav_gun_fx_adapt(float dt, const input_t* in);
+void sys_conveyor_update_adapt(float dt, const input_t* in);
+void sys_conveyor_apply_adapt(float dt, const input_t* in);
 void sys_render_begin_adapt(float dt, const input_t* in);
 void sys_render_world_prepare_adapt(float dt, const input_t* in);
 void sys_render_world_base_adapt(float dt, const input_t* in);
@@ -29,6 +27,11 @@ void sys_render_world_overlays_adapt(float dt, const input_t* in);
 void sys_render_world_end_adapt(float dt, const input_t* in);
 void sys_render_ui_adapt(float dt, const input_t* in);
 void sys_render_end_adapt(float dt, const input_t* in);
+
+void sys_recycle_bins_adapt(float dt, const input_t* in);
+void sys_recycle_anim_adapt(float dt, const input_t* in);
+void sys_storage_deposit_adapt(float dt, const input_t* in);
+void sys_doors_tick_adapt(float dt, const input_t* in);
 
 void sys_toast_update_adapt(float dt, const input_t* in);
 void sys_camera_tick_adapt(float dt, const input_t* in);
@@ -41,11 +44,6 @@ void sys_debug_binds_adapt(float dt, const input_t* in);
 void systems_registration_init(void)
 {
     systems_init();
-    ecs_register_render_component_hooks();
-    ecs_register_physics_component_hooks();
-    ecs_register_grav_gun_component_hooks();
-    ecs_register_liftable_component_hooks();
-    ecs_register_resource_component_hooks();
 
     // Pipeline mapping: Input -> Intent -> Physics -> Post-Sim -> Present -> Render -> GC.
     systems_register(PHASE_INPUT, -100, sys_effects_tick_begin_adapt, "effects_tick_begin");
@@ -56,13 +54,19 @@ void systems_registration_init(void)
 
     systems_register(PHASE_PHYSICS, 50, sys_follow_adapt, "follow_ai");
     systems_register(PHASE_PHYSICS, 90, sys_grav_gun_motion_adapt, "grav_gun_motion");
+    systems_register(PHASE_PHYSICS, 95, sys_conveyor_apply_adapt, "conveyor_apply");
     systems_register(PHASE_PHYSICS, 100, sys_physics_adapt, "physics");
 
     systems_register(PHASE_SIM_POST, 100, sys_prox_build_adapt, "proximity_view");
+    systems_register(PHASE_SIM_POST, 105, sys_conveyor_update_adapt, "conveyor_update");
+    systems_register(PHASE_SIM_POST, 110, sys_recycle_bins_adapt, "recycle_bins");
+    systems_register(PHASE_SIM_POST, 115, sys_recycle_anim_adapt, "recycle_anim");
+    systems_register(PHASE_SIM_POST, 120, sys_storage_deposit_adapt, "storage_deposit");
     systems_register(PHASE_SIM_POST, 150, sys_grav_gun_tool_adapt, "grav_gun_tool");
     systems_register(PHASE_SIM_POST, 175, sys_grav_gun_charger_adapt, "grav_gun_charger");
     systems_register(PHASE_SIM_POST, 200, sys_billboards_adapt, "billboards");
     systems_register(PHASE_SIM_POST, 250, sys_grav_gun_fx_adapt, "grav_gun_fx");
+    systems_register(PHASE_SIM_POST, 400, sys_doors_tick_adapt, "doors_tick");
     systems_register(PHASE_SIM_POST, 900, sys_world_apply_edits_adapt, "world_apply_edits");
 
     systems_register(PHASE_PRESENT, 10, sys_toast_update_adapt, "toast_update");
@@ -83,8 +87,5 @@ void systems_registration_init(void)
 #if DEBUG_BUILD
     systems_register(PHASE_DEBUG, 100, sys_debug_binds_adapt, "debug_binds");
 #endif
-
-    ecs_register_game_systems();
-    ecs_register_door_component_hooks();
 
 }

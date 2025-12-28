@@ -12,11 +12,6 @@ void ecs_door_on_destroy(int idx)
     }
 }
 
-void ecs_register_door_component_hooks(void)
-{
-    ecs_register_component_destroy_hook(ENUM_DOOR, ecs_door_on_destroy);
-}
-
 void cmp_add_door(ecs_entity_t e, float prox_radius, int tile_count, const door_tile_xy_t* tile_xy)
 {
     int i = ent_index_checked(e);

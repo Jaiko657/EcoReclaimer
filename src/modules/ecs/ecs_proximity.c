@@ -97,7 +97,19 @@ static void sys_proximity_build_view_impl(void)
 
         for (int b=0; b<ECS_MAX_ENTITIES; ++b) {
             if (b==a || !ecs_alive_idx(b)) continue;
-            if ((ecs_mask[b] & tr->target_mask) != tr->target_mask) continue;
+            if (tr->target_mask) {
+                bool matches = false;
+                switch (tr->match) {
+                    case TRIGGER_MATCH_ANY:
+                        matches = (ecs_mask[b] & tr->target_mask) != 0;
+                        break;
+                    case TRIGGER_MATCH_ALL:
+                    default:
+                        matches = (ecs_mask[b] & tr->target_mask) == tr->target_mask;
+                        break;
+                }
+                if (!matches) continue;
+            }
             if ((ecs_mask[b] & (CMP_POS|CMP_COL)) != (CMP_POS|CMP_COL)) continue;
 
             if (col_overlap_padded_idx(a, b, tr->pad)){

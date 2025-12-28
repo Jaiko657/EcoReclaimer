@@ -55,6 +55,17 @@ typedef struct {
 bool prefab_cmp_resource_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_resource_t* out_resource);
 
 typedef struct {
+    int capacity;
+    bool has_capacity;
+} prefab_cmp_storage_t;
+bool prefab_cmp_storage_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_storage_t* out_storage);
+
+typedef struct {
+    resource_type_t type;
+} prefab_cmp_recycle_bin_t;
+bool prefab_cmp_recycle_bin_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_recycle_bin_t* out_recycle_bin);
+
+typedef struct {
     int frame_w;
     int frame_h;
     float fps;
@@ -111,8 +122,15 @@ bool prefab_cmp_follow_build(const prefab_component_t* comp, const tiled_object_
 typedef struct { float hx, hy; } prefab_cmp_col_t;
 bool prefab_cmp_col_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_col_t* out_col);
 
-typedef struct { float pad; uint32_t target_mask; } prefab_cmp_trigger_t;
+typedef struct { float pad; uint32_t target_mask; trigger_match_t match; } prefab_cmp_trigger_t;
 bool prefab_cmp_trigger_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_trigger_t* out_trigger);
+
+typedef struct {
+    facing_t direction;
+    float speed;
+    bool block_player_input;
+} prefab_cmp_conveyor_t;
+bool prefab_cmp_conveyor_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_conveyor_t* out_conveyor);
 
 typedef struct {
     const char* text;

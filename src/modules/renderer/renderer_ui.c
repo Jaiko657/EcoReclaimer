@@ -1,10 +1,12 @@
 #include "modules/renderer/renderer_internal.h"
-#include "modules/ecs/ecs_game.h"
+#include "modules/ecs/ecs_gravity_gun.h"
+#include "modules/ecs/ecs_storage.h"
 #include "modules/asset/asset.h"
 #include "modules/asset/asset_renderer_internal.h"
 
 #include <math.h>
 #include <stdio.h>
+#include <limits.h>
 
 static bool grav_gun_ui_get_texture(Texture2D* out_tex)
 {
@@ -54,6 +56,23 @@ static const rectf* grav_gun_ui_frames(int* out_count)
     return frames;
 }
 
+static bool draw_storage_hud(ecs_entity_t storage, int x, int y, const char* label)
+{
+    int counts[RESOURCE_TYPE_COUNT] = {0};
+    int capacity = 0;
+    if (!ecs_storage_get(storage, counts, &capacity)) return false;
+
+    int total = counts[RESOURCE_TYPE_PLASTIC] + counts[RESOURCE_TYPE_METAL];
+    char storage_hud[64];
+    if (capacity >= INT_MAX / 2) {
+        snprintf(storage_hud, sizeof(storage_hud), "%s P:%d M:%d (%d/inf)", label, counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total);
+    } else {
+        snprintf(storage_hud, sizeof(storage_hud), "%s P:%d M:%d (%d/%d)", label, counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total, capacity);
+    }
+    DrawText(storage_hud, x, y, 18, RAYWHITE);
+    return true;
+}
+
 void draw_screen_space_ui(const render_view_t* view)
 {
     renderer_debug_draw_ui(view);
@@ -72,25 +91,20 @@ void draw_screen_space_ui(const render_view_t* view)
 
     // ===== HUD =====
     {
-        int counts[RESOURCE_TYPE_COUNT] = {0};
-        int capacity = 0;
-        if (game_get_tardas_storage(counts, &capacity)) {
-            int total = counts[RESOURCE_TYPE_PLASTIC] + counts[RESOURCE_TYPE_METAL];
-            char storage_hud[64];
-            snprintf(storage_hud, sizeof(storage_hud), "TARDAS P:%d M:%d (%d/%d)",
-                     counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total, capacity);
-            DrawText(storage_hud, 10, 10, 18, RAYWHITE);
-            DrawText("Move: Arrows/WASD | Interact: E | Lift/Throw: C", 10, 32, 18, GRAY);
-        } else {
-            DrawText("Move: Arrows/WASD | Interact: E | Lift/Throw: C", 10, 10, 18, GRAY);
-        }
+        int y = 10;
+        bool drew = false;
+        drew |= draw_storage_hud(ecs_storage_find_player(), 10, y, "PLAYER");
+        if (drew) y += 22;
+        drew |= draw_storage_hud(ecs_storage_find_tardas(), 10, y, "TARDAS");
+        if (drew) y += 22;
+        DrawText("Move: Arrows/WASD | Interact: E | Lift/Throw: C", 10, y, 18, GRAY);
     }
 
     // ===== grav gun charge UI =====
     {
         float charge = 0.0f;
         float max_charge = 0.0f;
-        if (game_get_grav_gun_charge(&charge, &max_charge) && max_charge > 0.0f) {
+        if (ecs_grav_gun_get_charge(&charge, &max_charge) && max_charge > 0.0f) {
             Texture2D tex;
             if (grav_gun_ui_get_texture(&tex)) {
                 int frame_count = 0;

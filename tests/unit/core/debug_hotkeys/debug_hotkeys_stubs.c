@@ -7,7 +7,7 @@
 #include "modules/asset/asset.h"
 #include "modules/core/camera.h"
 #include "modules/core/engine.h"
-#include "modules/ecs/ecs_game.h"
+#include "modules/ecs/ecs_storage.h"
 #include "modules/ecs/ecs_internal.h"
 #include "modules/core/logger.h"
 #include "modules/renderer/renderer.h"
@@ -39,6 +39,8 @@ cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
+cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
+cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
@@ -76,6 +78,8 @@ void debug_hotkeys_stub_reset(void)
     memset(cmp_spr, 0, sizeof(cmp_spr));
     memset(cmp_col, 0, sizeof(cmp_col));
     memset(cmp_trigger, 0, sizeof(cmp_trigger));
+    memset(cmp_conveyor, 0, sizeof(cmp_conveyor));
+    memset(cmp_conveyor_rider, 0, sizeof(cmp_conveyor_rider));
     memset(cmp_billboard, 0, sizeof(cmp_billboard));
     memset(cmp_phys_body, 0, sizeof(cmp_phys_body));
     memset(cmp_liftable, 0, sizeof(cmp_liftable));
@@ -152,7 +156,7 @@ camera_view_t camera_get_view(void)
     return view;
 }
 
-bool ecs_game_get_storage(ecs_entity_t e, int out_counts[RESOURCE_TYPE_COUNT], int* out_capacity)
+bool ecs_storage_get(ecs_entity_t e, int out_counts[RESOURCE_TYPE_COUNT], int* out_capacity)
 {
     (void)e;
     if (out_counts) {
@@ -229,8 +233,6 @@ void ecs_register_render_component_hooks(void) {}
 void ecs_register_physics_component_hooks(void) {}
 void ecs_register_grav_gun_component_hooks(void) {}
 void ecs_register_liftable_component_hooks(void) {}
-void ecs_register_door_component_hooks(void) {}
-
 void ecs_anim_reset_allocator(void) {}
 void ecs_anim_shutdown_allocator(void) {}
 

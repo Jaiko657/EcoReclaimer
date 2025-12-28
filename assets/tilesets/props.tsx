@@ -1290,11 +1290,13 @@
  </tile>
  <tile id="274">
   <properties>
+   <property name="painteroffset" value="30"/>
    <property name="renderstyle" value="painters"/>
   </properties>
  </tile>
  <tile id="275">
   <properties>
+   <property name="painteroffset" value="26"/>
    <property name="renderstyle" value="painters"/>
   </properties>
  </tile>
@@ -1418,21 +1420,25 @@
  </tile>
  <tile id="298">
   <properties>
+   <property name="painteroffset" value="1000"/>
    <property name="renderstyle" value="painters"/>
   </properties>
  </tile>
  <tile id="299">
   <properties>
+   <property name="painteroffset" value="1000"/>
    <property name="renderstyle" value="painters"/>
   </properties>
  </tile>
  <tile id="300">
   <properties>
+   <property name="painteroffset" value="1000"/>
    <property name="renderstyle" value="painters"/>
   </properties>
  </tile>
  <tile id="301">
   <properties>
+   <property name="painteroffset" value="1000"/>
    <property name="renderstyle" value="painters"/>
   </properties>
  </tile>

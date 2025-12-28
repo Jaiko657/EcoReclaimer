@@ -14,6 +14,9 @@
 #include "modules/ecs/ecs_prefab_loading.h"
 #include "modules/world/world_renderer.h"
 
+void sys_storage_deposit_adapt(float dt, const input_t* in);
+void sys_doors_tick_adapt(float dt, const input_t* in);
+
 uint32_t        ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];
 uint32_t        ecs_next_gen[ECS_MAX_ENTITIES];
@@ -25,6 +28,8 @@ cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
+cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
+cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
@@ -59,6 +64,8 @@ void ecs_game_stub_reset(void)
     memset(cmp_pos, 0, sizeof(cmp_pos));
     memset(cmp_player, 0, sizeof(cmp_player));
     memset(cmp_col, 0, sizeof(cmp_col));
+    memset(cmp_conveyor, 0, sizeof(cmp_conveyor));
+    memset(cmp_conveyor_rider, 0, sizeof(cmp_conveyor_rider));
     memset(cmp_billboard, 0, sizeof(cmp_billboard));
     g_player = (ecs_entity_t){0, 0};
     g_world_tiled_map = NULL;
@@ -116,6 +123,11 @@ ecs_entity_t find_player_handle(void)
     return g_player;
 }
 
+ecs_entity_t ecs_find_player(void)
+{
+    return g_player;
+}
+
 ecs_entity_t handle_from_index(int i)
 {
     if (i < 0 || i >= ECS_MAX_ENTITIES) return ecs_null();
@@ -135,6 +147,12 @@ void ecs_destroy(ecs_entity_t e)
     if (idx < 0) return;
     ecs_gen[idx] = 0;
     ecs_mask[idx] = 0;
+}
+
+void ecs_phys_body_destroy_for_entity(int idx)
+{
+    if (idx < 0 || idx >= ECS_MAX_ENTITIES) return;
+    cmp_phys_body[idx].created = false;
 }
 
 ecs_prox_iter_t ecs_prox_enter_begin(void) { return (ecs_prox_iter_t){ .i = 0 }; }
@@ -223,4 +241,10 @@ void systems_register(systems_phase_t phase, int order, systems_fn fn, const cha
     } else if (strcmp(name, "doors_tick") == 0) {
         g_ecs_sys_doors_tick = fn;
     }
+}
+
+void systems_registration_init(void)
+{
+    systems_register(PHASE_SIM_POST, 120, sys_storage_deposit_adapt, "storage_deposit");
+    systems_register(PHASE_SIM_POST, 400, sys_doors_tick_adapt, "doors_tick");
 }

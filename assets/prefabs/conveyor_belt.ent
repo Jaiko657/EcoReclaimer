@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefab name="conveyor_belt">
+  <component type="POS" override="true"/>
+  <component type="COL" override="true" hx="8" hy="8"/>
+  <component type="CONVEYOR" dir="west" speed="50" block_player_input="true"/>
+  <component type="TRIGGER" pad="1" target_mask="PLAYER|RESOURCE" match="or"/>
+</prefab>

@@ -102,6 +102,9 @@ int main(int argc, char **argv)
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
     nob_da_append(&sources, "src/modules/core/logger.c");
     nob_da_append(&sources, "src/modules/ecs/ecs_core.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_doors.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_physics.c");
+    nob_da_append(&sources, "src/modules/ecs/ecs_physics_hooks.c");
     nob_da_append(&sources, "src/modules/asset/bump_alloc.c");
     nob_da_append(&sources, "src/modules/tiled/tiled.c");
     nob_da_append(&sources, "src/modules/tiled/tiled_layers.c");
@@ -124,6 +127,9 @@ int main(int argc, char **argv)
     nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_resource.c");
     nob_da_append(&sources, "src/modules/ecs/ecs_resource.c");
     nob_da_append(&sources, "tests/unit/prefab/ecs_anim_stubs.c");
+    nob_da_append(&sources, "tests/unit/prefab/ecs_gravity_gun_stubs.c");
+    nob_da_append(&sources, "tests/unit/prefab/ecs_render_stubs.c");
+    nob_da_append(&sources, "tests/unit/prefab/world_door_stubs.c");
     nob_da_append(&sources, "third_party/xml.c/src/xml.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_common.c");

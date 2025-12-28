@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefab name="recycle_bin">
+  <component type="POS" override="true"/>
+  <component type="COL" hx="8" hy="10"/>
+  <component type="TRIGGER" pad="0" target_mask="RESOURCE"/>
+  <component type="RECYCLE_BIN"/>
+</prefab>

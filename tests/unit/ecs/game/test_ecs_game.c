@@ -1,8 +1,10 @@
 #include "unity.h"
 
 #include "modules/ecs/ecs_game.h"
+#include "modules/ecs/ecs_storage.h"
 #include "modules/ecs/ecs_resource.h"
 #include "modules/ecs/ecs_internal.h"
+#include "modules/systems/systems_registration.h"
 #include "ecs_game_stubs.h"
 #include "modules/ecs/ecs_render.h"
 
@@ -11,7 +13,6 @@
 void setUp(void)
 {
     ecs_game_stub_reset();
-    ecs_register_game_systems();
 }
 
 void tearDown(void)
@@ -30,10 +31,11 @@ void test_init_entities_requires_loaded_map(void)
     TEST_ASSERT_EQUAL_STRING("maps/test.tmx", g_prefab_spawn_last_path);
 }
 
-void test_ecs_register_game_systems_registers_callbacks(void)
+void test_systems_registration_registers_storage_callbacks(void)
 {
-    ecs_register_game_systems();
+    systems_registration_init();
     TEST_ASSERT_TRUE(g_ecs_register_system_calls > 0);
+    TEST_ASSERT_NOT_NULL(g_ecs_sys_storage);
 }
 
 void test_sys_storage_deposit_moves_plastic_into_tardas(void)
@@ -52,13 +54,13 @@ void test_sys_storage_deposit_moves_plastic_into_tardas(void)
     ecs_prox_view_t stay = { .trigger_owner = tardas, .matched_entity = plastic };
     ecs_game_stub_set_prox_stay(&stay, 1);
 
-    ecs_register_game_systems();
+    systems_registration_init();
     TEST_ASSERT_NOT_NULL(g_ecs_sys_storage);
     g_ecs_sys_storage(0.0f, NULL);
 
     int counts[RESOURCE_TYPE_COUNT] = {0};
     int capacity = 0;
-    TEST_ASSERT_TRUE(game_get_tardas_storage(counts, &capacity));
+    TEST_ASSERT_TRUE(ecs_storage_get(tardas, counts, &capacity));
     TEST_ASSERT_EQUAL_INT(1, counts[RESOURCE_TYPE_PLASTIC]);
     TEST_ASSERT_EQUAL_INT(0, counts[RESOURCE_TYPE_METAL]);
     TEST_ASSERT_EQUAL_INT(2, capacity);
@@ -79,6 +81,7 @@ void test_sys_doors_intent_and_present_updates_state(void)
     ecs_prox_view_t stay = { .trigger_owner = door, .matched_entity = ecs_null() };
     ecs_game_stub_set_prox_stay(&stay, 1);
 
+    systems_registration_init();
     g_world_door_primary_duration = 100;
     TEST_ASSERT_NOT_NULL(g_ecs_sys_doors_tick);
     g_ecs_sys_doors_tick(0.05f, NULL);

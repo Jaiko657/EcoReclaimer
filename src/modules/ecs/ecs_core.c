@@ -1,4 +1,5 @@
 #include "modules/ecs/ecs_internal.h"
+#include "modules/ecs/ecs_resource.h"
 #include "modules/core/logger.h"
 #include <math.h>
 #include <string.h>
@@ -15,6 +16,8 @@ cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
+cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
+cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
@@ -93,6 +96,16 @@ static void ecs_init_destroy_table(void)
     phys_body_create_hook = NULL;
 }
 
+static void ecs_register_component_hooks(void)
+{
+    ecs_register_render_component_hooks();
+    ecs_register_physics_component_hooks();
+    ecs_register_grav_gun_component_hooks();
+    ecs_register_liftable_component_hooks();
+    ecs_register_resource_component_hooks();
+    ecs_register_component_destroy_hook(ENUM_DOOR, ecs_door_on_destroy);
+}
+
 static void try_create_phys_body(int i){
     const uint32_t req = (CMP_POS | CMP_COL | CMP_PHYS_BODY);
     if ((ecs_mask[i] & req) != req) return;
@@ -111,6 +124,7 @@ void ecs_init(void){
     memset(ecs_destroy_state, 0, sizeof(ecs_destroy_state));
     free_top = 0;
     ecs_init_destroy_table();
+    ecs_register_component_hooks();
     ecs_anim_reset_allocator();
     for (int i = ECS_MAX_ENTITIES - 1; i >= 0; --i) {
         free_stack[free_top++] = i;
@@ -291,10 +305,22 @@ void cmp_add_follow(ecs_entity_t e, ecs_entity_t target, float desired_distance,
     ecs_mask[i] |= CMP_FOLLOW;
 }
 
-void cmp_add_trigger(ecs_entity_t e, float pad, uint32_t target_mask){
+void cmp_add_trigger(ecs_entity_t e, float pad, uint32_t target_mask, trigger_match_t match){
     int i = ent_index_checked(e); if (i < 0) return;
-    cmp_trigger[i] = (cmp_trigger_t){ pad, target_mask };
+    cmp_trigger[i] = (cmp_trigger_t){ pad, target_mask, match };
     ecs_mask[i] |= CMP_TRIGGER;
+}
+
+void cmp_add_conveyor(ecs_entity_t e, facing_t direction, float speed, bool block_player_input)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_conveyor[i] = (cmp_conveyor_t){
+        .direction = direction,
+        .speed = speed,
+        .block_player_input = block_player_input
+    };
+    ecs_mask[i] |= CMP_CONVEYOR;
 }
 
 void cmp_add_billboard(ecs_entity_t e, const char* text, float y_off, float linger, billboard_state_t state){
@@ -340,7 +366,9 @@ void cmp_add_liftable(ecs_entity_t e)
         .grab_offset_y      = 0.0f,
         .saved_mask_bits    = 0u,
         .saved_mask_valid   = false,
-        .just_dropped       = false
+        .just_dropped       = false,
+        .recycle_active     = false,
+        .recycle_target_y   = 0.0f
     };
     ecs_mask[i] |= CMP_LIFTABLE;
 }
@@ -388,7 +416,7 @@ void cmp_add_phys_body(ecs_entity_t e, PhysicsType type, float mass)
     if (ecs_mask[i] & CMP_PLAYER) {
         cmp_phys_body[i].category_bits |= PHYS_CAT_PLAYER;
     }
-    if (ecs_mask[i] & CMP_STORAGE) {
+    if ((ecs_mask[i] & CMP_STORAGE) && (ecs_mask[i] & CMP_PLAYER) == 0) {
         cmp_phys_body[i].category_bits |= PHYS_CAT_TARDAS;
     }
     ecs_mask[i] |= CMP_PHYS_BODY;

@@ -260,7 +260,7 @@ void test_helpers_validate_handles_and_clampf(void)
 void test_cmp_add_trigger_and_phys_body(void)
 {
     ecs_entity_t e = ecs_create();
-    cmp_add_trigger(e, 2.5f, CMP_PLAYER);
+    cmp_add_trigger(e, 2.5f, CMP_PLAYER, TRIGGER_MATCH_ALL);
 
     int idx = ent_index_checked(e);
     TEST_ASSERT_TRUE(idx >= 0);

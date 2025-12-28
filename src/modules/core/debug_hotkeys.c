@@ -12,7 +12,7 @@
 #include "modules/core/cmp_print.h"
 #include "modules/core/debug_hotkeys.h"
 #include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_game.h"
+#include "modules/ecs/ecs_storage.h"
 #include "modules/core/engine.h"
 #include "modules/world/world.h"
 #include "modules/systems/systems_registration.h"
@@ -139,7 +139,7 @@ void sys_debug_binds(const input_t* in)
             if (mask & CMP_STORAGE) {
                 int counts[RESOURCE_TYPE_COUNT] = {0};
                 int capacity = 0;
-                if (ecs_game_get_storage(h, counts, &capacity)) {
+                if (ecs_storage_get(h, counts, &capacity)) {
                     cmp_print_storage(cmp_indent, counts, capacity);
                 }
             }

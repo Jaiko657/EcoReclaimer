@@ -22,6 +22,8 @@ cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
 cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
+cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
+cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
 cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
@@ -137,6 +139,11 @@ void cmp_add_storage(ecs_entity_t e, int capacity)
     (void)e; (void)capacity;
 }
 
+void cmp_add_recycle_bin(ecs_entity_t e, resource_type_t type)
+{
+    (void)e; (void)type;
+}
+
 void cmp_add_follow(ecs_entity_t e, ecs_entity_t target, float desired_distance, float max_speed)
 {
     int idx = ent_index_checked(e);
@@ -172,9 +179,14 @@ void cmp_add_gun_charger(ecs_entity_t e)
     ecs_mask[idx] |= CMP_GUN_CHARGER;
 }
 
-void cmp_add_trigger(ecs_entity_t e, float pad, uint32_t target_mask)
+void cmp_add_trigger(ecs_entity_t e, float pad, uint32_t target_mask, trigger_match_t match)
 {
-    (void)e; (void)pad; (void)target_mask;
+    (void)e; (void)pad; (void)target_mask; (void)match;
+}
+
+void cmp_add_conveyor(ecs_entity_t e, facing_t dir, float speed, bool block_player_input)
+{
+    (void)e; (void)dir; (void)speed; (void)block_player_input;
 }
 
 void cmp_add_billboard(ecs_entity_t e, const char* text, float y_off, float linger, billboard_state_t state)
@@ -270,9 +282,27 @@ bool prefab_cmp_grav_gun_build(const prefab_component_t* comp, const tiled_objec
     return false;
 }
 
+bool prefab_cmp_storage_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_storage_t* out_storage)
+{
+    (void)comp; (void)obj; (void)out_storage;
+    return false;
+}
+
+bool prefab_cmp_recycle_bin_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_recycle_bin_t* out_recycle_bin)
+{
+    (void)comp; (void)obj; (void)out_recycle_bin;
+    return false;
+}
+
 bool prefab_cmp_trigger_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_trigger_t* out_trigger)
 {
     (void)comp; (void)obj; (void)out_trigger;
+    return false;
+}
+
+bool prefab_cmp_conveyor_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_conveyor_t* out_conveyor)
+{
+    (void)comp; (void)obj; (void)out_conveyor;
     return false;
 }
 
@@ -320,7 +350,5 @@ void ecs_register_render_component_hooks(void) {}
 void ecs_register_physics_component_hooks(void) {}
 void ecs_register_grav_gun_component_hooks(void) {}
 void ecs_register_liftable_component_hooks(void) {}
-void ecs_register_door_component_hooks(void) {}
-
 void ecs_anim_reset_allocator(void) {}
 void ecs_anim_shutdown_allocator(void) {}

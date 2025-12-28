@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefab name="unpacker">
+  <component type="POS" override="true"/>
+  <component type="SPR" path="assets/images/unpacker.png" src="0,0,48,32" ox="28" oy="16"/>
+  <component type="ANIM" frame_w="48" frame_h="32" fps="7.5">
+    <anim name="loop">
+      <frame col="0" row="3"/>
+      <frame col="0" row="2"/>
+      <frame col="0" row="1"/>
+      <frame col="0" row="0"/>
+    </anim>
+  </component>
+  <component type="CONVEYOR" dir="south" speed="50" block_player_input="true"/>
+  <component type="TRIGGER" pad="0" target_mask="RESOURCE" />
+  <component type="COL" hx="6" hy="28"/>
+</prefab>

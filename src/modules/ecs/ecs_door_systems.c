@@ -1,5 +1,3 @@
-#include "modules/ecs/ecs_door_systems.h"
-
 #include "modules/ecs/ecs_internal.h"
 #include "modules/ecs/ecs_proximity.h"
 #include "modules/core/input.h"
@@ -9,8 +7,6 @@
 #include "modules/world/world_door.h"
 
 static void sys_doors_tick(float dt);
-
-SYSTEMS_ADAPT_DT(sys_doors_tick_adapt, sys_doors_tick)
 
 static void sys_doors_tick(float dt)
 {
@@ -122,8 +118,4 @@ static void sys_doors_tick(float dt)
     }
 }
 
-void ecs_register_door_systems(void)
-{
-    // Doors: intent, animation, and collision updates all happen on the fixed tick.
-    systems_register(PHASE_SIM_POST, 400, sys_doors_tick_adapt, "doors_tick");
-}
+SYSTEMS_ADAPT_DT(sys_doors_tick_adapt, sys_doors_tick)

@@ -2,7 +2,6 @@
 
 #include <string.h>
 #include "modules/core/logger.h"
-
 systems_registration_call_t g_systems_registration_calls[32];
 int g_systems_registration_call_count = 0;
 int g_systems_init_seq = 0;
@@ -10,9 +9,6 @@ int g_ecs_render_hooks_seq = 0;
 int g_ecs_physics_hooks_seq = 0;
 int g_ecs_grav_gun_hooks_seq = 0;
 int g_ecs_liftable_hooks_seq = 0;
-int g_ecs_game_hooks_seq = 0;
-int g_ecs_door_hooks_seq = 0;
-
 static int g_call_seq = 0;
 
 void ecs_registration_stubs_reset(void)
@@ -24,8 +20,6 @@ void ecs_registration_stubs_reset(void)
     g_ecs_physics_hooks_seq = 0;
     g_ecs_grav_gun_hooks_seq = 0;
     g_ecs_liftable_hooks_seq = 0;
-    g_ecs_game_hooks_seq = 0;
-    g_ecs_door_hooks_seq = 0;
     g_call_seq = 0;
 }
 
@@ -69,16 +63,6 @@ void ecs_register_grav_gun_component_hooks(void)
 void ecs_register_liftable_component_hooks(void)
 {
     g_ecs_liftable_hooks_seq = ++g_call_seq;
-}
-
-void ecs_register_game_systems(void)
-{
-    g_ecs_game_hooks_seq = ++g_call_seq;
-}
-
-void ecs_register_door_component_hooks(void)
-{
-    g_ecs_door_hooks_seq = ++g_call_seq;
 }
 
 void sys_input(float dt, const input_t* in)
@@ -139,6 +123,18 @@ void sys_billboards_adapt(float dt, const input_t* in)
     (void)in;
 }
 
+void sys_recycle_bins_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
+void sys_recycle_anim_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
 void sys_grav_gun_input_adapt(float dt, const input_t* in)
 {
     (void)dt;
@@ -158,6 +154,18 @@ void sys_grav_gun_motion_adapt(float dt, const input_t* in)
 }
 
 void sys_grav_gun_charger_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
+void sys_conveyor_update_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
+void sys_conveyor_apply_adapt(float dt, const input_t* in)
 {
     (void)dt;
     (void)in;
@@ -253,6 +261,18 @@ void sys_asset_collect_adapt(float dt, const input_t* in)
     (void)in;
 }
 
+void sys_storage_deposit_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
+void sys_doors_tick_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
 #if DEBUG_BUILD
 void sys_debug_binds_adapt(float dt, const input_t* in)
 {
@@ -276,3 +296,8 @@ void log_msg(log_level_t lvl, const log_cat_t* cat, const char* fmt, ...)
 
 void ecs_anim_reset_allocator(void) {}
 void ecs_anim_shutdown_allocator(void) {}
+
+void ecs_door_on_destroy(int idx)
+{
+    (void)idx;
+}

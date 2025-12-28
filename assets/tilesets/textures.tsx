@@ -176,6 +176,19 @@
    <property name="collider" value="[0001],[0001],[0001],[0001]"/>
   </properties>
  </tile>
+ <tile id="180">
+  <animation>
+   <frame tileid="217" duration="100"/>
+   <frame tileid="218" duration="100"/>
+   <frame tileid="219" duration="100"/>
+   <frame tileid="220" duration="100"/>
+   <frame tileid="221" duration="100"/>
+   <frame tileid="254" duration="100"/>
+   <frame tileid="255" duration="100"/>
+   <frame tileid="256" duration="100"/>
+   <frame tileid="257" duration="100"/>
+  </animation>
+ </tile>
  <tile id="185">
   <properties>
    <property name="collider" value="[1111],[1111],[1111],[0000]"/>
@@ -259,6 +272,11 @@
  <tile id="273">
   <properties>
    <property name="collider" value="[1111],[1111],[1111],[0000]"/>
+  </properties>
+ </tile>
+ <tile id="291">
+  <properties>
+   <property name="collider" value="[0000],[1111],[1111],[1111]"/>
   </properties>
  </tile>
  <tile id="297">

@@ -34,6 +34,12 @@ void sys_input(float dt, const input_t* in)
     for (int e = 0; e < ECS_MAX_ENTITIES; ++e) {
         if (!ecs_alive_idx(e)) continue;
         if ((ecs_mask[e] & (CMP_PLAYER | CMP_VEL)) != (CMP_PLAYER | CMP_VEL)) continue;
+        if ((ecs_mask[e] & CMP_CONVEYOR_RIDER) && cmp_conveyor_rider[e].active_count > 0 &&
+            cmp_conveyor_rider[e].block_player_input) {
+            cmp_vel[e].x = 0.0f;
+            cmp_vel[e].y = 0.0f;
+            continue;
+        }
 
         cmp_velocity_t*      v = &cmp_vel[e];
         smoothed_facing_t*   f = &v->facing;

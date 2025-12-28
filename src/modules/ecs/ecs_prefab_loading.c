@@ -3,7 +3,8 @@
 #include "modules/ecs/ecs_internal.h"
 #include "modules/ecs/ecs_render.h"
 #include "modules/ecs/ecs_doors.h"
-#include "modules/ecs/ecs_game.h"
+#include "modules/ecs/ecs_recycler.h"
+#include "modules/ecs/ecs_storage.h"
 #include "modules/core/logger.h"
 #include "modules/prefab/prefab_cmp.h"
 
@@ -52,6 +53,9 @@ typedef struct prefab_built_entity_t {
     bool has_resource;
     prefab_cmp_resource_t resource;
     bool has_storage;
+    prefab_cmp_storage_t storage;
+    bool has_recycle_bin;
+    prefab_cmp_recycle_bin_t recycle_bin;
 
     bool has_follow;
     prefab_cmp_follow_t follow;
@@ -67,6 +71,9 @@ typedef struct prefab_built_entity_t {
 
     bool has_trigger;
     prefab_cmp_trigger_t trigger;
+
+    bool has_conveyor;
+    prefab_cmp_conveyor_t conveyor;
 
     bool has_billboard;
     prefab_cmp_billboard_t billboard;
@@ -103,13 +110,15 @@ static prefab_built_entity_t prefab_build_entity_components(const prefab_t* pref
             case ENUM_ANIM:      built.has_anim = prefab_cmp_anim_build(comp, obj, &built.anim); break;
             case ENUM_PLAYER:    built.has_player = true; break;
             case ENUM_RESOURCE:  built.has_resource = prefab_cmp_resource_build(comp, obj, &built.resource); break;
-            case ENUM_STORAGE:   built.has_storage = true; break;
+            case ENUM_STORAGE:   built.has_storage = prefab_cmp_storage_build(comp, obj, &built.storage); break;
+            case ENUM_RECYCLE_BIN: built.has_recycle_bin = prefab_cmp_recycle_bin_build(comp, obj, &built.recycle_bin); break;
             case ENUM_FOLLOW:    built.has_follow = prefab_cmp_follow_build(comp, obj, &built.follow); break;
             case ENUM_COL:       built.has_col = prefab_cmp_col_build(comp, obj, &built.col); break;
             case ENUM_LIFTABLE:  built.has_liftable = prefab_cmp_grav_gun_build(comp, obj, &built.liftable); break;
             case ENUM_GRAV_GUN:  built.has_grav_gun = true; break;
             case ENUM_GUN_CHARGER: built.has_gun_charger = true; break;
             case ENUM_TRIGGER:   built.has_trigger = prefab_cmp_trigger_build(comp, obj, &built.trigger); break;
+            case ENUM_CONVEYOR:  built.has_conveyor = prefab_cmp_conveyor_build(comp, obj, &built.conveyor); break;
             case ENUM_BILLBOARD: built.has_billboard = prefab_cmp_billboard_build(comp, obj, &built.billboard); break;
             case ENUM_DOOR:
                 if (built.has_door) prefab_cmp_door_free(&built.door);
@@ -180,7 +189,8 @@ static void prefab_add_to_ecs(ecs_entity_t e, const prefab_built_entity_t* built
 
     if (built->has_player) cmp_add_player(e);
     if (built->has_resource) cmp_add_resource(e, built->resource.type);
-    if (built->has_storage) cmp_add_storage(e, 0);
+    if (built->has_storage) cmp_add_storage(e, built->storage.has_capacity ? built->storage.capacity : 0);
+    if (built->has_recycle_bin) cmp_add_recycle_bin(e, built->recycle_bin.type);
 
     if (built->has_follow) {
         ecs_entity_t target = ecs_null();
@@ -216,7 +226,11 @@ static void prefab_add_to_ecs(ecs_entity_t e, const prefab_built_entity_t* built
     if (built->has_grav_gun) cmp_add_grav_gun(e);
     if (built->has_gun_charger) cmp_add_gun_charger(e);
 
-    if (built->has_trigger) cmp_add_trigger(e, built->trigger.pad, built->trigger.target_mask);
+    if (built->has_trigger) {
+        cmp_add_trigger(e, built->trigger.pad, built->trigger.target_mask, built->trigger.match);
+    }
+    if (built->has_conveyor) cmp_add_conveyor(e, built->conveyor.direction, built->conveyor.speed,
+                                              built->conveyor.block_player_input);
     if (built->has_billboard) cmp_add_billboard(e, built->billboard.text, built->billboard.y_offset, built->billboard.linger, built->billboard.state);
 
     if (built->has_door) {

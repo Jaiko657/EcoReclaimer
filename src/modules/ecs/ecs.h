@@ -65,6 +65,11 @@ typedef enum {
     GRAV_GUN_STATE_HELD = 1
 } grav_gun_state_t;
 
+typedef enum {
+    TRIGGER_MATCH_ALL = 0,
+    TRIGGER_MATCH_ANY = 1
+} trigger_match_t;
+
 // ====== Lifecycle / config ======
 void ecs_init(void);
 void ecs_shutdown(void);
@@ -92,7 +97,8 @@ void cmp_add_anim(
     float fps);
 void cmp_add_player   (ecs_entity_t e);
 void cmp_add_follow   (ecs_entity_t e, ecs_entity_t target, float desired_distance, float max_speed);
-void cmp_add_trigger  (ecs_entity_t e, float pad, uint32_t target_mask);
+void cmp_add_trigger  (ecs_entity_t e, float pad, uint32_t target_mask, trigger_match_t match);
+void cmp_add_conveyor (ecs_entity_t e, facing_t direction, float speed, bool block_player_input);
 void cmp_add_billboard(ecs_entity_t e, const char* text, float y_off, float linger, billboard_state_t state);
 void cmp_add_size     (ecs_entity_t e, float hx, float hy); // AABB half-extents
 void cmp_add_liftable (ecs_entity_t e);
