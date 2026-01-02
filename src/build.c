@@ -5,12 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RAYLIB_INCLUDE_DIR "third_party/raylib/src"
-
 #define XML_INCLUDE_DIR "third_party/xml.c/src"
-
-#define XML_LIB_DIR  "third_party/xml.c/build"
+#define XML_LIB_DIR "third_party/xml.c/build"
 #define XML_LIB_NAME "libxml.a"
+
+#if defined(_WIN32)
+#define RAYLIB_INCLUDE_DIR "third_party/raylib/build/raylib-5.5_win64_mingw-w64/include"
+#define RAYLIB_LIB_DIR "third_party/raylib/build/raylib-5.5_win64_mingw-w64/lib"
+#define EXE_EXT ".exe"
+#else
+#define RAYLIB_INCLUDE_DIR "third_party/raylib/src"
+#define RAYLIB_LIB_DIR "third_party/raylib/build/raylib"
+#define EXE_EXT ""
+#endif
 
 static bool cstr_ends_with(const char *s, const char *suffix)
 {
@@ -48,7 +55,6 @@ static bool gather_headless_sources(Nob_File_Paths *out_sources, Nob_File_Paths 
         const char *full = nob_temp_sprintf("src/headless/%s", name);
         nob_da_append(out_sources, full);
 
-        // If a file follows `*_headless.c`, treat it as an override for `src/modules/<base>.c`.
         if (cstr_ends_with(name, "_headless.c")) {
             size_t n = strlen(name);
             size_t suffix = strlen("_headless.c");
@@ -100,126 +106,122 @@ static bool gather_module_sources(Nob_File_Paths *out_sources, const Nob_File_Pa
     return gather_module_sources_recursive("src/modules", replacement_bases, out_sources);
 }
 
-static void sb_append_paths(Nob_String_Builder *sb, const Nob_File_Paths *paths)
+static void cmd_append_paths(Nob_Cmd *cmd, const Nob_File_Paths *paths)
 {
     for (size_t i = 0; i < paths->count; ++i) {
-        nob_sb_append_cstr(sb, paths->items[i]);
-        nob_sb_append_cstr(sb, " ");
+        nob_cmd_append(cmd, paths->items[i]);
     }
 }
 
-int main(int argc, char **argv) {
-	    NOB_GO_REBUILD_URSELF(argc, argv);
-
-	    bool debug_build = false;
-	    bool headless_build = false;
-    for (int i = 1; i < argc; ++i) {
-        if (nob_sv_eq(nob_sv_from_cstr(argv[i]), nob_sv_from_cstr("--debug"))) debug_build = true;
-        if (nob_sv_eq(nob_sv_from_cstr(argv[i]), nob_sv_from_cstr("--release"))) debug_build = false;
-        if (nob_sv_eq(nob_sv_from_cstr(argv[i]), nob_sv_from_cstr("--headless"))) headless_build = true;
-    }
-    if (headless_build) debug_build = true; // simplify: headless is always debug
-
-    if (!nob_mkdir_if_not_exists("build")) return 1;
-    if (!nob_mkdir_if_not_exists("build/src")) return 1;
-    if (!nob_mkdir_if_not_exists("build/test")) return 1;
-    nob_log(NOB_INFO, "Mode: %s%s", debug_build ? "debug" : "release", headless_build ? " (headless)" : "");
-
-    Nob_Cmd cmd = {0};
-
-	    const char *debug_flags = debug_build
-	        ? "-DDEBUG_BUILD=1 -DDEBUG_COLLISION=1 -DDEBUG_TRIGGERS=1 -DDEBUG_FPS=1 -g"
-	        : "-DDEBUG_BUILD=0 -DDEBUG_COLLISION=0 -DDEBUG_TRIGGERS=0 -DDEBUG_FPS=0 -DNDEBUG";
-
-	    const char *xml_lib_dir = XML_LIB_DIR;
-	    const char *xml_lib_name = XML_LIB_NAME;
-	    const char *xml_lib_file = nob_temp_sprintf("%s/%s", xml_lib_dir, xml_lib_name);
-	    nob_log(NOB_INFO, "Linking against %s", xml_lib_file);
-
-	    if (headless_build) {
-	        Nob_File_Paths headless_sources = {0};
-	        Nob_File_Paths replacement_bases = {0};
-	        Nob_File_Paths module_sources = {0};
-	        if (!gather_headless_sources(&headless_sources, &replacement_bases)) return 1;
-	        if (!gather_module_sources(&module_sources, &replacement_bases)) return 1;
-
-	        Nob_String_Builder sb = {0};
-	        nob_sb_appendf(&sb,
-	            "gcc -std=c99 -Wall -Wextra -fno-fast-math -fno-finite-math-only "
-	            "%s -DHEADLESS=1 "
-	            "-I %s -I src "
-	            "src/main.c ",
-	            debug_flags,
-	            XML_INCLUDE_DIR
-	        );
-	        sb_append_paths(&sb, &module_sources);
-	        sb_append_paths(&sb, &headless_sources);
-	        nob_sb_appendf(&sb,
-	            "-o build/src/game_headless "
-	            "-L %s -l:%s "
-	            "-lm -lpthread -ldl -lrt",
-	            xml_lib_dir,
-	            xml_lib_name
-	        );
-	        nob_sb_append_null(&sb);
-	        char *cmdline = sb.items;
-	        nob_cmd_append(&cmd, "sh", "-lc", cmdline);
-
-	        if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
-	        nob_sb_free(sb);
-	        return 0;
-	    }
-
-	    const char *raylib_include_dir = RAYLIB_INCLUDE_DIR;
-    const char *raylib_lib_file = NULL;
-
-    const char *raylib_candidates[] = {
-        "third_party/raylib/build/raylib/libraylib.a",
-        "third_party/raylib/build/raylib/libraylib.so",
+static void cmd_append_flags(Nob_Cmd *cmd, bool debug_build)
+{
+    const char *debug_flags[] = {
+        "-DDEBUG_BUILD=1",
+        "-DDEBUG_COLLISION=1",
+        "-DDEBUG_TRIGGERS=1",
+        "-DDEBUG_FPS=1",
+        "-g",
+    };
+    const char *release_flags[] = {
+        "-DDEBUG_BUILD=0",
+        "-DDEBUG_COLLISION=0",
+        "-DDEBUG_TRIGGERS=0",
+        "-DDEBUG_FPS=0",
+        "-DNDEBUG",
     };
 
-    for (size_t i = 0; i < sizeof(raylib_candidates)/sizeof(raylib_candidates[0]); ++i) {
-        if (nob_file_exists(raylib_candidates[i])) {
-            raylib_lib_file = raylib_candidates[i];
-            break;
+    const char **flags = debug_build ? debug_flags : release_flags;
+    size_t count = debug_build
+        ? sizeof(debug_flags) / sizeof(debug_flags[0])
+        : sizeof(release_flags) / sizeof(release_flags[0]);
+
+    for (size_t i = 0; i < count; ++i) {
+        nob_cmd_append(cmd, flags[i]);
+    }
+}
+
+static const char *target_path(const char *name)
+{
+    return nob_temp_sprintf("build/src/%s%s", name, EXE_EXT);
+}
+
+static bool build_game(bool debug_build)
+{
+    Nob_File_Paths module_sources = {0};
+    if (!gather_module_sources(&module_sources, NULL)) return false;
+
+    Nob_Cmd cmd = {0};
+    nob_cmd_append(&cmd, "gcc");
+    nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
+    cmd_append_flags(&cmd, debug_build);
+    nob_cmd_append(&cmd, "-I", RAYLIB_INCLUDE_DIR, "-I", XML_INCLUDE_DIR, "-I", "src");
+    nob_cmd_append(&cmd, "src/main.c");
+    cmd_append_paths(&cmd, &module_sources);
+    nob_cmd_append(&cmd, "-o", target_path(debug_build ? "game_debug" : "game"));
+    nob_cmd_append(&cmd, "-L", RAYLIB_LIB_DIR, "-lraylib");
+#if defined(_WIN32)
+    nob_cmd_append(&cmd, "-lgdi32", "-lwinmm");
+#else
+    nob_cmd_append(&cmd, "-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11");
+#endif
+    nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
+
+    return nob_cmd_run_sync_and_reset(&cmd);
+}
+
+static bool build_headless(void)
+{
+    Nob_File_Paths headless_sources = {0};
+    Nob_File_Paths replacement_bases = {0};
+    Nob_File_Paths module_sources = {0};
+    if (!gather_headless_sources(&headless_sources, &replacement_bases)) return false;
+    if (!gather_module_sources(&module_sources, &replacement_bases)) return false;
+
+    Nob_Cmd cmd = {0};
+    nob_cmd_append(&cmd, "gcc");
+    nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
+    cmd_append_flags(&cmd, true);
+    nob_cmd_append(&cmd, "-DHEADLESS=1");
+    nob_cmd_append(&cmd, "-I", XML_INCLUDE_DIR, "-I", "src");
+    nob_cmd_append(&cmd, "src/main.c");
+    cmd_append_paths(&cmd, &module_sources);
+    cmd_append_paths(&cmd, &headless_sources);
+    nob_cmd_append(&cmd, "-o", target_path("game_headless"));
+    nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
+#if !defined(_WIN32)
+    nob_cmd_append(&cmd, "-lm", "-lpthread", "-ldl", "-lrt");
+#endif
+
+    return nob_cmd_run_sync_and_reset(&cmd);
+}
+
+int main(int argc, char **argv)
+{
+    NOB_GO_REBUILD_URSELF(argc, argv);
+
+    bool do_headless = false;
+    bool debug_build = false;
+
+    for (int i = 1; i < argc; ++i) {
+        Nob_String_View arg = nob_sv_from_cstr(argv[i]);
+        if (nob_sv_eq(arg, nob_sv_from_cstr("--headless"))) {
+            do_headless = true;
+            debug_build = true;
+        } else if (nob_sv_eq(arg, nob_sv_from_cstr("--debug"))) {
+            debug_build = true;
+        } else if (nob_sv_eq(arg, nob_sv_from_cstr("--release"))) {
+            debug_build = false;
         }
     }
 
-    if (raylib_lib_file == NULL) {
-        nob_log(NOB_ERROR, "Could not find raylib build output. Run third_party/setup.sh first.");
-        return 1;
+    if (!nob_mkdir_if_not_exists("build")) return 1;
+    if (!nob_mkdir_if_not_exists("build/src")) return 1;
+
+    if (do_headless) {
+        if (!build_headless()) return 1;
+    } else {
+        if (!build_game(debug_build)) return 1;
     }
-    nob_log(NOB_INFO, "Linking against %s", raylib_lib_file);
-
-	    Nob_File_Paths module_sources = {0};
-	    if (!gather_module_sources(&module_sources, NULL)) return 1;
-
-		    Nob_String_Builder sb = {0};
-		    nob_sb_appendf(&sb,
-		        "gcc -std=c99 -Wall -Wextra -fno-fast-math -fno-finite-math-only "
-		        "%s "
-		        "-I %s -I %s -I src "
-		        "src/main.c ",
-		        debug_flags,
-		        raylib_include_dir,
-		        XML_INCLUDE_DIR
-		    );
-		    sb_append_paths(&sb, &module_sources);
-		        nob_sb_appendf(&sb,
-		        "-o build/src/game "
-		        "%s "
-		        "-L %s -l:%s "
-		        "-lGL -lm -lpthread -ldl -lrt -lX11",
-		        raylib_lib_file,
-		        xml_lib_dir,
-		        xml_lib_name
-		    );
-		    nob_sb_append_null(&sb);
-		    char *cmdline = sb.items;
-		    nob_cmd_append(&cmd, "sh", "-lc", cmdline);
-
-	    if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
 
     return 0;
 }
-

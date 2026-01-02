@@ -54,35 +54,27 @@ static bool apply_patch_if_needed(const char *repo_dir, const char *patch_path)
     return true;
 }
 
-static const char *xmlc_build_exe_name(void)
+static const char *build_exe_name(const char *base)
 {
 #if defined(_WIN32)
-    return "xmlc_build.exe";
+    return nob_temp_sprintf("%s.exe", base);
 #else
-    return "xmlc_build";
-#endif
-}
-static const char *raylib_build_exe_name(void)
-{
-#if defined(_WIN32)
-    return "raylib_build.exe";
-#else
-    return "raylib_build";
+    return base;
 #endif
 }
 
-static bool ensure_xmlc_build_exe(void)
+static bool ensure_build_exe(const char *repo_dir, const char *exe_base, const char *build_script)
 {
-    const char *exe_name = xmlc_build_exe_name();
-    const char *exe_path = nob_temp_sprintf("xml.c/%s", exe_name);
+    const char *exe_name = build_exe_name(exe_base);
+    const char *exe_path = nob_temp_sprintf("%s/%s", repo_dir, exe_name);
     if (nob_file_exists(exe_path)) return true;
 
     const char *start_dir = nob_get_current_dir_temp();
-    if (!nob_set_current_dir("xml.c")) return false;
+    if (!nob_set_current_dir(repo_dir)) return false;
 
     Nob_Cmd cmd = {0};
     nob_cmd_append(&cmd, "gcc", "-O2", "-std=c11", "-I", "..",
-                   "-o", exe_name, "../build_scripts/xml.c/xmlc_build.c");
+                   "-o", exe_name, build_script);
     if (!run_cmd(&cmd)) {
         nob_set_current_dir(start_dir);
         return false;
@@ -92,54 +84,11 @@ static bool ensure_xmlc_build_exe(void)
     return true;
 }
 
-static bool run_xmlc_build_exe(void)
+static bool run_build_exe(const char *repo_dir, const char *exe_base)
 {
-    const char *exe_name = xmlc_build_exe_name();
+    const char *exe_name = build_exe_name(exe_base);
     const char *start_dir = nob_get_current_dir_temp();
-    if (!nob_set_current_dir("xml.c")) return false;
-
-    Nob_Cmd cmd = {0};
-#if defined(_WIN32)
-    nob_cmd_append(&cmd, exe_name);
-#else
-    nob_cmd_append(&cmd, nob_temp_sprintf("./%s", exe_name));
-#endif
-
-    if (!run_cmd(&cmd)) {
-        nob_set_current_dir(start_dir);
-        return false;
-    }
-
-    nob_set_current_dir(start_dir);
-    return true;
-}
-
-static bool ensure_raylib_build_exe(void)
-{
-    const char *exe_name = raylib_build_exe_name();
-    const char *exe_path = nob_temp_sprintf("raylib/%s", exe_name);
-    if (nob_file_exists(exe_path)) return true;
-
-    const char *start_dir = nob_get_current_dir_temp();
-    if (!nob_set_current_dir("raylib")) return false;
-
-    Nob_Cmd cmd = {0};
-    nob_cmd_append(&cmd, "gcc", "-O2", "-std=c11", "-I", "..",
-                   "-o", exe_name, "../build_scripts/raylib/raylib_build.c");
-    if (!run_cmd(&cmd)) {
-        nob_set_current_dir(start_dir);
-        return false;
-    }
-
-    nob_set_current_dir(start_dir);
-    return true;
-}
-
-static bool run_raylib_build_exe(void)
-{
-    const char *exe_name = raylib_build_exe_name();
-    const char *start_dir = nob_get_current_dir_temp();
-    if (!nob_set_current_dir("raylib")) return false;
+    if (!nob_set_current_dir(repo_dir)) return false;
 
     Nob_Cmd cmd = {0};
 #if defined(_WIN32)
@@ -165,10 +114,12 @@ static int dependencies_build_main(int argc, char **argv)
     if (!ensure_third_party_dir()) return 1;
     if (!git_submodule_update()) return 1;
     if (!apply_patch_if_needed("xml.c", "../build_scripts/xml.c/attribute_parsing.patch")) return 1;
-    if (!ensure_xmlc_build_exe()) return 1;
-    if (!run_xmlc_build_exe()) return 1;
-    if (!ensure_raylib_build_exe()) return 1;
-    if (!run_raylib_build_exe()) return 1;
+    if (!ensure_build_exe("xml.c", "xmlc_build", "../build_scripts/xml.c/xmlc_build.c")) return 1;
+    if (!run_build_exe("xml.c", "xmlc_build")) return 1;
+    if (!ensure_build_exe("raylib", "raylib_build", "../build_scripts/raylib/raylib_build.c")) return 1;
+    if (!run_build_exe("raylib", "raylib_build")) return 1;
+    if (!ensure_build_exe("Unity", "unity_build", "../build_scripts/unity/unity_build.c")) return 1;
+    if (!run_build_exe("Unity", "unity_build")) return 1;
 
     return 0;
 }
@@ -178,5 +129,4 @@ int main(int argc, char **argv)
     NOB_GO_REBUILD_URSELF(argc, argv);
     return dependencies_build_main(argc, argv);
 }
-
 

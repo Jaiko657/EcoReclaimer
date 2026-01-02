@@ -99,6 +99,9 @@
 
 #ifndef NOB_H_
 #define NOB_H_
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#    define _POSIX_C_SOURCE 200809L
+#endif
 #ifdef _WIN32
 #    ifndef _CRT_SECURE_NO_WARNINGS
 #        define _CRT_SECURE_NO_WARNINGS (1)
