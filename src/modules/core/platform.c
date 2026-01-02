@@ -2,7 +2,10 @@
 
 #include "raylib.h"
 
-void platform_init(void) { }
+void platform_init(void)
+{
+    ChangeDirectory(GetApplicationDirectory());
+}
 
 inline bool platform_should_close(void)
 {

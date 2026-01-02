@@ -195,6 +195,50 @@ static bool build_headless(void)
     return nob_cmd_run_sync_and_reset(&cmd);
 }
 
+static bool copy_dir_recursive(const char *src_dir, const char *dst_dir)
+{
+    if (!nob_mkdir_if_not_exists(dst_dir)) return false;
+
+    Nob_File_Paths children = {0};
+    if (!nob_read_entire_dir(src_dir, &children)) return false;
+
+    for (size_t i = 0; i < children.count; ++i) {
+        const char *name = children.items[i];
+        if (is_dot_entry(name)) continue;
+
+        const char *src_path = nob_temp_sprintf("%s/%s", src_dir, name);
+        const char *dst_path = nob_temp_sprintf("%s/%s", dst_dir, name);
+        Nob_File_Type type = nob_get_file_type(src_path);
+
+        if (type == NOB_FILE_DIRECTORY) {
+            if (!copy_dir_recursive(src_path, dst_path)) return false;
+        } else if (type == NOB_FILE_REGULAR) {
+            if (!nob_copy_file(src_path, dst_path)) return false;
+        } else {
+            nob_log(NOB_ERROR, "unsupported asset entry type for %s", src_path);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool copy_assets_to_build(void)
+{
+    if (!nob_file_exists("assets")) {
+        return true;
+    }
+
+    Nob_File_Type type = nob_get_file_type("assets");
+    if (type != NOB_FILE_DIRECTORY) {
+        nob_log(NOB_ERROR, "assets exists but is not a directory");
+        return false;
+    }
+
+    if (!nob_mkdir_if_not_exists("build/src/assets")) return false;
+    return copy_dir_recursive("assets", "build/src/assets");
+}
+
 int main(int argc, char **argv)
 {
     NOB_GO_REBUILD_URSELF(argc, argv);
@@ -216,6 +260,7 @@ int main(int argc, char **argv)
 
     if (!nob_mkdir_if_not_exists("build")) return 1;
     if (!nob_mkdir_if_not_exists("build/src")) return 1;
+    if (!copy_assets_to_build()) return 1;
 
     if (do_headless) {
         if (!build_headless()) return 1;

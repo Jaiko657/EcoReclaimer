@@ -14,13 +14,6 @@
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
-
-static bool dir_exists(const char* path)
-{
-    struct stat st;
-    return path && stat(path, &st) == 0 && S_ISDIR(st.st_mode);
-}
-
 static void log_working_dir(void)
 {
     char buf[PATH_MAX];
@@ -41,11 +34,6 @@ void platform_init(void)
             *last_slash = '\0';
             (void)chdir(exe);
         }
-    }
-
-    for (int i = 0; i < 4; ++i) {
-        if (dir_exists("assets")) break;
-        if (chdir("..") != 0) break;
     }
 
     log_working_dir();
