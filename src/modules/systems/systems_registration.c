@@ -31,6 +31,7 @@ void sys_render_end_adapt(float dt, const input_t* in);
 void sys_recycle_bins_adapt(float dt, const input_t* in);
 void sys_recycle_anim_adapt(float dt, const input_t* in);
 void sys_storage_deposit_adapt(float dt, const input_t* in);
+void sys_unloader_tick_adapt(float dt, const input_t* in);
 void sys_doors_tick_adapt(float dt, const input_t* in);
 
 void sys_toast_update_adapt(float dt, const input_t* in);
@@ -62,6 +63,7 @@ void systems_registration_init(void)
     systems_register(PHASE_SIM_POST, 110, sys_recycle_bins_adapt, "recycle_bins");
     systems_register(PHASE_SIM_POST, 115, sys_recycle_anim_adapt, "recycle_anim");
     systems_register(PHASE_SIM_POST, 120, sys_storage_deposit_adapt, "storage_deposit");
+    systems_register(PHASE_SIM_POST, 130, sys_unloader_tick_adapt, "unloader_tick");
     systems_register(PHASE_SIM_POST, 150, sys_grav_gun_tool_adapt, "grav_gun_tool");
     systems_register(PHASE_SIM_POST, 175, sys_grav_gun_charger_adapt, "grav_gun_charger");
     systems_register(PHASE_SIM_POST, 200, sys_billboards_adapt, "billboards");

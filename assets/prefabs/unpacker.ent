@@ -10,6 +10,7 @@
       <frame col="0" row="0"/>
     </anim>
   </component>
+  <component type="UNPACKER"/>
   <component type="CONVEYOR" dir="south" speed="50" block_player_input="true"/>
   <component type="TRIGGER" pad="0" target_mask="RESOURCE" />
   <component type="COL" hx="6" hy="28"/>

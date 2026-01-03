@@ -81,6 +81,10 @@ typedef struct prefab_built_entity_t {
     bool has_door;
     prefab_cmp_door_t door;
 
+    bool has_unpacker;
+    bool has_unloader;
+    prefab_cmp_unloader_t unloader;
+
     bool has_player;
 } prefab_built_entity_t;
 
@@ -120,6 +124,8 @@ static prefab_built_entity_t prefab_build_entity_components(const prefab_t* pref
             case ENUM_TRIGGER:   built.has_trigger = prefab_cmp_trigger_build(comp, obj, &built.trigger); break;
             case ENUM_CONVEYOR:  built.has_conveyor = prefab_cmp_conveyor_build(comp, obj, &built.conveyor); break;
             case ENUM_BILLBOARD: built.has_billboard = prefab_cmp_billboard_build(comp, obj, &built.billboard); break;
+            case ENUM_UNPACKER:  built.has_unpacker = true; break;
+            case ENUM_UNLOADER:  built.has_unloader = prefab_cmp_unloader_build(comp, obj, &built.unloader); break;
             case ENUM_DOOR:
                 if (built.has_door) prefab_cmp_door_free(&built.door);
                 built.has_door = prefab_cmp_door_build(comp, obj, &built.door);
@@ -225,6 +231,8 @@ static void prefab_add_to_ecs(ecs_entity_t e, const prefab_built_entity_t* built
 
     if (built->has_grav_gun) cmp_add_grav_gun(e);
     if (built->has_gun_charger) cmp_add_gun_charger(e);
+    if (built->has_unpacker) cmp_add_unpacker(e);
+    if (built->has_unloader) cmp_add_unloader(e, ecs_null());
 
     if (built->has_trigger) {
         cmp_add_trigger(e, built->trigger.pad, built->trigger.target_mask, built->trigger.match);

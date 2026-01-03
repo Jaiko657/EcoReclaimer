@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prefab name="unloader">
+  <component type="POS" override="true"/>
+  <component type="COL" override="true"/>
+  <component type="TRIGGER" pad="0" target_mask="STORAGE|LIFTABLE"/>
+  <component type="UNLOADER"/>
+</prefab>

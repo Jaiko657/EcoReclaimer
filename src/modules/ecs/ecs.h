@@ -104,6 +104,8 @@ void cmp_add_size     (ecs_entity_t e, float hx, float hy); // AABB half-extents
 void cmp_add_liftable (ecs_entity_t e);
 void cmp_add_grav_gun (ecs_entity_t e);
 void cmp_add_gun_charger(ecs_entity_t e);
+void cmp_add_unpacker(ecs_entity_t e);
+void cmp_add_unloader(ecs_entity_t e, ecs_entity_t unpacker_handle);
 void cmp_add_phys_body(ecs_entity_t e, PhysicsType type, float mass);
 
 // ====== HUD helpers ======

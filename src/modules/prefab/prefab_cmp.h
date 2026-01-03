@@ -159,3 +159,8 @@ typedef struct {
 } prefab_cmp_door_t;
 bool prefab_cmp_door_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_door_t* out_door);
 void prefab_cmp_door_free(prefab_cmp_door_t* door);
+
+typedef struct {
+    int unused;
+} prefab_cmp_unloader_t;
+bool prefab_cmp_unloader_build(const prefab_component_t* comp, const tiled_object_t* obj, prefab_cmp_unloader_t* out_unloader);

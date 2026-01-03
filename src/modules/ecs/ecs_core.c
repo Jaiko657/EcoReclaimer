@@ -24,6 +24,8 @@ cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
 cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
+cmp_unloader_t  cmp_unloader[ECS_MAX_ENTITIES];
+cmp_unpacker_t  cmp_unpacker[ECS_MAX_ENTITIES];
 
 // ========== O(1) create/delete ==========
 static int free_stack[ECS_MAX_ENTITIES];
@@ -399,6 +401,27 @@ void cmp_add_gun_charger(ecs_entity_t e)
         .flash_timer = 0.0f
     };
     ecs_mask[i] |= CMP_GUN_CHARGER;
+}
+
+void cmp_add_unpacker(ecs_entity_t e)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_unpacker[i] = (cmp_unpacker_t){
+        .ready = true,
+        .spawned_entity = ecs_null()
+    };
+    ecs_mask[i] |= CMP_UNPACKER;
+}
+
+void cmp_add_unloader(ecs_entity_t e, ecs_entity_t unpacker_handle)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return;
+    cmp_unloader[i] = (cmp_unloader_t){
+        .unpacker_handle = unpacker_handle
+    };
+    ecs_mask[i] |= CMP_UNLOADER;
 }
 
 void cmp_add_phys_body(ecs_entity_t e, PhysicsType type, float mass)

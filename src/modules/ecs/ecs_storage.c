@@ -4,7 +4,9 @@
 #include "modules/systems/systems.h"
 #include "modules/systems/systems_registration.h"
 #include "modules/core/toast.h"
+#include "modules/core/time.h"
 #include <limits.h>
+#include <stdint.h>
 
 typedef struct {
     int counts[RESOURCE_TYPE_COUNT];
@@ -14,6 +16,19 @@ typedef struct {
 static cmp_storage_t g_storage[ECS_MAX_ENTITIES];
 
 static const int k_storage_default_capacity = INT_MAX;
+static uint32_t g_storage_rng = 0u;
+
+static uint32_t storage_rng_next(void)
+{
+    if (g_storage_rng == 0u) {
+        double t = time_now();
+        uint32_t seed = (uint32_t)(t * 1000.0);
+        if (seed == 0u) seed = 1u;
+        g_storage_rng = seed;
+    }
+    g_storage_rng = g_storage_rng * 1664525u + 1013904223u;
+    return g_storage_rng;
+}
 
 static int storage_total(const cmp_storage_t* storage)
 {
@@ -61,6 +76,30 @@ bool ecs_storage_add_resource(ecs_entity_t e, resource_type_t type, int count)
     if (count <= 0) return false;
     g_storage[i].counts[type] += count;
     return true;
+}
+
+bool ecs_storage_take_random(ecs_entity_t e, resource_type_t* out_type)
+{
+    int i = ent_index_checked(e);
+    if (i < 0) return false;
+    if ((ecs_mask[i] & CMP_STORAGE) == 0) return false;
+
+    int total = storage_total(&g_storage[i]);
+    if (total <= 0) return false;
+
+    int pick = (int)(storage_rng_next() % (uint32_t)total);
+    for (int type = 0; type < RESOURCE_TYPE_COUNT; ++type) {
+        int count = g_storage[i].counts[type];
+        if (count <= 0) continue;
+        if (pick < count) {
+            g_storage[i].counts[type] -= 1;
+            if (out_type) *out_type = (resource_type_t)type;
+            return true;
+        }
+        pick -= count;
+    }
+
+    return false;
 }
 
 ecs_entity_t ecs_storage_find_player(void)

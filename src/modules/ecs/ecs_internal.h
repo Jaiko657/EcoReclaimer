@@ -133,6 +133,15 @@ typedef struct {
     bool intent_open;
 } cmp_door_t;
 
+typedef struct {
+    ecs_entity_t unpacker_handle;
+} cmp_unloader_t;
+
+typedef struct {
+    bool ready;
+    ecs_entity_t spawned_entity;
+} cmp_unpacker_t;
+
 // ===== Global ECS storage (defined in ecs_core.c) =====
 extern uint32_t        ecs_mask[ECS_MAX_ENTITIES];
 extern uint32_t        ecs_gen[ECS_MAX_ENTITIES];
@@ -153,6 +162,8 @@ extern cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
 extern cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
 extern cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 extern cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
+extern cmp_unloader_t  cmp_unloader[ECS_MAX_ENTITIES];
+extern cmp_unpacker_t  cmp_unpacker[ECS_MAX_ENTITIES];
 
 // ===== Internal helpers =====
 int  ent_index_checked(ecs_entity_t e);

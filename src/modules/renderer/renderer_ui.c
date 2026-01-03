@@ -56,33 +56,35 @@ static const rectf* grav_gun_ui_frames(int* out_count)
     return frames;
 }
 
-static bool draw_storage_hud(ecs_entity_t storage, int x, int y, const char* label)
+static bool get_storage_counts(ecs_entity_t storage, int counts[RESOURCE_TYPE_COUNT], int* out_capacity)
 {
-    int counts[RESOURCE_TYPE_COUNT] = {0};
     int capacity = 0;
     if (!ecs_storage_get(storage, counts, &capacity)) return false;
-
-    int total = counts[RESOURCE_TYPE_PLASTIC] + counts[RESOURCE_TYPE_METAL];
-    char storage_hud[64];
-    if (capacity >= INT_MAX / 2) {
-        snprintf(storage_hud, sizeof(storage_hud), "%s P:%d M:%d (%d/inf)", label, counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total);
-    } else {
-        snprintf(storage_hud, sizeof(storage_hud), "%s P:%d M:%d (%d/%d)", label, counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total, capacity);
-    }
-    DrawText(storage_hud, x, y, 18, RAYWHITE);
+    if (out_capacity) *out_capacity = capacity;
     return true;
 }
 
 void draw_screen_space_ui(const render_view_t* view)
 {
     renderer_debug_draw_ui(view);
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+    float grav_scale = 4.0f;
+    int grav_frame_count = 0;
+    const rectf* grav_frames = grav_gun_ui_frames(&grav_frame_count);
+    float grav_w = (grav_frames && grav_frame_count > 0) ? grav_frames[0].w * grav_scale : 0.0f;
+    float grav_h = (grav_frames && grav_frame_count > 0) ? grav_frames[0].h * grav_scale : 0.0f;
+    float grav_x = (sw - grav_w) * 0.5f;
+    float grav_y = sh - grav_h - 10.0f;
+    int hud_label_y = (int)(grav_y - 28.0f);
+    int hud_value_y = hud_label_y + 22;
 
     // ===== toast =====
     if (ecs_toast_is_active()) {
         const char* t = ecs_toast_get_text();
         const int fs = 20;
         int tw = MeasureText(t, fs);
-        int x = (GetScreenWidth() - tw)/2;
+        int x = (sw - tw)/2;
         int y = 10;
 
         DrawRectangle(x-8, y-4, tw+16, 28, (Color){0,0,0,180});
@@ -91,13 +93,40 @@ void draw_screen_space_ui(const render_view_t* view)
 
     // ===== HUD =====
     {
-        int y = 10;
-        bool drew = false;
-        drew |= draw_storage_hud(ecs_storage_find_player(), 10, y, "PLAYER");
-        if (drew) y += 22;
-        drew |= draw_storage_hud(ecs_storage_find_tardas(), 10, y, "TARDAS");
-        if (drew) y += 22;
-        DrawText("Move: Arrows/WASD | Interact: E | Lift/Throw: C", 10, y, 18, GRAY);
+        int counts[RESOURCE_TYPE_COUNT] = {0};
+        int capacity = 0;
+
+        if (get_storage_counts(ecs_storage_find_tardas(), counts, &capacity)) {
+            const char* label = "Items Stored in TARDAS";
+            int total = counts[RESOURCE_TYPE_PLASTIC] + counts[RESOURCE_TYPE_METAL];
+            char storage_hud[64];
+            if (capacity >= INT_MAX / 2) {
+                snprintf(storage_hud, sizeof(storage_hud), "Plastic: %d | Metal: %d (%d/inf)",
+                         counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total);
+            } else {
+                snprintf(storage_hud, sizeof(storage_hud), "Plastic: %d | Metal: %d (%d/%d)",
+                         counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL], total, capacity);
+            }
+            int label_w = MeasureText(label, 18);
+            int value_w = MeasureText(storage_hud, 18);
+            int block_w = (label_w > value_w) ? label_w : value_w;
+            int x = (int)(grav_x - 20.0f - block_w);
+            if (x < 10) x = 10;
+            DrawText(label, x, hud_label_y, 18, RAYWHITE);
+            DrawText(storage_hud, x, hud_value_y, 18, RAYWHITE);
+        }
+
+        if (get_storage_counts(ecs_storage_find_player(), counts, NULL)) {
+            char storage_hud[64];
+            snprintf(storage_hud, sizeof(storage_hud), "Recycled: Plastic: %d   |   Metal: %d",
+                     counts[RESOURCE_TYPE_PLASTIC], counts[RESOURCE_TYPE_METAL]);
+            int tw = MeasureText(storage_hud, 18);
+            int x = (int)(grav_x + grav_w + 20.0f);
+            if (x + tw > sw - 10) x = sw - tw - 10;
+            DrawText(storage_hud, x, hud_value_y, 18, RAYWHITE);
+        }
+
+        DrawText("Move: Arrows/WASD | Interact: E | Lift/Throw: C", 10, 10, 18, GRAY);
     }
 
     // ===== grav gun charge UI =====
@@ -119,10 +148,15 @@ void draw_screen_space_ui(const render_view_t* view)
                     if (idx < 0) idx = 0;
                     if (idx >= frame_count) idx = frame_count - 1;
 
-                    int sw = GetScreenWidth();
                     Rectangle src = { frames[idx].x, frames[idx].y, frames[idx].w, frames[idx].h };
-                    Rectangle dst = { (float)(sw - 138), 10.0f, frames[idx].w * 2.0f, frames[idx].h * 2.0f };
+                    Rectangle dst = { grav_x, grav_y, grav_w, grav_h };
                     Vector2 origin = { 0.0f, 0.0f };
+                    const char* label = "Grav Gun Energy";
+                    int label_fs = 20;
+                    int label_w = MeasureText(label, label_fs);
+                    int label_x = (sw - label_w) / 2;
+                    int label_y = (int)(grav_y - 28.0f);
+                    DrawText(label, label_x, label_y, label_fs, RAYWHITE);
                     DrawTexturePro(tex, src, dst, origin, 0.0f, WHITE);
                 }
             }
