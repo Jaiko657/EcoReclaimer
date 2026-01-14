@@ -3,11 +3,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "modules/ecs/ecs.h"
-#include "modules/systems/systems.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/core/engine_types.h"
-#include "modules/world/world_door.h"
+#include "engine/ecs/ecs.h"
+#include "engine/systems/systems.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/core/engine_types.h"
+#include "engine/world/world_door.h"
 
 extern int g_asset_acquire_calls;
 extern int g_asset_release_calls;

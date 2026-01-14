@@ -1,11 +1,10 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_physics.h"
-#include "modules/core/input.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/ecs/ecs_physics.h"
+#include "engine/input/input.h"
 
 void sys_input(float dt, const input_t* in);
-void sys_follow(float dt);
 void sys_physics_integrate_impl(float dt);
 
 void ecs_system_domains_stub_reset(void);
@@ -44,31 +43,6 @@ void test_sys_input_updates_velocity_and_facing(void)
     TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_vel[0].y);
     TEST_ASSERT_EQUAL_INT(DIR_EAST, cmp_vel[0].facing.rawDir);
     TEST_ASSERT_EQUAL_INT(DIR_EAST, cmp_vel[0].facing.facingDir);
-}
-
-void test_sys_follow_sets_velocity_towards_target(void)
-{
-    ecs_gen[0] = 1;
-    ecs_gen[1] = 1;
-    ecs_mask[0] = CMP_FOLLOW | CMP_POS | CMP_VEL;
-    ecs_mask[1] = CMP_POS;
-
-    cmp_pos[0] = (cmp_position_t){ 0.0f, 0.0f };
-    cmp_pos[1] = (cmp_position_t){ 10.0f, 0.0f };
-    cmp_follow[0] = (cmp_follow_t){
-        .target = (ecs_entity_t){ 1, 1 },
-        .desired_distance = 0.0f,
-        .max_speed = 5.0f,
-        .vision_range = -1.0f
-    };
-
-    g_world_has_los = true;
-    g_world_walkable = true;
-
-    sys_follow(0.016f);
-
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 5.0f, cmp_vel[0].x);
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, cmp_vel[0].y);
 }
 
 void test_sys_physics_integrate_applies_velocity_and_clears(void)

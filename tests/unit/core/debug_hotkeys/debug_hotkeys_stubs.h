@@ -2,8 +2,8 @@
 
 #include <stdbool.h>
 
-#include "modules/ecs/ecs.h"
-#include "modules/ecs/ecs_resource.h"
+#include "engine/ecs/ecs.h"
+#include "game/ecs/ecs_resource.h"
 
 extern int g_asset_reload_calls;
 extern int g_asset_log_calls;

@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/core/cmp_print.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_resource.h"
-#include "modules/core/logger.h"
+#include "engine/core/cmp_print.h"
+#include "game/ecs/ecs_game.h"
+#include "game/ecs/ecs_resource.h"
+#include "engine/core/logger.h"
 
 static char s_last_log[512];
 static log_level_t s_last_level;
@@ -56,9 +56,6 @@ void test_cmp_print_handles_nulls(void)
 
     cmp_print_anim(NULL, NULL);
     assert_last_log("ANIM(null)");
-
-    cmp_print_follow(NULL, NULL);
-    assert_last_log("FOLLOW(null)");
 
     cmp_print_collider(NULL, NULL);
     assert_last_log("COL(null)");
@@ -163,26 +160,8 @@ void test_cmp_print_resource_format(void)
     assert_last_log("RESOURCE(type=metal)");
 }
 
-void test_cmp_print_follow_collider_and_misc(void)
+void test_cmp_print_collider_and_misc(void)
 {
-    cmp_follow_t follow = {0};
-    follow.target.idx = 42;
-    follow.desired_distance = 10.0f;
-    follow.max_speed = 3.5f;
-    follow.vision_range = 7.0f;
-    follow.has_last_seen = false;
-    cmp_print_follow(NULL, &follow);
-    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "FOLLOW(target=42"));
-    TEST_ASSERT_TRUE(strstr(s_last_log, "last=") == NULL);
-    TEST_ASSERT_EQUAL_INT(LOG_LVL_INFO, s_last_level);
-
-    follow.has_last_seen = true;
-    follow.last_seen_x = 1.0f;
-    follow.last_seen_y = 2.0f;
-    cmp_print_follow(NULL, &follow);
-    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "last=(1.0,2.0)"));
-    TEST_ASSERT_EQUAL_INT(LOG_LVL_INFO, s_last_level);
-
     cmp_collider_t col = { .hx = 2.25f, .hy = 1.75f };
     cmp_print_collider(NULL, &col);
     assert_last_log("COL(hx=2.25, hy=1.75)");
@@ -214,7 +193,7 @@ void test_cmp_print_follow_collider_and_misc(void)
     cmp_trigger_t trig = { .pad = 1.25f, .target_mask = 0xAABBCCDD };
     cmp_print_trigger(NULL, &trig);
     TEST_ASSERT_NOT_NULL(strstr(s_last_log, "TRIGGER(pad=1.25"));
-    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "target_mask=0xAABBCCDD"));
+    TEST_ASSERT_NOT_NULL(strstr(s_last_log, "target_mask=0x00000000AABBCCDD"));
     TEST_ASSERT_EQUAL_INT(LOG_LVL_INFO, s_last_level);
 
     cmp_billboard_t bb = {0};

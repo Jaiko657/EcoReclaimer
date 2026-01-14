@@ -1,5 +1,5 @@
-#include "modules/core/platform.h"
-#include "modules/core/logger.h"
+#include "engine/core/platform.h"
+#include "engine/core/logger.h"
 
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L

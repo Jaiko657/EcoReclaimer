@@ -156,8 +156,8 @@ int main(int argc, char **argv)
     if (!build_tool(cc, "tests/unit/ecs/game/build_ecs_game.c", "build/tests/bin/build_ecs_game")) return 1;
     if (!run_tool("build/tests/bin/build_ecs_game", coverage ? "--coverage" : NULL)) return 1;
 
-    if (!build_tool(cc, "tests/unit/ecs/prefab_loading/build_ecs_prefab_loading.c", "build/tests/bin/build_ecs_prefab_loading")) return 1;
-    if (!run_tool("build/tests/bin/build_ecs_prefab_loading", coverage ? "--coverage" : NULL)) return 1;
+    if (!build_tool(cc, "tests/unit/ecs/pf_loading/build_pf_loading.c", "build/tests/bin/build_pf_loading")) return 1;
+    if (!run_tool("build/tests/bin/build_pf_loading", coverage ? "--coverage" : NULL)) return 1;
 
     if (!build_tool(cc, "tests/unit/prefab/build_prefab.c", "build/tests/bin/build_prefab")) return 1;
     if (!run_tool("build/tests/bin/build_prefab", coverage ? "--coverage" : NULL)) return 1;

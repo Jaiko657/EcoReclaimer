@@ -1,8 +1,8 @@
 #include "unity.h"
 
 #include "ecs_registration_stubs.h"
-#include "modules/ecs/ecs.h"
-#include "modules/systems/systems_registration.h"
+#include "engine/ecs/ecs.h"
+#include "engine/systems/systems_registration.h"
 
 static void assert_registration(int idx, systems_phase_t phase, int order, const char* name)
 {
@@ -45,15 +45,15 @@ void test_systems_registration_orders_and_hooks(void)
     assert_registration(1, PHASE_INPUT, 0, "input");
     assert_registration(2, PHASE_INPUT, 50, "grav_gun_input");
     assert_registration(3, PHASE_SIM_PRE, 100, "animation_controller");
-    assert_registration(4, PHASE_PHYSICS, 50, "follow_ai");
-    assert_registration(5, PHASE_PHYSICS, 90, "grav_gun_motion");
-    assert_registration(6, PHASE_PHYSICS, 95, "conveyor_apply");
-    assert_registration(7, PHASE_PHYSICS, 100, "physics");
-    assert_registration(8, PHASE_SIM_POST, 100, "proximity_view");
-    assert_registration(9, PHASE_SIM_POST, 105, "conveyor_update");
-    assert_registration(10, PHASE_SIM_POST, 110, "recycle_bins");
-    assert_registration(11, PHASE_SIM_POST, 115, "recycle_anim");
-    assert_registration(12, PHASE_SIM_POST, 120, "storage_deposit");
+    assert_registration(4, PHASE_PHYSICS, 90, "grav_gun_motion");
+    assert_registration(5, PHASE_PHYSICS, 95, "conveyor_apply");
+    assert_registration(6, PHASE_PHYSICS, 100, "physics");
+    assert_registration(7, PHASE_SIM_POST, 100, "proximity_view");
+    assert_registration(8, PHASE_SIM_POST, 105, "conveyor_update");
+    assert_registration(9, PHASE_SIM_POST, 110, "recycle_bins");
+    assert_registration(10, PHASE_SIM_POST, 115, "recycle_anim");
+    assert_registration(11, PHASE_SIM_POST, 120, "storage_deposit");
+    assert_registration(12, PHASE_SIM_POST, 130, "unloader_tick");
     assert_registration(13, PHASE_SIM_POST, 150, "grav_gun_tool");
     assert_registration(14, PHASE_SIM_POST, 175, "grav_gun_charger");
     assert_registration(15, PHASE_SIM_POST, 200, "billboards");

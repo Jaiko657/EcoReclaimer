@@ -1,27 +1,12 @@
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_physics.h"
-#include "modules/world/world.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/ecs/ecs_physics.h"
+#include "engine/world/world.h"
 
 #include <string.h>
 
-uint32_t        ecs_mask[ECS_MAX_ENTITIES];
+ComponentMask   ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];
 uint32_t        ecs_next_gen[ECS_MAX_ENTITIES];
-cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
-cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
-cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
-cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
-cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
-cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
-cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
-cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
-cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
-cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
-cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
-cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
-cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
-cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
-cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 bool g_world_has_map = true;
 int g_world_subtile = 0;
@@ -36,13 +21,6 @@ void ecs_system_domains_stub_reset(void)
     memset(ecs_mask, 0, sizeof(ecs_mask));
     memset(ecs_gen, 0, sizeof(ecs_gen));
     memset(ecs_next_gen, 0, sizeof(ecs_next_gen));
-    memset(cmp_pos, 0, sizeof(cmp_pos));
-    memset(cmp_vel, 0, sizeof(cmp_vel));
-    memset(cmp_follow, 0, sizeof(cmp_follow));
-    memset(cmp_col, 0, sizeof(cmp_col));
-    memset(cmp_conveyor, 0, sizeof(cmp_conveyor));
-    memset(cmp_conveyor_rider, 0, sizeof(cmp_conveyor_rider));
-    memset(cmp_phys_body, 0, sizeof(cmp_phys_body));
     g_world_has_map = true;
     g_world_subtile = 0;
     g_world_has_los = true;

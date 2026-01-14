@@ -1,7 +1,7 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_physics.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/ecs/ecs_physics.h"
 
 #include <string.h>
 

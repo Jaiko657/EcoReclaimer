@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "modules/core/logger_raylib_adapter.h"
+#include "engine/core/logger_raylib_adapter.h"
 #include "logger_adapter_stubs.h"
 #include "raylib.h"
 

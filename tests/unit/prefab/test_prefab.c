@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/prefab/prefab.h"
+#include "engine/prefab/prefab.h"
 
 #if !defined(_WIN32)
 #include <sys/stat.h>
@@ -83,7 +83,6 @@ void test_prefab_load_parses_all_component_types_and_varieties(void)
         "    </anim>\n"
         "  </component>\n"
         "  <component type=\"PLAYER\"/>\n"
-        "  <component type=\"FOLLOW\" target=\"player\" desired_distance=\"10\" max_speed=\"20\" vision_range=\"30\"/>\n"
         "  <component type=\"COL\" hx=\"8\" hy=\"9\"/>\n"
         "  <component type=\"LIFTABLE\"><property name=\"pickup_distance\" value=\"40\"/></component>\n"
         "  <component type=\"TRIGGER\" pad=\"0\" target_mask=\"RESOURCE|COL\"/>\n"
@@ -96,7 +95,7 @@ void test_prefab_load_parses_all_component_types_and_varieties(void)
     TEST_ASSERT_TRUE(prefab_load(path, &p));
     TEST_ASSERT_NOT_NULL(p.name);
     TEST_ASSERT_EQUAL_STRING("everything", p.name);
-    TEST_ASSERT_EQUAL_UINT32(12, (uint32_t)p.component_count);
+    TEST_ASSERT_EQUAL_UINT32(11, (uint32_t)p.component_count);
 
     const prefab_component_t *pos = find_comp(&p, ENUM_POS);
     TEST_ASSERT_NOT_NULL(pos);

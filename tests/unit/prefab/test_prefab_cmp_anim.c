@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "modules/prefab/prefab_cmp.h"
+#include "engine/prefab/pf_components_engine.h"
 
 static prefab_component_t make_anim_comp(const char* type_name, prefab_anim_def_t* anim)
 {
@@ -33,8 +33,8 @@ void test_prefab_cmp_anim_build_flattens_sequences(void)
     };
     prefab_component_t comp = make_anim_comp("ANIM", &anim);
 
-    prefab_cmp_anim_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_anim_build(&comp, NULL, &out));
+    pf_component_anim_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_anim_build(&comp, NULL, &out));
     TEST_ASSERT_EQUAL_INT(16, out.frame_w);
     TEST_ASSERT_EQUAL_INT(17, out.frame_h);
     TEST_ASSERT_EQUAL_FLOAT(6.0f, out.fps);
@@ -43,9 +43,9 @@ void test_prefab_cmp_anim_build_flattens_sequences(void)
     TEST_ASSERT_EQUAL_INT(2, out.frame_buffer_height);
     TEST_ASSERT_EQUAL_INT(2, out.frames_per_anim[0]);
     TEST_ASSERT_EQUAL_INT(1, out.frames_per_anim[1]);
-    const anim_frame_coord_t* walk_00 = prefab_cmp_anim_frame_coord(&out, 0, 0);
-    const anim_frame_coord_t* walk_01 = prefab_cmp_anim_frame_coord(&out, 0, 1);
-    const anim_frame_coord_t* idle_00 = prefab_cmp_anim_frame_coord(&out, 1, 0);
+    const anim_frame_coord_t* walk_00 = pf_component_anim_frame_coord(&out, 0, 0);
+    const anim_frame_coord_t* walk_01 = pf_component_anim_frame_coord(&out, 0, 1);
+    const anim_frame_coord_t* idle_00 = pf_component_anim_frame_coord(&out, 1, 0);
     TEST_ASSERT_NOT_NULL(walk_00);
     TEST_ASSERT_NOT_NULL(walk_01);
     TEST_ASSERT_NOT_NULL(idle_00);
@@ -55,5 +55,5 @@ void test_prefab_cmp_anim_build_flattens_sequences(void)
     TEST_ASSERT_EQUAL_INT(0, walk_01->row);
     TEST_ASSERT_EQUAL_INT(2, idle_00->col);
     TEST_ASSERT_EQUAL_INT(1, idle_00->row);
-    prefab_cmp_anim_free(&out);
+    pf_component_anim_free(&out);
 }

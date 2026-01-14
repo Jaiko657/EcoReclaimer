@@ -1,4 +1,4 @@
-#include "modules/asset/asset_backend.h"
+#include "engine/asset/asset_backend.h"
 #include "asset_backend_stub.h"
 
 #include <stdbool.h>
@@ -69,11 +69,14 @@ void asset_backend_unload_texture(AssetBackendTexture* tex)
     free(tex);
 }
 
-void asset_backend_texture_size(const AssetBackendTexture* tex, int* out_w, int* out_h)
+bool asset_backend_texture_size(const AssetBackendTexture* tex, int* out_w, int* out_h)
 {
-    if (!tex) { if (out_w) *out_w = 0; if (out_h) *out_h = 0; return; }
+    if (out_w) *out_w = 0;
+    if (out_h) *out_h = 0;
+    if (!tex) return false;
     if (out_w) *out_w = tex->width;
     if (out_h) *out_h = tex->height;
+    return true;
 }
 
 void asset_backend_debug_info(const AssetBackendTexture* tex, AssetBackendDebugInfo* out)

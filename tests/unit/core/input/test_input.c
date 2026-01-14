@@ -2,13 +2,19 @@
 
 #include <math.h>
 
-#include "modules/core/input.h"
+#include "engine/input/input.h"
 #include "raylib.h"
 
 static void reset_input_state(void)
 {
     raylib_stub_reset();
-    input_init_defaults();
+    input_init();
+    input_bind(BTN_LEFT,  KEY_LEFT);
+    input_bind(BTN_RIGHT, KEY_RIGHT);
+    input_bind(BTN_UP,    KEY_UP);
+    input_bind(BTN_DOWN,  KEY_DOWN);
+    input_bind(BTN_INTERACT, KEY_E);
+    input_bind(BTN_MOUSE_L, MOUSE_LEFT_BUTTON);
 }
 
 void setUp(void)

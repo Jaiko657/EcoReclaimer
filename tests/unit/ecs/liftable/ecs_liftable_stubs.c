@@ -1,29 +1,19 @@
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_proximity.h"
-#include "modules/renderer/renderer.h"
-#include "modules/world/world.h"
-#include "modules/asset/asset.h"
-#include "modules/core/toast.h"
+#include "game/ecs/ecs_game.h"
+#include "game/ecs/ecs_proximity.h"
+#include "engine/renderer/renderer.h"
+#include "engine/world/world.h"
+#include "engine/asset/asset.h"
+#include "engine/core/toast.h"
 
-uint32_t        ecs_mask[ECS_MAX_ENTITIES];
+ComponentMask   ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];
 uint32_t        ecs_next_gen[ECS_MAX_ENTITIES];
 cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
-cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
-cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
-cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
-cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
-cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
-cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
-cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
-cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
-cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
-cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 static ecs_entity_t g_player = {0, 0};
 
@@ -109,10 +99,11 @@ int world_subtile_size(void)
     return 16;
 }
 
-void world_size_px(int* out_w, int* out_h)
+bool world_size_px(int* out_w, int* out_h)
 {
     if (out_w) *out_w = 1000;
     if (out_h) *out_h = 1000;
+    return true;
 }
 
 bool world_is_walkable_subtile(int sx, int sy)

@@ -87,8 +87,8 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/core/logger.c");
-    nob_da_append(&sources, "src/modules/systems/systems.c");
+    nob_da_append(&sources, "src/engine/core/logger.c");
+    nob_da_append(&sources, "src/engine/systems/systems.c");
     nob_da_append(&sources, "tests/unit/ecs/test_ecs_systems.c");
     nob_da_append(&sources, runner_path);
 

@@ -83,11 +83,30 @@ int main(int argc, char **argv)
         "-I tests/unit/test_runner";
     const char *cflags = coverage
         ? "-std=c99 -Wall -Wextra -O0 -g -fPIC --coverage "
-        : "-std=c99 -Wall -Wextra -O0 -g -fPIC ";
+          "-DECS_ENGINE_SECTION_RENDER=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_HOOKS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_SYSTEM=0 "
+          "-DECS_ENGINE_SECTION_ANIM=0 "
+          "-DECS_ENGINE_SECTION_EFFECTS=0 "
+        : "-std=c99 -Wall -Wextra -O0 -g -fPIC "
+          "-DECS_ENGINE_SECTION_RENDER=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_HOOKS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_SYSTEM=0 "
+          "-DECS_ENGINE_SECTION_ANIM=0 "
+          "-DECS_ENGINE_SECTION_EFFECTS=0 ";
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_iterators.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_engine.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_render_components.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_iterators.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics_hooks.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics_system.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_anim.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_effects.c");
     nob_da_append(&sources, "tests/unit/ecs/iterators/ecs_iterators_stubs.c");
     nob_da_append(&sources, "tests/unit/ecs/iterators/test_ecs_iterators.c");
     nob_da_append(&sources, runner_path);

@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "modules/systems/systems.h"
+#include "engine/systems/systems.h"
 
 static int g_calls[16];
 static int g_call_count = 0;
@@ -43,7 +43,8 @@ void test_ecs_systems_get_phase_systems_returns_sorted_list(void)
     systems_register(PHASE_PHYSICS, 10, sys_a, "a");
 
     const systems_info_t* list = NULL;
-    size_t n = systems_get_phase_systems(PHASE_PHYSICS, &list);
+    size_t n = 0;
+    TEST_ASSERT_TRUE(systems_get_phase_systems(PHASE_PHYSICS, &list, &n));
 
     TEST_ASSERT_EQUAL_UINT32(2, (uint32_t)n);
     TEST_ASSERT_NOT_NULL(list);
@@ -63,6 +64,7 @@ void test_ecs_systems_caps_system_count(void)
     }
 
     const systems_info_t* list = NULL;
-    size_t n = systems_get_phase_systems(PHASE_INPUT, &list);
+    size_t n = 0;
+    TEST_ASSERT_TRUE(systems_get_phase_systems(PHASE_INPUT, &list, &n));
     TEST_ASSERT_TRUE(n <= 64);
 }

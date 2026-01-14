@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "modules/prefab/prefab_cmp.h"
+#include "game/prefab/pf_components_game.h"
 
 static prefab_component_t make_comp(const char* type_name, prefab_kv_t* props, size_t prop_count)
 {
@@ -24,8 +24,8 @@ void test_prefab_cmp_door_build_parses_tiles_string(void)
     };
     prefab_component_t comp = make_comp("DOOR", props, 2);
 
-    prefab_cmp_door_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_door_build(&comp, NULL, &out));
+    pf_component_door_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_door_build(&comp, NULL, &out));
     TEST_ASSERT_EQUAL_FLOAT(12.0f, out.prox_radius);
     TEST_ASSERT_EQUAL_UINT32(2, (uint32_t)out.tiles.size);
     TEST_ASSERT_EQUAL_INT(1, out.tiles.data[0].x);
@@ -33,6 +33,5 @@ void test_prefab_cmp_door_build_parses_tiles_string(void)
     TEST_ASSERT_EQUAL_INT(3, out.tiles.data[1].x);
     TEST_ASSERT_EQUAL_INT(4, out.tiles.data[1].y);
 
-    prefab_cmp_door_free(&out);
+    pf_component_door_free(&out);
 }
-

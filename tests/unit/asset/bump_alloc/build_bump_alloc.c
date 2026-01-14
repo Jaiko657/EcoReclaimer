@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/asset/bump_alloc.c");
+    nob_da_append(&sources, "src/shared/bump_alloc.c");
     nob_da_append(&sources, "tests/unit/asset/bump_alloc/test_bump_alloc.c");
     nob_da_append(&sources, runner_path);
 

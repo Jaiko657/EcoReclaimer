@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "modules/prefab/prefab_cmp.h"
+#include "engine/prefab/pf_components_engine.h"
 
 static prefab_component_t make_comp(const char* type_name, prefab_kv_t* props, size_t prop_count)
 {
@@ -41,10 +41,10 @@ void test_prefab_cmp_col_build_uses_object_w_h_when_missing(void)
 {
     prefab_component_t comp = make_comp("COL", NULL, 0);
     tiled_object_t obj = make_obj(100.0f, 50.0f);
+    pf_override_ctx_t ovr = { .obj = &obj, .enabled = true };
 
-    prefab_cmp_col_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_col_build(&comp, &obj, &out));
+    pf_component_col_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_col_build(&comp, &ovr, &out));
     TEST_ASSERT_EQUAL_FLOAT(50.0f, out.hx);
     TEST_ASSERT_EQUAL_FLOAT(25.0f, out.hy);
 }
-

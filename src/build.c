@@ -103,7 +103,10 @@ static bool gather_module_sources_recursive(const char *parent, const Nob_File_P
 
 static bool gather_module_sources(Nob_File_Paths *out_sources, const Nob_File_Paths *replacement_bases)
 {
-    return gather_module_sources_recursive("src/modules", replacement_bases, out_sources);
+    if (!gather_module_sources_recursive("src/engine", replacement_bases, out_sources)) return false;
+    if (!gather_module_sources_recursive("src/game", replacement_bases, out_sources)) return false;
+    if (!gather_module_sources_recursive("src/shared", replacement_bases, out_sources)) return false;
+    return true;
 }
 
 static void cmd_append_paths(Nob_Cmd *cmd, const Nob_File_Paths *paths)

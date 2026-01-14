@@ -2,9 +2,9 @@
 
 #include <stdbool.h>
 
-#include "modules/core/engine_types.h"
-#include "modules/ecs/ecs.h"
-#include "modules/core/camera.h"
+#include "engine/core/engine_types.h"
+#include "engine/ecs/ecs.h"
+#include "engine/core/camera.h"
 
 extern int g_platform_init_calls;
 extern int g_logger_use_raylib_calls;
@@ -16,6 +16,10 @@ extern int g_asset_init_calls;
 extern int g_asset_shutdown_calls;
 extern int g_ecs_init_calls;
 extern int g_ecs_shutdown_calls;
+extern int g_ecs_engine_init_calls;
+extern int g_ecs_game_init_calls;
+extern int g_ecs_engine_shutdown_calls;
+extern int g_ecs_game_shutdown_calls;
 extern int g_ecs_register_game_systems_calls;
 extern int g_ecs_phys_destroy_all_calls;
 extern int g_renderer_init_calls;

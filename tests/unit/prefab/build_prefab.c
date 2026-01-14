@@ -75,7 +75,6 @@ int main(int argc, char **argv)
     nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_spr.c");
     nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_anim.c");
     nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_phys_body.c");
-    nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_follow.c");
     nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_trigger.c");
     nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_billboard.c");
     nob_da_append(&test_sources, "tests/unit/prefab/test_prefab_cmp_grav_gun.c");
@@ -96,36 +95,83 @@ int main(int argc, char **argv)
         "-I tests/unit/test_runner";
     const char *cflags = coverage
         ? "-std=c99 -Wall -Wextra -O0 -g -fPIC --coverage "
-        : "-std=c99 -Wall -Wextra -O0 -g -fPIC ";
+          "-DECS_ENGINE_SECTION_RENDER=0 "
+          "-DECS_ENGINE_SECTION_ITERATORS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_SYSTEM=0 "
+          "-DECS_ENGINE_SECTION_ANIM=0 "
+          "-DECS_ENGINE_SECTION_EFFECTS=0 "
+          "-DECS_GAME_SECTION_INIT=0 "
+          "-DECS_GAME_SECTION_PREFAB_LOADING=0 "
+          "-DECS_GAME_SECTION_STORAGE=0 "
+          "-DECS_GAME_SECTION_UNLOADER=0 "
+          "-DECS_GAME_SECTION_RECYCLER=0 "
+          "-DECS_GAME_SECTION_PROXIMITY=0 "
+          "-DECS_GAME_SECTION_GRAVITY_GUN=0 "
+          "-DECS_GAME_SECTION_DOORS=0 "
+          "-DECS_GAME_SECTION_DOOR_SYSTEMS=0 "
+          "-DECS_GAME_SECTION_CONVEYOR=0 "
+          "-DECS_GAME_SECTION_INPUT_SYSTEM=0 "
+        : "-std=c99 -Wall -Wextra -O0 -g -fPIC "
+          "-DECS_ENGINE_SECTION_RENDER=0 "
+          "-DECS_ENGINE_SECTION_ITERATORS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_SYSTEM=0 "
+          "-DECS_ENGINE_SECTION_ANIM=0 "
+          "-DECS_ENGINE_SECTION_EFFECTS=0 "
+          "-DECS_GAME_SECTION_INIT=0 "
+          "-DECS_GAME_SECTION_PREFAB_LOADING=0 "
+          "-DECS_GAME_SECTION_STORAGE=0 "
+          "-DECS_GAME_SECTION_UNLOADER=0 "
+          "-DECS_GAME_SECTION_RECYCLER=0 "
+          "-DECS_GAME_SECTION_PROXIMITY=0 "
+          "-DECS_GAME_SECTION_GRAVITY_GUN=0 "
+          "-DECS_GAME_SECTION_DOORS=0 "
+          "-DECS_GAME_SECTION_DOOR_SYSTEMS=0 "
+          "-DECS_GAME_SECTION_CONVEYOR=0 "
+          "-DECS_GAME_SECTION_INPUT_SYSTEM=0 ";
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/core/logger.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_core.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_doors.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_physics.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_physics_hooks.c");
-    nob_da_append(&sources, "src/modules/asset/bump_alloc.c");
-    nob_da_append(&sources, "src/modules/tiled/tiled.c");
-    nob_da_append(&sources, "src/modules/tiled/tiled_layers.c");
-    nob_da_append(&sources, "src/modules/tiled/tiled_objects.c");
-    nob_da_append(&sources, "src/modules/tiled/tiled_tilesets.c");
-    nob_da_append(&sources, "src/modules/tiled/tiled_utils.c");
-    nob_da_append(&sources, "src/modules/prefab/prefab.c");
-    nob_da_append(&sources, "src/modules/prefab/prefab_cmp_common.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_pos.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_vel.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_col.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_spr.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_anim.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_phys_body.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_follow.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_trigger.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_billboard.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_grav_gun.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_door.c");
-    nob_da_append(&sources, "src/modules/prefab/components/prefab_cmp_resource.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_resource.c");
+    nob_da_append(&sources, "src/engine/core/logger.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_core.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_engine.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_render_components.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_iterators.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics_hooks.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics_system.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_anim.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_effects.c");
+    nob_da_append(&sources, "src/shared/bump_alloc.c");
+    nob_da_append(&sources, "src/engine/tiled/tiled.c");
+    nob_da_append(&sources, "src/engine/tiled/tiled_layers.c");
+    nob_da_append(&sources, "src/engine/tiled/tiled_objects.c");
+    nob_da_append(&sources, "src/engine/tiled/tiled_tilesets.c");
+    nob_da_append(&sources, "src/engine/tiled/tiled_utils.c");
+    nob_da_append(&sources, "src/engine/prefab/prefab.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_helpers.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_pos.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_vel.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_col.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_spr.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_anim.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_phys_body.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_trigger.c");
+    nob_da_append(&sources, "src/engine/prefab/components/pf_component_billboard.c");
+    nob_da_append(&sources, "src/game/prefab/components/pf_component_liftable.c");
+    nob_da_append(&sources, "src/game/prefab/components/pf_component_door.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_game.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_game_init.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_resource.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_storage.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_unloader.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_recycler.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_proximity.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_gravity_gun.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_doors.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_door_systems.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_conveyor.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_anim_controller.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_input_system.c");
     nob_da_append(&sources, "tests/unit/prefab/ecs_anim_stubs.c");
     nob_da_append(&sources, "tests/unit/prefab/ecs_gravity_gun_stubs.c");
     nob_da_append(&sources, "tests/unit/prefab/ecs_render_stubs.c");
@@ -139,7 +185,6 @@ int main(int argc, char **argv)
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_spr.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_anim.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_phys_body.c");
-    nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_follow.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_trigger.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_billboard.c");
     nob_da_append(&sources, "tests/unit/prefab/test_prefab_cmp_grav_gun.c");

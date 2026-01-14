@@ -1,8 +1,8 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs.h"
-#include "modules/ecs/ecs_render.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/ecs/ecs.h"
+#include "engine/ecs/ecs_render.h"
 
 #include <stdio.h>
 #include <string.h>

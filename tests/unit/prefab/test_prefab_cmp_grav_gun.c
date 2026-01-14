@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "modules/prefab/prefab_cmp.h"
+#include "game/prefab/pf_components_game.h"
 
 static prefab_component_t make_comp(const char* type_name, prefab_kv_t* props, size_t prop_count)
 {
@@ -22,8 +22,8 @@ void test_prefab_cmp_grav_gun_build_sets_present_overrides(void)
     };
     prefab_component_t comp = make_comp("LIFTABLE", props, 2);
 
-    prefab_cmp_grav_gun_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_grav_gun_build(&comp, NULL, &out));
+    pf_component_grav_gun_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_grav_gun_build(&comp, NULL, &out));
     TEST_ASSERT_TRUE(out.has_pickup_distance);
     TEST_ASSERT_EQUAL_FLOAT(12.0f, out.pickup_distance);
     TEST_ASSERT_TRUE(out.has_damping);

@@ -1,8 +1,8 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_proximity.h"
-#include "modules/core/input.h"
+#include "game/ecs/ecs_game.h"
+#include "game/ecs/ecs_proximity.h"
+#include "engine/input/input.h"
 
 #include <string.h>
 

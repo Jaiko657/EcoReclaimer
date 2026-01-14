@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/tiled/tiled.h"
-#include "modules/core/logger.h"
+#include "engine/tiled/tiled.h"
+#include "engine/core/logger.h"
 #include "test_log_sink.h"
 
 #if !defined(_WIN32)

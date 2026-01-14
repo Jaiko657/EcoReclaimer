@@ -1,12 +1,12 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_doors.h"
-#include "modules/ecs/ecs_render.h"
+#include "engine/ecs/ecs.h"
+#include "game/ecs/ecs_game.h"
+#include "game/ecs/ecs_doors.h"
+#include "engine/ecs/ecs_render.h"
 #include "ecs_core_stubs.h"
-#include "modules/core/input.h"
-#include "modules/systems/systems_registration.h"
+#include "engine/input/input.h"
+#include "engine/systems/systems_registration.h"
 
 void setUp(void)
 {
@@ -38,9 +38,9 @@ void test_ecs_create_destroy_reuses_slot_and_gen(void)
 void test_ecs_init_registers_systems_and_tick_runs_phases(void)
 {
 #if DEBUG_BUILD
-    const int expected_registers = 25;
-#else
     const int expected_registers = 24;
+#else
+    const int expected_registers = 23;
 #endif
     TEST_ASSERT_EQUAL_INT(expected_registers, g_ecs_register_system_calls);
 
@@ -87,29 +87,6 @@ void test_ecs_get_player_position_and_get_position(void)
 
     ecs_entity_t other = ecs_create();
     TEST_ASSERT_FALSE(ecs_get_position(other, &pos));
-}
-
-void test_cmp_add_follow_sets_last_seen_when_target_has_pos(void)
-{
-    ecs_entity_t target = ecs_create();
-    cmp_add_position(target, 10.0f, 20.0f);
-
-    ecs_entity_t follower = ecs_create();
-    cmp_add_follow(follower, target, 5.0f, 7.0f);
-
-    int idx = ent_index_checked(follower);
-    TEST_ASSERT_TRUE(idx >= 0);
-    TEST_ASSERT_TRUE(cmp_follow[idx].has_last_seen);
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 10.0f, cmp_follow[idx].last_seen_x);
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 20.0f, cmp_follow[idx].last_seen_y);
-
-    ecs_entity_t no_pos = ecs_create();
-    ecs_entity_t follower2 = ecs_create();
-    cmp_add_follow(follower2, no_pos, 2.0f, 3.0f);
-
-    int idx2 = ent_index_checked(follower2);
-    TEST_ASSERT_TRUE(idx2 >= 0);
-    TEST_ASSERT_FALSE(cmp_follow[idx2].has_last_seen);
 }
 
 void test_cmp_add_billboard_warns_without_trigger(void)
@@ -194,7 +171,7 @@ void test_ecs_count_entities_counts_masks(void)
     cmp_add_position(b, 2.0f, 2.0f);
     cmp_add_velocity(b, 0.0f, 0.0f, DIR_SOUTH);
 
-    uint32_t masks[2] = { CMP_POS, (CMP_POS | CMP_VEL) };
+    ComponentMask masks[2] = { CMP_POS, (CMP_POS | CMP_VEL) };
     ecs_count_result_t result = ecs_count_entities(masks, 2);
 
     TEST_ASSERT_EQUAL_INT(2, result.count[0]);
@@ -266,7 +243,7 @@ void test_cmp_add_trigger_and_phys_body(void)
     TEST_ASSERT_TRUE(idx >= 0);
     TEST_ASSERT_TRUE(ecs_mask[idx] & CMP_TRIGGER);
     TEST_ASSERT_FLOAT_WITHIN(0.001f, 2.5f, cmp_trigger[idx].pad);
-    TEST_ASSERT_EQUAL_UINT32(CMP_PLAYER, cmp_trigger[idx].target_mask);
+    TEST_ASSERT_EQUAL_UINT64(CMP_PLAYER, cmp_trigger[idx].target_mask);
 
     cmp_add_position(e, 1.0f, 1.0f);
     cmp_add_size(e, 2.0f, 3.0f);

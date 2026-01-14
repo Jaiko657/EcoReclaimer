@@ -1,6 +1,6 @@
 #pragma once
 
-#include "modules/core/logger.h"
+#include "engine/core/logger.h"
 
 void logger_adapter_stub_reset(void);
 log_sink_fn logger_adapter_stub_sink(void);

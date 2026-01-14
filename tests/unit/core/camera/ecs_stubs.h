@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include "modules/ecs/ecs.h"
+#include "engine/ecs/ecs.h"
 
 void ecs_stub_reset(void);
 void ecs_stub_set_target(ecs_entity_t target);

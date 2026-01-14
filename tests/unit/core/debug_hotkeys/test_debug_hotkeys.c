@@ -3,8 +3,9 @@
 #include <string.h>
 
 #include "debug_hotkeys_stubs.h"
-#include "modules/core/input.h"
-#include "modules/ecs/ecs_internal.h"
+#include "engine/input/input.h"
+#include "shared/buttons.h"
+#include "game/ecs/ecs_game.h"
 
 void sys_debug_binds(const input_t* in);
 
@@ -94,7 +95,7 @@ void test_debug_hotkeys_inspect_click_logs_components(void)
     int idx = 1;
     g_ecs_alive[idx] = true;
     ecs_mask[idx] = CMP_POS | CMP_COL | CMP_VEL | CMP_PHYS_BODY | CMP_SPR | CMP_ANIM |
-                    CMP_PLAYER | CMP_FOLLOW | CMP_STORAGE |
+                    CMP_PLAYER | CMP_STORAGE |
                     CMP_TRIGGER | CMP_BILLBOARD | CMP_LIFTABLE | CMP_DOOR;
 
     cmp_pos[idx].x = 5.0f;
@@ -125,11 +126,6 @@ void test_debug_hotkeys_inspect_click_logs_components(void)
     cmp_anim[idx].frame_index = 0;
     cmp_anim[idx].frame_duration = 0.1f;
     cmp_anim[idx].current_time = 0.0f;
-
-    cmp_follow[idx].target.idx = 2;
-    cmp_follow[idx].desired_distance = 10.0f;
-    cmp_follow[idx].max_speed = 5.0f;
-    cmp_follow[idx].vision_range = 20.0f;
 
     cmp_trigger[idx].pad = 1.0f;
     cmp_trigger[idx].target_mask = CMP_RESOURCE;

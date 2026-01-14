@@ -4,18 +4,18 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/asset/asset.h"
-#include "modules/ecs/ecs.h"
-#include "modules/ecs/ecs_game.h"
-#include "modules/ecs/ecs_physics.h"
-#include "modules/core/input.h"
-#include "modules/core/logger.h"
-#include "modules/core/logger_raylib_adapter.h"
-#include "modules/core/platform.h"
-#include "modules/renderer/renderer.h"
-#include "modules/core/toast.h"
-#include "modules/world/world.h"
-#include "modules/world/world_query.h"
+#include "engine/asset/asset.h"
+#include "engine/ecs/ecs.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/ecs/ecs_physics.h"
+#include "engine/input/input.h"
+#include "engine/core/logger.h"
+#include "engine/core/logger_raylib_adapter.h"
+#include "engine/core/platform.h"
+#include "engine/renderer/renderer.h"
+#include "engine/core/toast.h"
+#include "engine/world/world.h"
+#include "engine/world/world_query.h"
 
 int g_platform_init_calls = 0;
 int g_logger_use_raylib_calls = 0;
@@ -27,6 +27,10 @@ int g_asset_init_calls = 0;
 int g_asset_shutdown_calls = 0;
 int g_ecs_init_calls = 0;
 int g_ecs_shutdown_calls = 0;
+int g_ecs_engine_init_calls = 0;
+int g_ecs_game_init_calls = 0;
+int g_ecs_engine_shutdown_calls = 0;
+int g_ecs_game_shutdown_calls = 0;
 int g_ecs_register_game_systems_calls = 0;
 int g_ecs_phys_destroy_all_calls = 0;
 int g_renderer_init_calls = 0;
@@ -79,6 +83,10 @@ void engine_stub_reset(void)
     g_asset_shutdown_calls = 0;
     g_ecs_init_calls = 0;
     g_ecs_shutdown_calls = 0;
+    g_ecs_engine_init_calls = 0;
+    g_ecs_game_init_calls = 0;
+    g_ecs_engine_shutdown_calls = 0;
+    g_ecs_game_shutdown_calls = 0;
     g_ecs_register_game_systems_calls = 0;
     g_ecs_phys_destroy_all_calls = 0;
     g_renderer_init_calls = 0;
@@ -153,10 +161,11 @@ void ui_toast_update(float dt)
     g_ui_toast_update_calls++;
 }
 
-void input_init_defaults(void)
+void input_init(void)
 {
     g_input_init_calls++;
 }
+
 
 void asset_init(void)
 {
@@ -176,6 +185,26 @@ void ecs_init(void)
 void ecs_shutdown(void)
 {
     g_ecs_shutdown_calls++;
+}
+
+void ecs_engine_init(void)
+{
+    g_ecs_engine_init_calls++;
+}
+
+void ecs_game_init(void)
+{
+    g_ecs_game_init_calls++;
+}
+
+void ecs_engine_shutdown(void)
+{
+    g_ecs_engine_shutdown_calls++;
+}
+
+void ecs_game_shutdown(void)
+{
+    g_ecs_game_shutdown_calls++;
 }
 
 void ecs_register_game_systems(void)
@@ -209,10 +238,11 @@ void world_shutdown(void)
     g_world_shutdown_calls++;
 }
 
-void world_size_px(int* out_w, int* out_h)
+bool world_size_px(int* out_w, int* out_h)
 {
     if (out_w) *out_w = g_world_px_w;
     if (out_h) *out_h = g_world_px_h;
+    return true;
 }
 
 bool renderer_init(int width, int height, const char* title, int target_fps)

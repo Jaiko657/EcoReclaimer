@@ -1,7 +1,7 @@
 #include "unity.h"
 
-#include "modules/world/world_collision_internal.h"
-#include "modules/world/world.h"
+#include "engine/world/world_collision_internal.h"
+#include "engine/world/world.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +51,7 @@ void test_world_collision_build_from_map_populates_queries(void)
     TEST_ASSERT_TRUE(world_collision_build_from_map(&map, "walls"));
 
     int tw = 0, th = 0;
-    world_size_tiles(&tw, &th);
+    TEST_ASSERT_TRUE(world_size_tiles(&tw, &th));
     TEST_ASSERT_EQUAL_INT(2, tw);
     TEST_ASSERT_EQUAL_INT(1, th);
 
@@ -180,7 +180,7 @@ void test_world_collision_line_of_sight_clear_returns_true(void)
     TEST_ASSERT_TRUE(world_has_line_of_sight(x0, y0, x1, y1, -1.0f, 0.0f, 0.0f));
 
     int px = 0, py = 0;
-    world_size_px(&px, &py);
+    TEST_ASSERT_TRUE(world_size_px(&px, &py));
     TEST_ASSERT_EQUAL_INT(2 * world_tile_size(), px);
     TEST_ASSERT_EQUAL_INT(1 * world_tile_size(), py);
 

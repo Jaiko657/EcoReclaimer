@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "modules/prefab/prefab_cmp.h"
+#include "engine/prefab/pf_components_engine.h"
 
 static prefab_component_t make_comp(const char* type_name, prefab_kv_t* props, size_t prop_count)
 {
@@ -50,9 +50,10 @@ void test_prefab_cmp_pos_build_prefers_object_override_when_both_present(void)
         { .name = "POS.y", .value = "6" },
     };
     tiled_object_t obj = make_obj(0, 0, 0, 0, 0, obj_props, 2);
+    pf_override_ctx_t ovr = { .obj = &obj, .enabled = true };
 
-    prefab_cmp_pos_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_pos_build(&comp, &obj, &out));
+    pf_component_pos_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_pos_build(&comp, &ovr, &out));
     TEST_ASSERT_EQUAL_FLOAT(5.0f, out.x);
     TEST_ASSERT_EQUAL_FLOAT(6.0f, out.y);
 }
@@ -65,9 +66,10 @@ void test_prefab_cmp_pos_build_defaults_to_object_center_and_allows_partial_over
         { .name = "POS.x", .value = "7" },
     };
     tiled_object_t obj = make_obj(10.0f, 20.0f, 100.0f, 50.0f, 0, obj_props, 1);
+    pf_override_ctx_t ovr = { .obj = &obj, .enabled = true };
 
-    prefab_cmp_pos_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_pos_build(&comp, &obj, &out));
+    pf_component_pos_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_pos_build(&comp, &ovr, &out));
     TEST_ASSERT_EQUAL_FLOAT(7.0f, out.x);
     TEST_ASSERT_EQUAL_FLOAT(45.0f, out.y); // 20 + 50/2
 }
@@ -77,10 +79,10 @@ void test_prefab_cmp_pos_build_tile_object_offsets_y_by_half_height(void)
     prefab_component_t comp = make_comp("POS", NULL, 0);
 
     tiled_object_t tile_obj = make_obj(0.0f, 0.0f, 16.0f, 32.0f, 123u, NULL, 0);
+    pf_override_ctx_t ovr = { .obj = &tile_obj, .enabled = true };
 
-    prefab_cmp_pos_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_pos_build(&comp, &tile_obj, &out));
+    pf_component_pos_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_pos_build(&comp, &ovr, &out));
     TEST_ASSERT_EQUAL_FLOAT(8.0f, out.x);
     TEST_ASSERT_EQUAL_FLOAT(-16.0f, out.y); // y - h/2 for gid objects
 }
-

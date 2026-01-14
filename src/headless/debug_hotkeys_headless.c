@@ -1,10 +1,10 @@
-#include "modules/core/build_config.h"
+#include "shared/utils/build_config.h"
 
 #if DEBUG_BUILD
 
-#include "modules/core/input.h"
-#include "modules/systems/systems_registration.h"
-#include "modules/core/debug_hotkeys.h"
+#include "engine/input/input.h"
+#include "engine/systems/systems_registration.h"
+#include "engine/core/debug_hotkeys.h"
 
 void sys_debug_binds(const input_t* in)
 {

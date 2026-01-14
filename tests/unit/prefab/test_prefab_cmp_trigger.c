@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "modules/prefab/prefab_cmp.h"
+#include "engine/prefab/pf_components_engine.h"
 
 static prefab_component_t make_comp(const char* type_name, prefab_kv_t* props, size_t prop_count)
 {
@@ -47,9 +47,10 @@ void test_prefab_cmp_trigger_build_uses_object_proximity_radius_when_pad_missing
     prefab_component_t comp = make_comp("TRIGGER", props, 1);
 
     tiled_object_t obj = make_obj_with_prop("proximity_radius", "12.5");
+    pf_override_ctx_t ovr = { .obj = &obj, .enabled = true };
 
-    prefab_cmp_trigger_t out = {0};
-    TEST_ASSERT_TRUE(prefab_cmp_trigger_build(&comp, &obj, &out));
+    pf_component_trigger_t out = {0};
+    TEST_ASSERT_TRUE(pf_component_trigger_build(&comp, &ovr, &out));
     TEST_ASSERT_EQUAL_FLOAT(12.5f, out.pad);
     TEST_ASSERT_TRUE((out.target_mask & CMP_RESOURCE) != 0);
     TEST_ASSERT_TRUE((out.target_mask & CMP_COL) != 0);

@@ -1,12 +1,12 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs_game.h"
-#include "modules/ecs/ecs_storage.h"
-#include "modules/ecs/ecs_resource.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/systems/systems_registration.h"
+#include "game/ecs/ecs_game.h"
+#include "game/ecs/ecs_storage.h"
+#include "game/ecs/ecs_resource.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/systems/systems_registration.h"
 #include "ecs_game_stubs.h"
-#include "modules/ecs/ecs_render.h"
+#include "engine/ecs/ecs_render.h"
 
 #include <string.h>
 
@@ -27,8 +27,8 @@ void test_init_entities_requires_loaded_map(void)
     world_map_t map = {0};
     g_world_tiled_map = &map;
     TEST_ASSERT_TRUE(init_entities("maps/test.tmx"));
-    TEST_ASSERT_EQUAL_INT(1, g_prefab_spawn_calls);
-    TEST_ASSERT_EQUAL_STRING("maps/test.tmx", g_prefab_spawn_last_path);
+    TEST_ASSERT_EQUAL_INT(1, g_pf_spawn_calls);
+    TEST_ASSERT_EQUAL_STRING("maps/test.tmx", g_pf_spawn_last_path);
 }
 
 void test_systems_registration_registers_storage_callbacks(void)

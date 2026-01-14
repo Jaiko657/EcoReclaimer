@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/core/time.c");
+    nob_da_append(&sources, "src/engine/core/time.c");
     nob_da_append(&sources, "tests/unit/core/time/raylib_stubs.c");
     nob_da_append(&sources, "tests/unit/core/time/test_time.c");
     nob_da_append(&sources, runner_path);

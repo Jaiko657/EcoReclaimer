@@ -6,6 +6,7 @@
     <property name="type" value="dynamic"/>
     <property name="mass" value="20.0"/>
     <property name="friction" value="1.5"/>
+    <property name="category" value="tardas"/>
   </component>
   <component type="GRAV_GUN" pickup_distance="48" pickup_radius="8" max_hold_distance="40" breakoff_distance="60" follow_gain="10" max_speed="220" damping="8"/>
   <component type="LIFTABLE" pickup_distance="48" pickup_radius="8" max_hold_distance="40" breakoff_distance="60" follow_gain="10" max_speed="220" damping="8"/>

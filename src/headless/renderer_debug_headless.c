@@ -1,8 +1,8 @@
-#include "modules/core/build_config.h"
+#include "shared/utils/build_config.h"
 
 #if DEBUG_BUILD
-#include "modules/renderer/renderer.h"
-#include "modules/renderer/renderer_internal.h"
+#include "engine/renderer/renderer.h"
+#include "engine/renderer/renderer_internal.h"
 
 bool renderer_toggle_ecs_colliders(void) { return false; }
 bool renderer_toggle_phys_colliders(void) { return false; }

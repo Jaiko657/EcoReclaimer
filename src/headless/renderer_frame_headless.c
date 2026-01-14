@@ -1,5 +1,5 @@
-#include "modules/renderer/renderer_internal.h"
-#include "modules/systems/systems_registration.h"
+#include "engine/renderer/renderer_internal.h"
+#include "engine/systems/systems_registration.h"
 
 static void renderer_noop(void) { }
 

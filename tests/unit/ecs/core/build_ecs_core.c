@@ -83,13 +83,62 @@ int main(int argc, char **argv)
         "-I tests/unit/test_runner";
     const char *cflags = coverage
         ? "-std=c99 -Wall -Wextra -O0 -g -fPIC --coverage "
-        : "-std=c99 -Wall -Wextra -O0 -g -fPIC ";
+          "-DECS_ENGINE_SECTION_ITERATORS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_SYSTEM=0 "
+          "-DECS_ENGINE_SECTION_ANIM=0 "
+          "-DECS_ENGINE_SECTION_EFFECTS=0 "
+          "-DECS_GAME_SECTION_INIT=0 "
+          "-DECS_GAME_SECTION_PREFAB_LOADING=0 "
+          "-DECS_GAME_SECTION_RESOURCE=0 "
+          "-DECS_GAME_SECTION_STORAGE=0 "
+          "-DECS_GAME_SECTION_UNLOADER=0 "
+          "-DECS_GAME_SECTION_RECYCLER=0 "
+          "-DECS_GAME_SECTION_PROXIMITY=0 "
+          "-DECS_GAME_SECTION_GRAVITY_GUN=0 "
+          "-DECS_GAME_SECTION_DOOR_SYSTEMS=0 "
+          "-DECS_GAME_SECTION_CONVEYOR=0 "
+          "-DECS_GAME_SECTION_INPUT_SYSTEM=0 "
+        : "-std=c99 -Wall -Wextra -O0 -g -fPIC "
+          "-DECS_ENGINE_SECTION_ITERATORS=0 "
+          "-DECS_ENGINE_SECTION_PHYSICS_SYSTEM=0 "
+          "-DECS_ENGINE_SECTION_ANIM=0 "
+          "-DECS_ENGINE_SECTION_EFFECTS=0 "
+          "-DECS_GAME_SECTION_INIT=0 "
+          "-DECS_GAME_SECTION_PREFAB_LOADING=0 "
+          "-DECS_GAME_SECTION_RESOURCE=0 "
+          "-DECS_GAME_SECTION_STORAGE=0 "
+          "-DECS_GAME_SECTION_UNLOADER=0 "
+          "-DECS_GAME_SECTION_RECYCLER=0 "
+          "-DECS_GAME_SECTION_PROXIMITY=0 "
+          "-DECS_GAME_SECTION_GRAVITY_GUN=0 "
+          "-DECS_GAME_SECTION_DOOR_SYSTEMS=0 "
+          "-DECS_GAME_SECTION_CONVEYOR=0 "
+          "-DECS_GAME_SECTION_INPUT_SYSTEM=0 ";
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_core.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_doors.c");
-    nob_da_append(&sources, "src/modules/ecs/ecs_render_components.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_core.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_engine.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_render_components.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_iterators.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics_hooks.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_physics_system.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_anim.c");
+    nob_da_append(&sources, "src/engine/ecs/ecs_effects.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_game.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_game_init.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_resource.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_storage.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_unloader.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_recycler.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_proximity.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_gravity_gun.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_doors.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_door_systems.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_conveyor.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_anim_controller.c");
+    nob_da_append(&sources, "src/game/ecs/ecs_input_system.c");
     nob_da_append(&sources, "tests/unit/ecs/core/ecs_core_stubs.c");
     nob_da_append(&sources, "tests/unit/ecs/core/test_ecs_core.c");
     nob_da_append(&sources, runner_path);

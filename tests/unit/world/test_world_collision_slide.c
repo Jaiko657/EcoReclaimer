@@ -1,7 +1,7 @@
 #include "unity.h"
 
-#include "modules/world/world_collision_internal.h"
-#include "modules/world/world.h"
+#include "engine/world/world_collision_internal.h"
+#include "engine/world/world.h"
 
 #include <stdlib.h>
 

@@ -4,15 +4,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/asset/asset.h"
-#include "modules/core/camera.h"
-#include "modules/core/engine.h"
-#include "modules/ecs/ecs_storage.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/core/logger.h"
-#include "modules/renderer/renderer.h"
-#include "modules/core/toast.h"
-#include "modules/world/world_query.h"
+#include "engine/asset/asset.h"
+#include "engine/core/camera.h"
+#include "engine/core/engine.h"
+#include "game/ecs/ecs_storage.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/core/logger.h"
+#include "engine/renderer/renderer.h"
+#include "engine/core/toast.h"
+#include "engine/world/world_query.h"
 
 int g_asset_reload_calls = 0;
 int g_asset_log_calls = 0;
@@ -29,24 +29,15 @@ int g_world_tiles_w = 0;
 int g_world_tiles_h = 0;
 int g_game_storage_counts[RESOURCE_TYPE_COUNT] = {0};
 int g_game_storage_capacity = 0;
-uint32_t        ecs_mask[ECS_MAX_ENTITIES];
+ComponentMask   ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];
 uint32_t        ecs_next_gen[ECS_MAX_ENTITIES];
 cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
-cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
-cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
-cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
-cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
-cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
-cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
-cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
-cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
-cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 bool g_ecs_alive[ECS_MAX_ENTITIES];
 
 void debug_hotkeys_stub_reset(void)
@@ -73,18 +64,10 @@ void debug_hotkeys_stub_reset(void)
     memset(ecs_next_gen, 0, sizeof(ecs_next_gen));
     memset(cmp_pos, 0, sizeof(cmp_pos));
     memset(cmp_vel, 0, sizeof(cmp_vel));
-    memset(cmp_follow, 0, sizeof(cmp_follow));
     memset(cmp_anim, 0, sizeof(cmp_anim));
     memset(cmp_spr, 0, sizeof(cmp_spr));
     memset(cmp_col, 0, sizeof(cmp_col));
-    memset(cmp_trigger, 0, sizeof(cmp_trigger));
-    memset(cmp_conveyor, 0, sizeof(cmp_conveyor));
-    memset(cmp_conveyor_rider, 0, sizeof(cmp_conveyor_rider));
-    memset(cmp_billboard, 0, sizeof(cmp_billboard));
     memset(cmp_phys_body, 0, sizeof(cmp_phys_body));
-    memset(cmp_liftable, 0, sizeof(cmp_liftable));
-    memset(cmp_grav_gun, 0, sizeof(cmp_grav_gun));
-    memset(cmp_door, 0, sizeof(cmp_door));
     memset(g_ecs_alive, 0, sizeof(g_ecs_alive));
 }
 
@@ -143,10 +126,11 @@ bool engine_reload_world(void)
     return g_engine_reload_world_result;
 }
 
-void world_size_tiles(int* out_w, int* out_h)
+bool world_size_tiles(int* out_w, int* out_h)
 {
     if (out_w) *out_w = g_world_tiles_w;
     if (out_h) *out_h = g_world_tiles_h;
+    return true;
 }
 
 camera_view_t camera_get_view(void)

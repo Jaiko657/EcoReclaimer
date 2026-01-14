@@ -1,4 +1,5 @@
-#include "modules/world/world_door.h"
+#include "engine/world/world_door.h"
+#include "engine/world/world_door_handle.h"
 
 world_door_handle_t world_door_register(const door_tile_xy_t* tile_xy, size_t tile_count)
 {

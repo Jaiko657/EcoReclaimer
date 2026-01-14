@@ -1,7 +1,8 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs_internal.h"
-#include "modules/core/input.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/input/input.h"
+#include "shared/buttons.h"
 #include "ecs_liftable_stubs.h"
 
 #include <string.h>

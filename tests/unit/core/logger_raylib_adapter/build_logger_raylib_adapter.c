@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/modules/core/logger_raylib_adapter.c");
+    nob_da_append(&sources, "src/engine/core/logger_raylib_adapter.c");
     nob_da_append(&sources, "tests/unit/core/logger_raylib_adapter/logger_adapter_stubs.c");
     nob_da_append(&sources, "tests/unit/core/logger_raylib_adapter/raylib_stubs.c");
     nob_da_append(&sources, "tests/unit/core/logger_raylib_adapter/test_logger_raylib_adapter.c");

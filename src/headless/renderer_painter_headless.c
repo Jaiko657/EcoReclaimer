@@ -1,4 +1,4 @@
-#include "modules/renderer/renderer_internal.h"
+#include "engine/renderer/renderer_internal.h"
 
 void renderer_painter_prepare(renderer_ctx_t* ctx, int max_items)
 {

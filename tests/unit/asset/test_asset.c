@@ -1,7 +1,7 @@
 #include "unity.h"
 
-#include "modules/asset/asset.h"
-#include "modules/core/logger.h"
+#include "engine/asset/asset.h"
+#include "engine/core/logger.h"
 #include "asset_backend_stub.h"
 #include "test_log_sink.h"
 
@@ -25,7 +25,7 @@ void test_asset_acquire_caches_textures(void)
     TEST_ASSERT_TRUE(asset_texture_valid(first));
     TEST_ASSERT_EQUAL_STRING("foo", asset_texture_path(first));
     int width = -1, height = -1;
-    asset_texture_size(first, &width, &height);
+    TEST_ASSERT_TRUE(asset_texture_size(first, &width, &height));
     TEST_ASSERT_EQUAL_INT(3, width);
     TEST_ASSERT_EQUAL_INT(3, height);
 
@@ -84,7 +84,7 @@ void test_asset_release_ignores_double_free(void)
 void test_asset_texture_size_invalid_handle_returns_zero(void)
 {
     int w = -1, h = -1;
-    asset_texture_size((tex_handle_t){0}, &w, &h);
+    TEST_ASSERT_FALSE(asset_texture_size((tex_handle_t){0}, &w, &h));
     TEST_ASSERT_EQUAL_INT(0, w);
     TEST_ASSERT_EQUAL_INT(0, h);
 }

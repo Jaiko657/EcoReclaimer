@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "modules/core/engine.h"
+#include "engine/core/engine.h"
 #include "engine_stubs.h"
 
 void setUp(void)
@@ -35,7 +35,8 @@ void test_engine_init_success_calls_subsystems(void)
     TEST_ASSERT_EQUAL_INT(1, g_input_init_calls);
     TEST_ASSERT_EQUAL_INT(1, g_asset_init_calls);
     TEST_ASSERT_EQUAL_INT(1, g_ecs_init_calls);
-    TEST_ASSERT_EQUAL_INT(1, g_ecs_register_game_systems_calls);
+    TEST_ASSERT_EQUAL_INT(1, g_ecs_engine_init_calls);
+    TEST_ASSERT_EQUAL_INT(1, g_ecs_game_init_calls);
     TEST_ASSERT_EQUAL_INT(1, g_systems_registration_init_calls);
     TEST_ASSERT_EQUAL_INT(1, g_world_load_from_tmx_calls);
     TEST_ASSERT_EQUAL_INT(1, g_camera_init_calls);
@@ -63,6 +64,8 @@ void test_engine_init_failure_cleans_up(void)
 
     TEST_ASSERT_FALSE(engine_init("Fail"));
 
+    TEST_ASSERT_EQUAL_INT(1, g_ecs_game_shutdown_calls);
+    TEST_ASSERT_EQUAL_INT(1, g_ecs_engine_shutdown_calls);
     TEST_ASSERT_EQUAL_INT(1, g_ecs_shutdown_calls);
     TEST_ASSERT_EQUAL_INT(1, g_asset_shutdown_calls);
     TEST_ASSERT_EQUAL_INT(1, g_renderer_shutdown_calls);

@@ -1,46 +1,37 @@
 #include "ecs_game_stubs.h"
+#include "engine/world/world_door_handle.h"
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/ecs/ecs_internal.h"
-#include "modules/ecs/ecs_proximity.h"
-#include "modules/systems/systems.h"
-#include "modules/core/logger.h"
-#include "modules/tiled/tiled.h"
-#include "modules/world/world.h"
-#include "modules/world/world_door.h"
-#include "modules/ecs/ecs_prefab_loading.h"
-#include "modules/world/world_renderer.h"
+#include "game/ecs/ecs_game.h"
+#include "game/ecs/ecs_proximity.h"
+#include "engine/systems/systems.h"
+#include "engine/core/logger.h"
+#include "engine/tiled/tiled.h"
+#include "engine/world/world.h"
+#include "engine/world/world_door.h"
+#include "engine/prefab/pf_spawning.h"
+#include "engine/world/world_renderer.h"
 
 void sys_storage_deposit_adapt(float dt, const input_t* in);
 void sys_doors_tick_adapt(float dt, const input_t* in);
 
-uint32_t        ecs_mask[ECS_MAX_ENTITIES];
+ComponentMask   ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];
 uint32_t        ecs_next_gen[ECS_MAX_ENTITIES];
 cmp_position_t  cmp_pos[ECS_MAX_ENTITIES];
 cmp_velocity_t  cmp_vel[ECS_MAX_ENTITIES];
-cmp_follow_t    cmp_follow[ECS_MAX_ENTITIES];
 cmp_anim_t      cmp_anim[ECS_MAX_ENTITIES];
-cmp_player_t    cmp_player[ECS_MAX_ENTITIES];
 cmp_sprite_t    cmp_spr[ECS_MAX_ENTITIES];
 cmp_collider_t  cmp_col[ECS_MAX_ENTITIES];
-cmp_trigger_t   cmp_trigger[ECS_MAX_ENTITIES];
-cmp_conveyor_t  cmp_conveyor[ECS_MAX_ENTITIES];
-cmp_conveyor_rider_t cmp_conveyor_rider[ECS_MAX_ENTITIES];
-cmp_billboard_t cmp_billboard[ECS_MAX_ENTITIES];
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
-cmp_liftable_t  cmp_liftable[ECS_MAX_ENTITIES];
-cmp_grav_gun_t  cmp_grav_gun[ECS_MAX_ENTITIES];
-cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
-cmp_door_t      cmp_door[ECS_MAX_ENTITIES];
 
 static ecs_entity_t g_player = {0, 0};
 const world_map_t* g_world_tiled_map = NULL;
-int g_prefab_spawn_calls = 0;
-char g_prefab_spawn_last_path[256];
+int g_pf_spawn_calls = 0;
+char g_pf_spawn_last_path[256];
 int g_ecs_register_system_calls = 0;
 int g_world_door_apply_calls = 0;
 int g_world_door_anim_calls = 0;
@@ -62,15 +53,11 @@ void ecs_game_stub_reset(void)
     memset(ecs_mask, 0, sizeof(ecs_mask));
     memset(ecs_gen, 0, sizeof(ecs_gen));
     memset(cmp_pos, 0, sizeof(cmp_pos));
-    memset(cmp_player, 0, sizeof(cmp_player));
     memset(cmp_col, 0, sizeof(cmp_col));
-    memset(cmp_conveyor, 0, sizeof(cmp_conveyor));
-    memset(cmp_conveyor_rider, 0, sizeof(cmp_conveyor_rider));
-    memset(cmp_billboard, 0, sizeof(cmp_billboard));
     g_player = (ecs_entity_t){0, 0};
     g_world_tiled_map = NULL;
-    g_prefab_spawn_calls = 0;
-    g_prefab_spawn_last_path[0] = '\0';
+    g_pf_spawn_calls = 0;
+    g_pf_spawn_last_path[0] = '\0';
     g_ecs_register_system_calls = 0;
     g_world_door_apply_calls = 0;
     g_world_door_anim_calls = 0;
@@ -207,11 +194,11 @@ bool world_has_map(void)
     return g_world_tiled_map != NULL;
 }
 
-size_t ecs_prefab_spawn_from_map(const world_map_t* map, const char* tmx_path)
+size_t pf_spawn_from_map(const world_map_t* map, const char* tmx_path)
 {
-    g_prefab_spawn_calls++;
+    g_pf_spawn_calls++;
     if (tmx_path) {
-        snprintf(g_prefab_spawn_last_path, sizeof(g_prefab_spawn_last_path), "%s", tmx_path);
+        snprintf(g_pf_spawn_last_path, sizeof(g_pf_spawn_last_path), "%s", tmx_path);
     }
     return 0;
 }

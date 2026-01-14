@@ -1,14 +1,15 @@
 #include "ecs_core_stubs.h"
+#include "engine/world/world_door_handle.h"
 
 #include <string.h>
 
-#include "modules/asset/asset.h"
-#include "modules/core/camera.h"
-#include "modules/core/toast.h"
-#include "modules/systems/systems.h"
-#include "modules/systems/systems_registration.h"
-#include "modules/core/logger.h"
-#include "modules/world/world.h"
+#include "engine/asset/asset.h"
+#include "engine/core/camera.h"
+#include "engine/core/toast.h"
+#include "engine/systems/systems.h"
+#include "engine/systems/systems_registration.h"
+#include "engine/core/logger.h"
+#include "engine/world/world.h"
 
 int g_asset_acquire_calls = 0;
 int g_asset_release_calls = 0;
@@ -156,7 +157,6 @@ void systems_registration_init(void)
     systems_register(PHASE_INPUT,    0,   NULL, "input");
     systems_register(PHASE_INPUT,    50,  NULL, "grav_gun_input");
 
-    systems_register(PHASE_PHYSICS,  50,  NULL, "follow_ai");
     systems_register(PHASE_PHYSICS,  90,  NULL, "grav_gun_motion");
     systems_register(PHASE_SIM_PRE,  200, NULL, "animation_controller");
 

@@ -1,9 +1,9 @@
 #include "unity.h"
 
-#include "modules/ecs/ecs.h"
-#include "modules/ecs/ecs_internal.h"
-#include "modules/asset/bump_alloc.h"
-#include "modules/core/input.h"
+#include "engine/ecs/ecs.h"
+#include "game/ecs/ecs_game.h"
+#include "shared/utils/bump_alloc.h"
+#include "engine/input/input.h"
 
 #include <string.h>
 

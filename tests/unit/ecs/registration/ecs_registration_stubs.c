@@ -1,7 +1,11 @@
 #include "ecs_registration_stubs.h"
 
 #include <string.h>
-#include "modules/core/logger.h"
+#include "game/ecs/ecs_game.h"
+#include "engine/core/logger.h"
+
+ecs_component_hook_fn phys_body_create_hook = NULL;
+cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];
 systems_registration_call_t g_systems_registration_calls[32];
 int g_systems_registration_call_count = 0;
 int g_systems_init_seq = 0;
@@ -71,23 +75,12 @@ void sys_input(float dt, const input_t* in)
     (void)in;
 }
 
-void sys_follow(float dt)
-{
-    (void)dt;
-}
-
 void sys_physics_integrate_impl(float dt)
 {
     (void)dt;
 }
 
 void sys_input_adapt(float dt, const input_t* in)
-{
-    (void)dt;
-    (void)in;
-}
-
-void sys_follow_adapt(float dt, const input_t* in)
 {
     (void)dt;
     (void)in;
@@ -262,6 +255,12 @@ void sys_asset_collect_adapt(float dt, const input_t* in)
 }
 
 void sys_storage_deposit_adapt(float dt, const input_t* in)
+{
+    (void)dt;
+    (void)in;
+}
+
+void sys_unloader_tick_adapt(float dt, const input_t* in)
 {
     (void)dt;
     (void)in;

@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "modules/core/logger.h"
+#include "engine/core/logger.h"
 
 #define TEST_LOG_SINK_MAX_RECORDS 128
 #define TEST_LOG_SINK_ANY_LEVEL ((log_level_t)-1)

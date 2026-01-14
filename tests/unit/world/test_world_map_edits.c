@@ -1,8 +1,8 @@
 #include "unity.h"
 
-#include "modules/world/world.h"
-#include "modules/world/world_renderer.h"
-#include "modules/world/world_query.h"
+#include "engine/world/world.h"
+#include "engine/world/world_renderer.h"
+#include "engine/world/world_query.h"
 #include "test_log_sink.h"
 
 #include <errno.h>
