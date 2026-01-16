@@ -3,8 +3,7 @@
 #include "engine/core/debug_hotkeys.h"
 #include "engine/core/time.h"
 #include "engine/systems/systems_registration.h"
-#include "engine/world/world.h"
-#include "engine/world/world_renderer.h"
+#include "engine/world/world_map.h"
 
 static void renderer_world_base_adapt_impl(void)
 {

@@ -1,8 +1,7 @@
 //==== FROM ecs_doors.c ====
 #include "game/ecs/ecs_game.h"
 #include "game/ecs/ecs_doors.h"
-#include "engine/world/world.h"
-#include "engine/world/world_renderer.h"
+#include "engine/world/world_map.h"
 
 #include <stdlib.h>
 

@@ -15,7 +15,7 @@
 #include "engine/ecs/ecs_core.h"
 #include "engine/ecs/ecs_engine.h"
 #include "engine/core/debug_str/debug_str_registry.h"
-#include "engine/world/world.h"
+#include "engine/world/world_query.h"
 #include "engine/systems/systems_registration.h"
 #include "raylib.h"
 #include <inttypes.h>

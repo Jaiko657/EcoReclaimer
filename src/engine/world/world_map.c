@@ -1,4 +1,4 @@
-#include "engine/world/world.h"
+#include "engine/world/world_map.h"
 #include "engine/systems/systems_registration.h"
 #include "engine/world/world_collision_internal.h"
 #include "engine/core/logger.h"

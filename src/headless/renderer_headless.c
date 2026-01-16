@@ -1,6 +1,6 @@
 #include "engine/renderer/renderer.h"
 #include "engine/core/logger.h"
-#include "engine/world/world_renderer.h"
+#include "engine/world/world_map.h"
 
 bool renderer_init(int width, int height, const char* title, int target_fps)
 {

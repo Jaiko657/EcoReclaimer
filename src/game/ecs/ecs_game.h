@@ -22,12 +22,6 @@ typedef struct {
 
 typedef struct {
     int active_count;
-    PhysicsType saved_type;
-    float saved_mass;
-    float saved_inv_mass;
-    unsigned int saved_category_bits;
-    unsigned int saved_mask_bits;
-    bool saved_valid;
     float vel_x;
     float vel_y;
     bool block_player_input;
@@ -107,12 +101,10 @@ extern cmp_door_t cmp_door[ECS_MAX_ENTITIES];
 extern cmp_unloader_t cmp_unloader[ECS_MAX_ENTITIES];
 extern cmp_unpacker_t cmp_unpacker[ECS_MAX_ENTITIES];
 
-void ecs_game_init(void);
+void game_init(void);
 void ecs_game_shutdown(void);
 
 ecs_entity_t ecs_find_player(void);
 bool ecs_get_player_position(float* out_x, float* out_y);
-
-bool init_entities(const char* tmx_path);
 
 void ecs_game_render_ui(const render_view_t* view);

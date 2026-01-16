@@ -2,8 +2,8 @@
 #include "engine/renderer/renderer_internal.h"
 #include "engine/core/logger.h"
 #include "engine/core/camera.h"
-#include "engine/world/world.h"
-#include "engine/world/world_renderer.h"
+#include "engine/world/world_map.h"
+#include "engine/world/world_query.h"
 
 static renderer_ctx_t g_renderer = {0};
 

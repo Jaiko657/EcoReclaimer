@@ -3,6 +3,7 @@
 #include "game/ecs/ecs_resource.h"
 #include "engine/core/logger.h"
 #include "game/prefab/pf_register_game.h"
+#include "shared/utils/build_config.h"
 #include <math.h>
 #include <string.h>
 
@@ -48,13 +49,16 @@ bool ecs_get_player_position(float* out_x, float* out_y)
     return true;
 }
 
-void ecs_game_init(void)
+void game_init(void)
 {
     pf_register_game_components();
     ecs_register_grav_gun_component_hooks();
     ecs_register_liftable_component_hooks();
     ecs_register_resource_component_hooks();
     ecs_register_component_destroy_hook(ENUM_DOOR, ecs_door_on_destroy);
+#if DEBUG_BUILD
+    debug_str_game_register_all();
+#endif
 }
 
 void ecs_game_shutdown(void)
@@ -157,11 +161,6 @@ void cmp_add_unloader(ecs_entity_t e, ecs_entity_t unpacker_handle)
     };
     ecs_mask[i] |= CMP_UNLOADER;
 }
-
-
-
-
-
 
 
 

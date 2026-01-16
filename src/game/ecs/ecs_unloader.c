@@ -1,6 +1,6 @@
 //==== FROM ecs_unloader.c ====
 #include "game/ecs/ecs_game.h"
-#include "engine/prefab/pf_spawning.h"
+#include "engine/prefab/pf_loading.h"
 #include "game/ecs/ecs_proximity.h"
 #include "game/ecs/ecs_storage.h"
 #include "engine/systems/systems.h"

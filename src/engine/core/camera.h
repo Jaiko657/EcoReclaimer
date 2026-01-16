@@ -21,6 +21,7 @@ typedef struct {
 
 void camera_init(void);
 void camera_shutdown(void);
+void camera_set_target(ecs_entity_t target);
 camera_config_t camera_get_config(void);
 void camera_set_config(const camera_config_t* cfg);
 void camera_tick(float dt);

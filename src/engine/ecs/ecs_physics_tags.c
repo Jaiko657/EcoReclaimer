@@ -1,8 +1,9 @@
-#include "engine/ecs/ecs_physics_tags.h"
+#include "engine/ecs/ecs_physics.h"
 
 #include "engine/core/logger.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -14,6 +15,17 @@ typedef struct {
 
 static phys_tag_entry_t g_tags[32];
 static int g_tag_count = 0;
+
+static char* phys_tag_strdup(const char* s)
+{
+    if (!s) return NULL;
+    size_t len = strlen(s);
+    char* out = (char*)malloc(len + 1);
+    if (!out) return NULL;
+    memcpy(out, s, len);
+    out[len] = '\0';
+    return out;
+}
 
 void phys_tag_reset_registry(void)
 {
@@ -66,7 +78,7 @@ unsigned int phys_tag_bit(const char* name)
     }
 
     const unsigned int bit = 1u << g_tag_count;
-    g_tags[g_tag_count].name = strdup(name);
+    g_tags[g_tag_count].name = phys_tag_strdup(name);
     if (!g_tags[g_tag_count].name) {
         return 0u;
     }
@@ -86,22 +98,41 @@ unsigned int phys_parse_tag_list(const char* s)
             ++p;
         }
         const char* start = p;
-        while (*p && *p != '|' && *p != ',' ) {
+        while (*p && *p != '|' && *p != ',') {
             ++p;
         }
         if (p == start) continue;
         char* token = trim_copy(start, (size_t)(p - start));
         if (!token) continue;
-        if (token[0] != '\0') {
-            if (strcasecmp(token, "all") == 0) {
-                free(token);
-                return 0xFFFFFFFFu;
+
+        char* name = token;
+        bool negate = false;
+        if (name[0] == '!' || name[0] == '~') {
+            negate = true;
+            name++;
+            while (*name && isspace((unsigned char)*name)) {
+                name++;
             }
-            if (strcasecmp(token, "none") == 0) {
+        }
+
+        if (name[0] != '\0') {
+            if (strcasecmp(name, "all") == 0) {
+                bits = negate ? 0u : 0xFFFFFFFFu;
                 free(token);
                 continue;
             }
-            bits |= phys_tag_bit(token);
+            if (strcasecmp(name, "none") == 0) {
+                if (!negate) bits = 0u;
+                free(token);
+                continue;
+            }
+            unsigned int bit = phys_tag_bit(name);
+            if (negate) {
+                if (bits == 0u) bits = 0xFFFFFFFFu;
+                bits &= ~bit;
+            } else {
+                bits |= bit;
+            }
         }
         free(token);
     }

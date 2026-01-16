@@ -2,6 +2,10 @@
 <prefab name="conveyor_belt">
   <component type="POS" override="true"/>
   <component type="COL" override="true" hx="8" hy="8"/>
+  <component type="PHYS_BODY">
+    <property name="type" value="static"/>
+    <property name="mask" value="all|~resource"/>
+  </component>
   <component type="CONVEYOR" dir="west" speed="50" block_player_input="true"/>
-  <component type="TRIGGER" pad="1" target_mask="PLAYER|RESOURCE" match="or"/>
+  <component type="TRIGGER" pad="1" target_mask="RESOURCE" match="or"/>
 </prefab>

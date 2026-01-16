@@ -33,6 +33,7 @@ void world_shutdown(void);
 bool world_has_map(void);
 bool world_get_map_info(world_map_info_t* out);
 uint32_t world_map_generation(void);
+const world_map_t* world_get_map(void);
 
 // Runtime tile edits (queued; applied later via `world_apply_tile_edits()`).
 bool world_set_tile_gid(int layer_idx, int tx, int ty, uint32_t raw_gid);

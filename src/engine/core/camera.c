@@ -12,6 +12,8 @@ typedef struct {
 } camera_state_t;
 
 static camera_state_t g_camera;
+static ecs_entity_t g_camera_pending_target = {0};
+static bool g_camera_has_pending_target = false;
 
 static float clampf(float v, float lo, float hi) {
     if (v < lo) return lo;
@@ -44,10 +46,23 @@ static void camera_reset_state(void) {
 
 void camera_init(void) {
     camera_reset_state();
+    if (g_camera_has_pending_target) {
+        g_camera.config.target = g_camera_pending_target;
+        g_camera_has_pending_target = false;
+    }
 }
 
 void camera_shutdown(void) {
     camera_reset_state();
+}
+
+void camera_set_target(ecs_entity_t target) {
+    if (g_camera.initialized) {
+        g_camera.config.target = target;
+    } else {
+        g_camera_pending_target = target;
+        g_camera_has_pending_target = true;
+    }
 }
 
 camera_config_t camera_get_config(void) {

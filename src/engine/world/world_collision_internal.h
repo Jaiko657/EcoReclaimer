@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
+#include "engine/world/world_map.h"
 #include "engine/tiled/tiled.h"
 
 // Derived collision grid helpers used by the world map owner when tiles change.

@@ -23,8 +23,9 @@ static bool debug_str_phys_body(ecs_entity_t e, char* out, size_t cap)
     if (idx < 0 || !out || cap == 0) return false;
     const cmp_phys_body_t* b = &cmp_phys_body[idx];
     return snprintf(out, cap,
-                    "PHYS_BODY(type=%s, mass=%.3f, cat=0x%X, mask=0x%X, def_cat=0x%X, def_mask=0x%X, created=%d)",
+                    "PHYS_BODY(type=%s, mass=%.3f, cat=0x%X, mask=0x%X, def_type=%s, def_cat=0x%X, def_mask=0x%X, created=%d)",
                     phys_type_short(b->type), b->mass, b->category_bits, b->mask_bits,
+                    phys_type_short(b->default_type),
                     b->default_category_bits, b->default_mask_bits,
                     b->created ? 1 : 0) > 0;
 }

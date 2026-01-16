@@ -1,6 +1,6 @@
 #include "engine/prefab/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
-#include "engine/ecs/ecs_physics_tags.h"
+#include "engine/ecs/ecs_physics.h"
 
 #include <strings.h>
 #include <stdlib.h>

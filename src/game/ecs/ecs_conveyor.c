@@ -23,49 +23,87 @@ static void facing_to_vector(facing_t dir, float* out_x, float* out_y)
     if (out_y) *out_y = k_dy[idx];
 }
 
-static void conveyor_save_phys_state(int idx, cmp_conveyor_rider_t* rider)
+static bool conveyor_rider_is_held(int idx)
 {
-    if (!rider || (ecs_mask[idx] & CMP_PHYS_BODY) == 0) return;
-    rider->saved_type = cmp_phys_body[idx].type;
-    rider->saved_mass = cmp_phys_body[idx].mass;
-    rider->saved_inv_mass = cmp_phys_body[idx].inv_mass;
-    rider->saved_category_bits = cmp_phys_body[idx].category_bits;
-    rider->saved_mask_bits = cmp_phys_body[idx].mask_bits;
-    rider->saved_valid = true;
-    cmp_phys_body[idx].type = PHYS_KINEMATIC;
+    return (ecs_mask[idx] & CMP_LIFTABLE) && (cmp_liftable[idx].state == GRAV_GUN_STATE_HELD);
 }
 
-static void conveyor_restore_phys_state(int idx, cmp_conveyor_rider_t* rider)
+static void conveyor_enter_rider(int idx, cmp_conveyor_rider_t* rider)
 {
-    if (!rider || !rider->saved_valid) return;
-    if ((ecs_mask[idx] & CMP_PHYS_BODY) == 0) return;
-    cmp_phys_body[idx].type = rider->saved_type;
-    cmp_phys_body[idx].mass = rider->saved_mass;
-    cmp_phys_body[idx].inv_mass = rider->saved_inv_mass;
-    cmp_phys_body[idx].category_bits = rider->saved_category_bits;
-    cmp_phys_body[idx].mask_bits = rider->saved_mask_bits;
+    if (!rider || (ecs_mask[idx] & CMP_PHYS_BODY) == 0) return;
+    if (rider->active_count == 0) {
+        cmp_phys_body[idx].type = PHYS_KINEMATIC;
+    }
+    rider->active_count += 1;
+}
+
+static void conveyor_exit_rider(int idx, cmp_conveyor_rider_t* rider)
+{
+    if (!rider || (ecs_mask[idx] & CMP_PHYS_BODY) == 0) return;
+    if (rider->active_count > 0) {
+        rider->active_count -= 1;
+    }
+    if (rider->active_count == 0) {
+        cmp_phys_body[idx].type = cmp_phys_body[idx].default_type;
+        cmp_phys_body[idx].category_bits = cmp_phys_body[idx].default_category_bits;
+        cmp_phys_body[idx].mask_bits = cmp_phys_body[idx].default_mask_bits;
+        *rider = (cmp_conveyor_rider_t){0};
+        ecs_mask[idx] &= ~CMP_CONVEYOR_RIDER;
+    }
+}
+
+static void conveyor_force_exit(int idx, cmp_conveyor_rider_t* rider)
+{
+    if (!rider || (ecs_mask[idx] & CMP_PHYS_BODY) == 0) return;
+    rider->active_count = 0;
+    cmp_phys_body[idx].type = cmp_phys_body[idx].default_type;
+    cmp_phys_body[idx].category_bits = cmp_phys_body[idx].default_category_bits;
+    cmp_phys_body[idx].mask_bits = cmp_phys_body[idx].default_mask_bits;
+    *rider = (cmp_conveyor_rider_t){0};
+    ecs_mask[idx] &= ~CMP_CONVEYOR_RIDER;
 }
 
 static void sys_conveyor_update_impl(void)
 {
-    int belt_counts[ECS_MAX_ENTITIES] = {0};
     float belt_vel_x[ECS_MAX_ENTITIES] = {0};
     float belt_vel_y[ECS_MAX_ENTITIES] = {0};
     bool belt_block_input[ECS_MAX_ENTITIES] = {0};
 
-    ecs_prox_iter_t it = ecs_prox_stay_begin();
+    ecs_prox_iter_t enter_it = ecs_prox_enter_begin();
     ecs_prox_view_t v;
+    while (ecs_prox_enter_next(&enter_it, &v)) {
+        int belt_idx = ent_index_checked(v.trigger_owner);
+        int rider_idx = ent_index_checked(v.matched_entity);
+        if (belt_idx < 0 || rider_idx < 0) continue;
+        if ((ecs_mask[belt_idx] & CMP_CONVEYOR) == 0) continue;
+        if ((ecs_mask[rider_idx] & CMP_PHYS_BODY) == 0) continue;
+        if (conveyor_rider_is_held(rider_idx)) continue;
+
+        if ((ecs_mask[rider_idx] & CMP_CONVEYOR_RIDER) == 0) {
+            cmp_conveyor_rider[rider_idx] = (cmp_conveyor_rider_t){0};
+            ecs_mask[rider_idx] |= CMP_CONVEYOR_RIDER;
+        }
+        conveyor_enter_rider(rider_idx, &cmp_conveyor_rider[rider_idx]);
+    }
+
+    ecs_prox_iter_t exit_it = ecs_prox_exit_begin();
+    while (ecs_prox_exit_next(&exit_it, &v)) {
+        int belt_idx = ent_index_checked(v.trigger_owner);
+        int rider_idx = ent_index_checked(v.matched_entity);
+        if (belt_idx < 0 || rider_idx < 0) continue;
+        if ((ecs_mask[belt_idx] & CMP_CONVEYOR) == 0) continue;
+        if ((ecs_mask[rider_idx] & CMP_CONVEYOR_RIDER) == 0) continue;
+        conveyor_exit_rider(rider_idx, &cmp_conveyor_rider[rider_idx]);
+    }
+
+    ecs_prox_iter_t it = ecs_prox_stay_begin();
     while (ecs_prox_stay_next(&it, &v)) {
         int belt_idx = ent_index_checked(v.trigger_owner);
         int rider_idx = ent_index_checked(v.matched_entity);
         if (belt_idx < 0 || rider_idx < 0) continue;
         if ((ecs_mask[belt_idx] & CMP_CONVEYOR) == 0) continue;
         if ((ecs_mask[rider_idx] & CMP_PHYS_BODY) == 0) continue;
-        if ((ecs_mask[rider_idx] & CMP_LIFTABLE) && cmp_liftable[rider_idx].state == GRAV_GUN_STATE_HELD) {
-            continue;
-        }
-
-        belt_counts[rider_idx] += 1;
+        if (conveyor_rider_is_held(rider_idx)) continue;
 
         const cmp_conveyor_t* belt = &cmp_conveyor[belt_idx];
         float dir_x = 0.0f;
@@ -87,32 +125,17 @@ static void sys_conveyor_update_impl(void)
 
     for (int i = 0; i < ECS_MAX_ENTITIES; ++i) {
         if (!ecs_alive_idx(i)) continue;
+        if ((ecs_mask[i] & CMP_CONVEYOR_RIDER) == 0) continue;
 
-        const int next_count = belt_counts[i];
         cmp_conveyor_rider_t* rider = &cmp_conveyor_rider[i];
-
-        if (next_count > 0) {
-            if ((ecs_mask[i] & CMP_CONVEYOR_RIDER) == 0) {
-                *rider = (cmp_conveyor_rider_t){0};
-                ecs_mask[i] |= CMP_CONVEYOR_RIDER;
-            }
-            if (rider->active_count == 0) {
-                conveyor_save_phys_state(i, rider);
-            }
-            rider->active_count = next_count;
-            rider->vel_x = belt_vel_x[i];
-            rider->vel_y = belt_vel_y[i];
-            rider->block_player_input = belt_block_input[i];
+        if (conveyor_rider_is_held(i)) {
+            conveyor_force_exit(i, rider);
             continue;
         }
 
-        if (rider->active_count > 0) {
-            conveyor_restore_phys_state(i, rider);
-        }
-        if (ecs_mask[i] & CMP_CONVEYOR_RIDER) {
-            *rider = (cmp_conveyor_rider_t){0};
-            ecs_mask[i] &= ~CMP_CONVEYOR_RIDER;
-        }
+        rider->vel_x = belt_vel_x[i];
+        rider->vel_y = belt_vel_y[i];
+        rider->block_player_input = belt_block_input[i];
     }
 }
 

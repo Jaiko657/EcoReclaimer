@@ -10,7 +10,7 @@
 #include "engine/core/effects.h"
 #include "engine/asset/asset.h"
 #include "engine/renderer/renderer.h"
-#include "engine/ecs/ecs_physics_tags.h"
+#include "engine/ecs/ecs_physics.h"
 #include <float.h>
 #include <math.h>
 

@@ -18,11 +18,6 @@ void draw_screen_space_ui(const render_view_t* view)
         DrawText(t, x, y, fs, RAYWHITE);
     }
 
-    const engine_game_hooks_t* hooks = engine_get_game_hooks();
-    if (hooks && hooks->render_game_ui) {
-        hooks->render_game_ui(view);
-    }
-
     // ===== floating billboards (from proximity) =====
     {
         const int fs = 15; // slightly larger text
@@ -59,5 +54,9 @@ void draw_screen_space_ui(const render_view_t* view)
             DrawRectangle((int)bb.x, (int)bb.y, (int)bb.width, (int)bb.height, bg);
             DrawText(v.text, x, y, fs, fg);
         }
+    }
+    const engine_game_hooks_t* hooks = engine_get_game_hooks();
+    if (hooks && hooks->render_game_ui) {
+        hooks->render_game_ui(view);
     }
 }

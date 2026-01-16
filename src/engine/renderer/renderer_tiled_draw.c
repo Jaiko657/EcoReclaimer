@@ -1,6 +1,7 @@
 #include "engine/renderer/renderer_internal.h"
 #include "engine/asset/asset_renderer_internal.h"
-#include "engine/world/world.h"
+#include "engine/world/world_map.h"
+#include "engine/world/world_query.h"
 
 #include <limits.h>
 #include <math.h>

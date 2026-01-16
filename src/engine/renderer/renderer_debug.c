@@ -1,7 +1,7 @@
 #include "shared/utils/build_config.h"
 #include "engine/renderer/renderer.h"
 #include "engine/renderer/renderer_internal.h"
-#include "engine/world/world.h"
+#include "engine/world/world_query.h"
 
 #include <math.h>
 #include <stdio.h>

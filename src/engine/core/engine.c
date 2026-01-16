@@ -9,12 +9,14 @@
 #include "engine/core/toast.h"
 #include "engine/renderer/renderer.h"
 #include "engine/core/camera.h"
-#include "engine/world/world.h"
+#include "engine/world/world_map.h"
+#include "engine/world/world_query.h"
 #include "engine/systems/systems.h"
 #include "engine/systems/systems_registration.h"
 #include "engine/core/platform.h"
 #include "engine/core/time.h"
 #include "engine/prefab/pf_registry.h"
+#include "engine/prefab/pf_loading.h"
 #include "shared/utils/build_config.h"
 
 #include <string.h>
@@ -38,6 +40,17 @@ static void remember_tmx_path(const char* path)
     if (!path) return;
     strncpy(g_current_tmx_path, path, sizeof(g_current_tmx_path));
     g_current_tmx_path[sizeof(g_current_tmx_path) - 1] = '\0';
+}
+
+static bool engine_init_entities(const char* tmx_path)
+{
+    const world_map_t* map = world_get_map();
+    if (!map) {
+        LOGC(LOGCAT_ECS, LOG_LVL_ERROR, "init_entities: no tiled map loaded");
+        return false;
+    }
+    pf_spawn_from_map(map, tmx_path);
+    return true;
 }
 
 static void sync_camera_to_world(bool snap_to_center)
@@ -103,17 +116,12 @@ static bool engine_init_subsystems(const char *title)
     asset_init();
     ecs_init();
     ecs_engine_init();
-#if DEBUG_BUILD
-    if (g_game_hooks.debug_str_register_game) {
-        g_game_hooks.debug_str_register_game();
-    }
-#endif
     pf_register_engine_components();
-    if (!g_game_hooks.ecs_game_init || !g_game_hooks.init_entities) {
+    if (!g_game_hooks.game_init) {
         LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "engine: game hooks not registered");
         return false;
     }
-    g_game_hooks.ecs_game_init();
+    g_game_hooks.game_init();
     systems_registration_init();
     if (!world_load_from_tmx(g_current_tmx_path, "walls")) {
         LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "Failed to load world collision");
@@ -133,7 +141,7 @@ static bool engine_init_subsystems(const char *title)
     remember_tmx_path(g_current_tmx_path);
 
     // game entities/assets
-    if (!g_game_hooks.init_entities(g_current_tmx_path)) {
+    if (!engine_init_entities(g_current_tmx_path)) {
         LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "init_entities failed");
         return false;
     }

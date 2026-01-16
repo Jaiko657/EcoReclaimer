@@ -9,6 +9,7 @@
     <property name="mass" value="3.0"/>
     <property name="restitution" value="0.2"/>
     <property name="friction" value="1.5"/>
+    <property name="category" value="resource"/>
   </component>
   <component type="LIFTABLE" pickup_distance="36" pickup_radius="0" max_hold_distance="24" breakoff_distance="40" follow_gain="14" max_speed="360" damping="12"/>
 </prefab>

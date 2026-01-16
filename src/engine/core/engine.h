@@ -5,11 +5,9 @@
 typedef struct render_view_t render_view_t;
 
 typedef struct {
-    void (*ecs_game_init)(void);
+    void (*game_init)(void);
     void (*ecs_game_shutdown)(void);
-    bool (*init_entities)(const char* tmx_path);
     ecs_entity_t (*ecs_find_player)(void);
-    void (*debug_str_register_game)(void);
     void (*render_game_ui)(const render_view_t* view);
 } engine_game_hooks_t;
 

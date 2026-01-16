@@ -5,7 +5,8 @@
 //==== FROM ecs_physics_system.c ====
 #include "engine/ecs/ecs_engine.h"
 #include "engine/ecs/ecs_physics.h"
-#include "engine/world/world.h"
+#include "engine/world/world_map.h"
+#include "engine/world/world_query.h"
 #include "engine/systems/systems_registration.h"
 #include <math.h>
 

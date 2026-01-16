@@ -5,8 +5,7 @@
 #include "shared/buttons.h"
 #include "engine/systems/systems.h"
 #include "engine/systems/systems_registration.h"
-#include "engine/world/world.h"
-#include "engine/world/world_renderer.h"
+#include "engine/world/world_map.h"
 
 static void sys_doors_tick(float dt);
 

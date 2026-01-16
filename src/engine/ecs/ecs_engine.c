@@ -105,6 +105,7 @@ void cmp_add_phys_body(ecs_entity_t e, PhysicsType type, float mass, unsigned in
         .mask_bits = mask_bits,
         .default_category_bits = category_bits,
         .default_mask_bits = mask_bits,
+        .default_type = type,
         .created = false
     };
     ecs_mask[i] |= CMP_PHYS_BODY;
@@ -128,5 +129,4 @@ void ecs_engine_shutdown(void)
 {
     ecs_anim_shutdown_allocator();
 }
-
 

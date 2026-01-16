@@ -20,6 +20,7 @@ typedef struct {
     unsigned int mask_bits;
     unsigned int default_category_bits;
     unsigned int default_mask_bits;
+    PhysicsType default_type;
 
     // Runtime flag: becomes true once the entity has the required components (POS+COL+PHYS_BODY)
     // and is participating in the physics-lite step.

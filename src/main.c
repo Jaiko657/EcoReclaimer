@@ -3,12 +3,12 @@
 
 int main(void)
 {
+    //TODO: Replace this with Stage Based init (with registration of systems in central registry)
+    // IE: PreEcs Registration, ECS Registration, PostECS Registration, Post Spawn, etc.
     engine_register_game_hooks((engine_game_hooks_t){
-        .ecs_game_init = ecs_game_init,
+        .game_init = game_init,
         .ecs_game_shutdown = ecs_game_shutdown,
-        .init_entities = init_entities,
         .ecs_find_player = ecs_find_player,
-        .debug_str_register_game = debug_str_game_register_all,
         .render_game_ui = ecs_game_render_ui,
     });
 
