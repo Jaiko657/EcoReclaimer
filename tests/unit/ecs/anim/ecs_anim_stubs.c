@@ -1,5 +1,5 @@
 #include "game/ecs/ecs_game.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 ComponentMask   ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];

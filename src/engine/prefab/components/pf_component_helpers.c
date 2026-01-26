@@ -107,9 +107,9 @@ const char* pf_combined_value(const prefab_component_t* comp, const pf_override_
 }
 
 // Computes the default position for a tiled object.
-v2f pf_object_position_default(const tiled_object_t* obj)
+gfx_vec2 pf_object_position_default(const tiled_object_t* obj)
 {
-    if (!obj) return v2f_make(0.0f, 0.0f);
+    if (!obj) return gfx_vec2_make(0.0f, 0.0f);
     float x = obj->x;
     float y = obj->y;
     bool is_tile_obj = obj->gid != 0;
@@ -117,7 +117,7 @@ v2f pf_object_position_default(const tiled_object_t* obj)
         x += obj->w * 0.5f;
         y += is_tile_obj ? -obj->h * 0.5f : obj->h * 0.5f;
     }
-    return v2f_make(x, y);
+    return gfx_vec2_make(x, y);
 }
 
 // Looks up an object property using "COMP.field" then plain "field".

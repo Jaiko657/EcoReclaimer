@@ -1,8 +1,9 @@
 #include "game/prefab/pf_register_game.h"
 
-#include "engine/prefab/pf_registry.h"
+#include "engine/prefab/registry/pf_registry.h"
 #include "game/prefab/pf_components_game.h"
 
+// Register all game related prefabs parsing ops for each game component
 void pf_register_game_components(void)
 {
     pf_register_set(pf_component_player_ops());

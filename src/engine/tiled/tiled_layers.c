@@ -1,5 +1,5 @@
 #include "engine/tiled/tiled_internal.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -131,7 +131,7 @@ static bool parse_layer(struct xml_node *layer_node, tiled_layer_t *out_layer) {
     if (!ok) {
         free(out_layer->gids);
         free(out_layer->name);
-        *out_layer = (tiled_layer_t){0};
+        *out_layer = (tiled_layer_t){ .name = NULL };
     }
     return ok;
 }

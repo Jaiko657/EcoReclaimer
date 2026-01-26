@@ -1,10 +1,10 @@
 #include "game/prefab/pf_components_game.h"
-#include "game/ecs/ecs_storage.h"
+#include "game/ecs/ecs_game.h"
 
 bool pf_component_storage_build(const prefab_component_t* comp, const pf_override_ctx_t* ovr, pf_component_storage_t* out_storage)
 {
     if (!out_storage) return false;
-    *out_storage = (pf_component_storage_t){0};
+    *out_storage = (pf_component_storage_t){ .capacity = 0 };
     const char* value = pf_combined_value(comp, ovr, "capacity");
     if (pf_parse_int(value, &out_storage->capacity)) {
         out_storage->has_capacity = true;
@@ -18,6 +18,7 @@ static void pf_component_storage_apply(ecs_entity_t e, const void* component)
     cmp_add_storage(e, storage->has_capacity ? storage->capacity : 0);
 }
 
+// Returns a pointer to the static ops struct for this component type.
 const pf_component_ops_t* pf_component_storage_ops(void)
 {
     static const pf_component_ops_t ops = {

@@ -1,4 +1,4 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
 #include "xml.h"
 
@@ -71,7 +71,7 @@ static void anim_def_tmp_free(anim_def_tmp_t* def)
         free(def->seqs[i].frames);
     }
     free(def->seqs);
-    *def = (anim_def_tmp_t){0};
+    *def = (anim_def_tmp_t){ .seqs = NULL };
 }
 
 static bool anim_def_add_seq(anim_def_tmp_t* def, anim_seq_tmp_t seq)
@@ -109,7 +109,7 @@ static bool parse_anim_sequence(struct xml_node* anim_node, anim_def_tmp_t* def)
         char* srow = node_attr_strdup_local(frame_node, "row");
         if (scol) { col = atoi(scol); free(scol); }
         if (srow) { row = atoi(srow); free(srow); }
-        seq.frames[fi++] = (anim_frame_coord_t){ (uint8_t)col, (uint8_t)row };
+        seq.frames[fi++] = (anim_frame_coord_t){ .col = (uint8_t)col, .row = (uint8_t)row };
     }
     seq.frame_count = fi;
 
@@ -123,7 +123,7 @@ static bool parse_anim_sequence(struct xml_node* anim_node, anim_def_tmp_t* def)
 static bool parse_anim_component_xml(const char* xml, anim_def_tmp_t* out_def)
 {
     if (!xml || !out_def) return false;
-    *out_def = (anim_def_tmp_t){0};
+    *out_def = (anim_def_tmp_t){ .seqs = NULL };
 
     size_t len = strlen(xml);
     char* buf = (char*)malloc(len + 1);
@@ -178,7 +178,7 @@ bool pf_component_anim_build(const prefab_component_t* comp, const pf_override_c
     pf_parse_int(pf_combined_value(comp, ovr, "frame_h"), &frame_h);
     pf_parse_float(pf_combined_value(comp, ovr, "fps"), &fps);
 
-    anim_def_tmp_t def = {0};
+    anim_def_tmp_t def = { .seqs = NULL };
     if (!parse_anim_component_xml(comp->xml, &def)) {
         return false;
     }

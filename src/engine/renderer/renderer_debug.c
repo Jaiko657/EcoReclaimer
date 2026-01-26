@@ -2,6 +2,7 @@
 #include "engine/renderer/renderer.h"
 #include "engine/renderer/renderer_internal.h"
 #include "engine/world/world_query.h"
+#include "engine/core/time/time.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -69,22 +70,18 @@ bool renderer_toggle_fps_overlay(void) { return false; }
 #endif
 
 #if DEBUG_BUILD && DEBUG_COLLISION
-static Rectangle collider_bounds_at(float x, float y, float hx, float hy)
+static gfx_rect collider_bounds_at(float x, float y, float hx, float hy)
 {
-    return (Rectangle){ x - hx, y - hy, 2.f * hx, 2.f * hy };
+    return (gfx_rect){ .x = x - hx, .y = y - hy, .w = 2.f * hx, .h = 2.f * hy  };
 }
 
-static void draw_collider_outline(Rectangle bounds, const Rectangle* padded_view, Color color)
+static void draw_collider_outline(gfx_rect bounds, const gfx_rect* padded_view, gfx_color color)
 {
     if (!rects_intersect(bounds, *padded_view)) return;
-    int rx = (int)floorf(bounds.x);
-    int ry = (int)floorf(bounds.y);
-    int rw = (int)ceilf(bounds.width);
-    int rh = (int)ceilf(bounds.height);
-    DrawRectangleLines(rx, ry, rw, rh, color);
+    gfx_draw_rect_lines(bounds, color);
 }
 
-static void draw_static_colliders(const render_view_t* view, Color color)
+static void draw_static_colliders(const render_view_t* view, gfx_color color)
 {
     int tiles_w = 0, tiles_h = 0;
     if (!world_size_tiles(&tiles_w, &tiles_h)) return;
@@ -99,7 +96,7 @@ static void draw_static_colliders(const render_view_t* view, Color color)
         for (int tx = 0; tx < tiles_w; ++tx) {
             if (world_tile_is_dynamic(tx, ty)) continue;
 
-            Rectangle tile_rect = { (float)(tx * tile_px), (float)(ty * tile_px), (float)tile_px, (float)tile_px };
+            gfx_rect tile_rect = { (float)(tx * tile_px), (float)(ty * tile_px), (float)tile_px, (float)tile_px };
             if (!rects_intersect(tile_rect, view->padded_view)) continue;
 
             uint16_t mask = world_subtile_mask_at(tx, ty);
@@ -110,7 +107,7 @@ static void draw_static_colliders(const render_view_t* view, Color color)
                     int bit = sy * subtiles_per_tile + sx;
                     if ((mask & (uint16_t)(1u << bit)) == 0) continue;
 
-                    Rectangle r = {
+                    gfx_rect r = {
                         tile_rect.x + (float)(sx * subtile_px),
                         tile_rect.y + (float)(sy * subtile_px),
                         (float)subtile_px,
@@ -123,7 +120,7 @@ static void draw_static_colliders(const render_view_t* view, Color color)
     }
 }
 
-static void draw_dynamic_colliders(const render_view_t* view, Color color)
+static void draw_dynamic_colliders(const render_view_t* view, gfx_color color)
 {
     int tiles_w = 0, tiles_h = 0;
     if (!world_size_tiles(&tiles_w, &tiles_h)) return;
@@ -138,7 +135,7 @@ static void draw_dynamic_colliders(const render_view_t* view, Color color)
         for (int tx = 0; tx < tiles_w; ++tx) {
             if (!world_tile_is_dynamic(tx, ty)) continue;
 
-            Rectangle tile_rect = { (float)(tx * tile_px), (float)(ty * tile_px), (float)tile_px, (float)tile_px };
+            gfx_rect tile_rect = { (float)(tx * tile_px), (float)(ty * tile_px), (float)tile_px, (float)tile_px };
             if (!rects_intersect(tile_rect, view->padded_view)) continue;
 
             uint16_t mask = world_subtile_mask_at(tx, ty);
@@ -149,7 +146,7 @@ static void draw_dynamic_colliders(const render_view_t* view, Color color)
                     int bit = sy * subtiles_per_tile + sx;
                     if ((mask & (uint16_t)(1u << bit)) == 0) continue;
 
-                    Rectangle r = {
+                    gfx_rect r = {
                         tile_rect.x + (float)(sx * subtile_px),
                         tile_rect.y + (float)(sy * subtile_px),
                         (float)subtile_px,
@@ -167,9 +164,9 @@ void draw_debug_collision_overlays(const render_view_t* view)
 {
 #if DEBUG_BUILD && DEBUG_COLLISION
     if (!g_draw_ecs_colliders && !g_draw_phys_colliders && !g_draw_static_colliders) return;
-    Color ecs_color = RED;
-    Color phys_color = BLUE;
-    Color static_color = WHITE;
+    gfx_color ecs_color = GFX_RED;
+    gfx_color phys_color = GFX_BLUE;
+    gfx_color static_color = GFX_WHITE;
 
     if (g_draw_static_colliders) {
         draw_static_colliders(view, static_color);
@@ -182,12 +179,12 @@ void draw_debug_collision_overlays(const render_view_t* view)
             if (!ecs_colliders_next(&it, &c)) break;
 
             if (g_draw_ecs_colliders) {
-                Rectangle bounds = collider_bounds_at(c.ecs_x, c.ecs_y, c.hx, c.hy);
+                gfx_rect bounds = collider_bounds_at(c.ecs_x, c.ecs_y, c.hx, c.hy);
                 draw_collider_outline(bounds, &view->padded_view, ecs_color);
             }
 
             if (g_draw_phys_colliders && c.has_phys) {
-                Rectangle bounds = collider_bounds_at(c.phys_x, c.phys_y, c.hx, c.hy);
+                gfx_rect bounds = collider_bounds_at(c.phys_x, c.phys_y, c.hx, c.hy);
                 draw_collider_outline(bounds, &view->padded_view, phys_color);
             }
         }
@@ -205,14 +202,9 @@ void draw_debug_trigger_overlays(const render_view_t* view)
         ecs_trigger_view_t c;
         if (!ecs_triggers_next(&it, &c)) break;
 
-        Rectangle bounds = (Rectangle){ c.x - c.hx - c.pad, c.y - c.hy - c.pad, 2.f * c.hx + 2.f * c.pad, 2.f * c.hy + 2.f * c.pad };
+        gfx_rect bounds = (gfx_rect){ .x = c.x - c.hx - c.pad, .y = c.y - c.hy - c.pad, .w = 2.f * c.hx + 2.f * c.pad, .h = 2.f * c.hy + 2.f * c.pad  };
         if (!rects_intersect(bounds, view->padded_view)) continue;
-
-        int rx = (int)floorf(bounds.x);
-        int ry = (int)floorf(bounds.y);
-        int rw = (int)ceilf(bounds.width);
-        int rh = (int)ceilf(bounds.height);
-        DrawRectangleLines(rx, ry, rw, rh, GREEN);
+        gfx_draw_rect_lines(bounds, GFX_GREEN);
     }
 #else
     (void)view;
@@ -225,18 +217,18 @@ void renderer_debug_draw_ui(const render_view_t* view)
     (void)view;
     if (!g_show_fps) return;
 
-    int fps = GetFPS();
-    float ms = GetFrameTime() * 1000.0f;
+    int fps = time_fps();
+    float ms = time_frame_dt() * 1000.0f;
     char buf[64];
     snprintf(buf, sizeof(buf), "FPS: %d | %.2f ms", fps, ms);
 
     int fs = 18;
-    int tw = MeasureText(buf, fs);
-    int x = (GetScreenWidth() - tw)/2;
-    int y = GetScreenHeight() - fs - 6;
+    int tw = gfx_measure_text(buf, fs);
+    int x = (gfx_screen_width() - tw)/2;
+    int y = gfx_screen_height() - fs - 6;
 
-    DrawRectangle(x-8, y-4, tw+16, fs+8, (Color){0,0,0,160});
-    DrawText(buf, x, y, fs, RAYWHITE);
+    gfx_draw_rect((gfx_rect){ .x = (float)(x - 8), .y = (float)(y - 4), .w = (float)(tw + 16), .h = (float)(fs + 8)  }, GFX_COLOR(0, 0, 0, 160));
+    gfx_draw_text(buf, x, y, fs, GFX_RAYWHITE);
 #else
     (void)view;
 #endif

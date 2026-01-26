@@ -1,12 +1,12 @@
 #include "engine/tiled/tiled.h"
 #include "engine/tiled/tiled_internal.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 #include <stdlib.h>
 
 bool tiled_load_map(const char *tmx_path, world_map_t *out_map) {
     if (!out_map) return false;
-    *out_map = (world_map_t){0};
+    *out_map = (world_map_t){ .width = 0 };
     tiled_reset_tile_anim_arena();
 
     struct xml_document *doc = tiled_load_xml_document(tmx_path);
@@ -70,6 +70,6 @@ void tiled_free_map(world_map_t *map) {
     }
     free(map->tilesets);
     tiled_free_objects(map);
-    *map = (world_map_t){0};
+    *map = (world_map_t){ .width = 0 };
     tiled_reset_tile_anim_arena();
 }

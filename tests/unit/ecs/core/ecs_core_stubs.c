@@ -4,11 +4,11 @@
 #include <string.h>
 
 #include "engine/asset/asset.h"
-#include "engine/core/camera.h"
-#include "engine/core/toast.h"
-#include "engine/systems/systems.h"
-#include "engine/systems/systems_registration.h"
-#include "engine/core/logger.h"
+#include "engine/runtime/camera.h"
+#include "engine/runtime/toast.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/core/logger/logger.h"
 #include "engine/world/world.h"
 
 int g_asset_acquire_calls = 0;

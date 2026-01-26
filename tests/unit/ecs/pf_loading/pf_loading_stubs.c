@@ -5,13 +5,11 @@
 #include <string.h>
 
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_doors.h"
 #include "engine/ecs/ecs_render.h"
-#include "engine/core/logger.h"
-#include "game/ecs/ecs_resource.h"
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/core/logger/logger.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/prefab/components/pf_component_helpers.h"
-#include "engine/prefab/pf_registry.h"
+#include "engine/prefab/registry/pf_registry.h"
 #include "engine/tiled/tiled.h"
 
 ComponentMask   ecs_mask[ECS_MAX_ENTITIES];

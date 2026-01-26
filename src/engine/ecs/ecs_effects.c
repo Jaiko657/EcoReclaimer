@@ -1,12 +1,7 @@
-#ifndef ECS_ENGINE_SECTION_EFFECTS
-#define ECS_ENGINE_SECTION_EFFECTS 1
-#endif
-#if ECS_ENGINE_SECTION_EFFECTS
-//==== FROM ecs_effects.c ====
 #include "engine/ecs/ecs_engine.h"
-#include "engine/core/effects.h"
+#include "engine/runtime/effects.h"
 #include "engine/input/input.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 
 static void sys_effects_tick_begin_impl(void)
 {
@@ -20,4 +15,3 @@ static void sys_effects_tick_begin_impl(void)
 }
 
 SYSTEMS_ADAPT_VOID(sys_effects_tick_begin_adapt, sys_effects_tick_begin_impl)
-#endif

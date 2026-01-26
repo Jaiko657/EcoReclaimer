@@ -16,3 +16,7 @@
 #ifndef DEBUG_FPS
 #define DEBUG_FPS DEBUG_BUILD
 #endif
+
+#ifndef ENGINE_PHASE_LOGGING
+#define ENGINE_PHASE_LOGGING 0
+#endif

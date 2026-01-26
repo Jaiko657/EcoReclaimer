@@ -6,11 +6,11 @@
 // --- draw views (data only) ---
 typedef struct {
     tex_handle_t tex;
-    rectf src;
+    gfx_rect src;
     float x, y;   // world position
     float ox, oy; // origin
     bool highlighted;
-    colorf highlight_color;
+    gfx_color highlight_color;
     bool front;
     int highlight_thickness;
 } ecs_sprite_view_t;
@@ -36,8 +36,8 @@ typedef struct {
 } ecs_billboard_view_t;
 
 // Sprite component helpers (render/asset-facing).
-void cmp_add_sprite_handle(ecs_entity_t e, tex_handle_t h, rectf src, float ox, float oy);
-void cmp_add_sprite_path  (ecs_entity_t e, const char* path, rectf src, float ox, float oy);
+void cmp_add_sprite_handle(ecs_entity_t e, tex_handle_t h, gfx_rect src, float ox, float oy);
+void cmp_add_sprite_path  (ecs_entity_t e, const char* path, gfx_rect src, float ox, float oy);
 
 // ========= Iterators (render-facing) ========
 // --- sprite iterator ---

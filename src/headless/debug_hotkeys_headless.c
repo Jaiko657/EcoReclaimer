@@ -3,8 +3,8 @@
 #if DEBUG_BUILD
 
 #include "engine/input/input.h"
-#include "engine/systems/systems_registration.h"
-#include "engine/core/debug_hotkeys.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/debug/debug_hotkeys/debug_hotkeys.h"
 
 void sys_debug_binds(const input_t* in)
 {

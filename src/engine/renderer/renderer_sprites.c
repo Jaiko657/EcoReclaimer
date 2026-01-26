@@ -11,7 +11,7 @@ void enqueue_ecs_sprites(const render_view_t* view, painter_queue_ctx_t* painter
         ecs_sprite_view_t v;
         if (!ecs_sprites_next(&it, &v)) break;
 
-        Rectangle bounds = sprite_bounds(&v);
+        gfx_rect bounds = sprite_bounds(&v);
         if (!rects_intersect(bounds, view->padded_view)) continue;
 
         // depth: screen-space "feet"

@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "engine/prefab/pf_registry.h"
+#include "engine/prefab/registry/pf_registry.h"
 #include "engine/prefab/pf_spawning.h"
 #include "pf_loading_stubs.h"
 #include "game/ecs/ecs_game.h"

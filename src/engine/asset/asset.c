@@ -1,14 +1,13 @@
 #include "engine/asset/asset.h"
 #include "engine/asset/asset_backend.h"
-#include "engine/asset/asset_backend_internal.h"
-#include "engine/core/logger.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/core/logger/logger.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 typedef struct Slot {
-    AssetBackendTexture* tex;
+    gfx_texture* tex;
     uint32_t  gen;
     bool      used;
     uint32_t  refc;
@@ -79,7 +78,7 @@ static int find_by_path(const char* path) {
 }
 
 tex_handle_t asset_acquire_texture(const char* path) {
-    if (!path) return (tex_handle_t){0};
+    if (!path) return (tex_handle_t){ .idx = 0, .gen = 0 };
 
     int idx = find_by_path(path);
     if (idx >= 0) {
@@ -91,10 +90,10 @@ tex_handle_t asset_acquire_texture(const char* path) {
     for (int i = 0; i < MAX_TEX; ++i) {
         if (!s_tex[i].used) {
             Slot* s = &s_tex[i];
-            AssetBackendTexture* backend = asset_backend_load_texture(path);
+            gfx_texture* backend = asset_backend_load_texture(path);
             if (!backend) {
                 LOGC(LOGCAT_ASSET, LOG_LVL_ERROR, "asset: backend failed to load '%s'", path);
-                return (tex_handle_t){0};
+                return (tex_handle_t){ .idx = 0, .gen = 0 };
             }
             s->tex = backend;
             s->used = true;
@@ -106,7 +105,7 @@ tex_handle_t asset_acquire_texture(const char* path) {
     }
 
     LOGC(LOGCAT_ASSET, LOG_LVL_ERROR, "asset: out of texture slots (MAX_TEX=%i)", MAX_TEX);
-    return (tex_handle_t){0};
+    return (tex_handle_t){ .idx = 0, .gen = 0 };
 }
 
 void asset_addref_texture(tex_handle_t h) {
@@ -182,7 +181,7 @@ void asset_reload_all(void) {
     asset_backend_reload_all_end();
 }
 
-AssetBackendTexture* asset_backend_lookup_texture(tex_handle_t h) {
+const gfx_texture* asset_lookup_texture(tex_handle_t h) {
     Slot* s = slot_from_handle(h);
     return s ? s->tex : NULL;
 }

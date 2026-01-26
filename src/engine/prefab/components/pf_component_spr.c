@@ -1,14 +1,14 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs_render.h"
 
 #include <stdio.h>
 
-static bool parse_rect(const char* s, rectf* out)
+static bool parse_rect(const char* s, gfx_rect* out)
 {
     if (!s || !out) return false;
     float x = 0, y = 0, w = 0, h = 0;
     if (sscanf(s, "%f,%f,%f,%f", &x, &y, &w, &h) != 4) return false;
-    *out = rectf_xywh(x, y, w, h);
+    *out = gfx_rect_xywh(x, y, w, h);
     return true;
 }
 
@@ -19,7 +19,7 @@ bool pf_component_spr_build(const prefab_component_t* comp, const pf_override_ct
     const char* path = pf_combined_value(comp, ovr, "path");
     if (!path) path = pf_combined_value(comp, ovr, "tex");
 
-    rectf src = rectf_xywh(0, 0, 0, 0);
+    gfx_rect src = gfx_rect_xywh(0, 0, 0, 0);
     parse_rect(pf_combined_value(comp, ovr, "src"), &src);
 
     float x = src.x, y = src.y, w = src.w, h = src.h;
@@ -27,7 +27,7 @@ bool pf_component_spr_build(const prefab_component_t* comp, const pf_override_ct
     pf_parse_float(pf_combined_value(comp, ovr, "src_y"), &y);
     pf_parse_float(pf_combined_value(comp, ovr, "src_w"), &w);
     pf_parse_float(pf_combined_value(comp, ovr, "src_h"), &h);
-    src = rectf_xywh(x, y, w, h);
+    src = gfx_rect_xywh(x, y, w, h);
 
     float ox = 0.0f, oy = 0.0f;
     pf_parse_float(pf_combined_value(comp, ovr, "ox"), &ox);

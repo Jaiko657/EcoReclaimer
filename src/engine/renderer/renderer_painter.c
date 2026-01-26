@@ -1,30 +1,26 @@
 #include "engine/renderer/renderer_internal.h"
 #include "engine/asset/asset_renderer_internal.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
+#include "engine/core/time/time.h"
 
 #include <math.h>
 #include <stdlib.h>
-
-static Color color_from_colorf(colorf c)
-{
-    return (Color){ u8(c.r), u8(c.g), u8(c.b), u8(c.a) };
-}
 
 static float clampf_local(float v, float lo, float hi)
 {
     return (v < lo) ? lo : ((v > hi) ? hi : v);
 }
 
-static void draw_sprite_highlight(Texture2D tex, Rectangle src, Rectangle dst, Vector2 origin, colorf color)
+static void draw_sprite_highlight(const gfx_texture* tex, gfx_rect src, gfx_rect dst, gfx_vec2 origin, gfx_color color)
 {
     if (color.a <= 0.0f) return;
 
-    float t = (sinf((float)GetTime() * 6.0f) + 1.0f) * 0.5f;
+    float t = (sinf((float)time_now() * 6.0f) + 1.0f) * 0.5f;
     float base_a = clampf_local(color.a, 0.0f, 1.0f);
     float pulse = (60.0f + t * 120.0f) * base_a;
-    Color tint = color_from_colorf((colorf){ color.r, color.g, color.b, pulse / 255.0f });
+    gfx_color tint = (gfx_color){ .r = color.r, .g = color.g, .b = color.b, .a = pulse / 255.0f  };
 
-    DrawTexturePro(tex, src, dst, origin, 0.0f, tint);
+    gfx_draw_texture_pro(tex, src, dst, origin, 0.0f, tint);
 }
 
 void renderer_painter_prepare(renderer_ctx_t* ctx, int max_items)
@@ -84,14 +80,14 @@ void flush_painter_queue(painter_queue_ctx_t* painter_ctx)
     for (size_t i = 0; i < painter_ctx->queue->size; ++i) {
         ecs_sprite_view_t v = painter_ctx->queue->data[i].v;
 
-        Texture2D t = asset_backend_resolve_texture_value(v.tex);
-        if (t.id == 0) continue;
+        const gfx_texture* t = asset_lookup_texture(v.tex);
+        if (!t) continue;
 
-        Rectangle src = (Rectangle){ v.src.x, v.src.y, v.src.w, v.src.h };
-        Rectangle dst = (Rectangle){ v.x, v.y, fabsf(v.src.w), fabsf(v.src.h) };
-        Vector2   origin = (Vector2){ v.ox, v.oy };
+        gfx_rect src = (gfx_rect){ .x = v.src.x, .y = v.src.y, .w = v.src.w, .h = v.src.h  };
+        gfx_rect dst = (gfx_rect){ .x = v.x, .y = v.y, .w = fabsf(v.src.w), .h = fabsf(v.src.h)  };
+        gfx_vec2 origin = (gfx_vec2){ .x = v.ox, .y = v.oy  };
 
-        DrawTexturePro(t, src, dst, origin, 0.0f, WHITE);
+        gfx_draw_texture_pro(t, src, dst, origin, 0.0f, GFX_WHITE);
         if (v.highlighted && v.highlight_color.a > 0.0f) {
             draw_sprite_highlight(t, src, dst, origin, v.highlight_color);
         }

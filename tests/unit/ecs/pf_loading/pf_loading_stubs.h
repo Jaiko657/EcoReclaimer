@@ -2,8 +2,8 @@
 
 #include <stdbool.h>
 #include "engine/ecs/ecs.h"
-#include "engine/prefab/prefab.h"
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/parser/prefab.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "game/prefab/pf_components_game.h"
 
 extern int g_cmp_add_position_calls;

@@ -1,28 +1,28 @@
 #include "engine/input/input.h"
-#include "raylib.h"
+#include "engine/input/input_backend.h"
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "engine/input/input_tables.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
-#define MAX_KEYS_PER_BTN 6
+#define MAX_KEYS_PER_ACT 6
 
 /*
-  Internal storage for button bindings:
-  Each logical button can map to up to MAX_KEYS_PER_BTN physical codes.
+  Internal storage for action bindings:
+  Each logical action can map to up to MAX_KEYS_PER_ACT physical codes.
 */
 typedef struct {
-    int keys[MAX_KEYS_PER_BTN];
+    int keys[MAX_KEYS_PER_ACT];
     int key_count;
-} button_binding_t;
+} action_binding_t;
 
 /*
   Static state that persists across frames.
 */
-static button_binding_t g_bindings[BTN_COUNT];
+static action_binding_t g_bindings[ACT_COUNT];
 static uint64_t s_prev_down_bits = 0;
 static input_t  s_frame_input;
 static bool     s_edges_available = false;
@@ -30,57 +30,58 @@ static uint64_t s_latched_pressed = 0;
 static float    s_latched_wheel   = 0.0f;
 
 /*
-  Small helper macro for building bit masks for buttons.
+  Small helper macro for building bit masks for actions.
 */
-#define BUTTON_BIT(b) (1ull << (b))
+#define ACTION_BIT(a) (1ull << (a))
 
-static const char* k_button_names[BTN_COUNT] = {
-    [BTN_LEFT] = "BTN_LEFT",
-    [BTN_RIGHT] = "BTN_RIGHT",
-    [BTN_UP] = "BTN_UP",
-    [BTN_DOWN] = "BTN_DOWN",
-    [BTN_INTERACT] = "BTN_INTERACT",
-    [BTN_LIFT] = "BTN_LIFT",
-    [BTN_MOUSE_L] = "BTN_MOUSE_L",
-    [BTN_MOUSE_R] = "BTN_MOUSE_R",
+static const char* k_action_names[ACT_COUNT] = {
+    [ACT_LEFT] = "ACT_LEFT",
+    [ACT_RIGHT] = "ACT_RIGHT",
+    [ACT_UP] = "ACT_UP",
+    [ACT_DOWN] = "ACT_DOWN",
+    [ACT_INTERACT] = "ACT_INTERACT",
+    [ACT_LIFT] = "ACT_LIFT",
+    [ACT_MOUSE_L] = "ACT_MOUSE_L",
+    [ACT_MOUSE_R] = "ACT_MOUSE_R",
 #if DEBUG_BUILD
-    [BTN_ASSET_DEBUG_PRINT] = "BTN_ASSET_DEBUG_PRINT",
-    [BTN_DEBUG_COLLIDER_ECS] = "BTN_DEBUG_COLLIDER_ECS",
-    [BTN_DEBUG_COLLIDER_PHYSICS] = "BTN_DEBUG_COLLIDER_PHYSICS",
-    [BTN_DEBUG_COLLIDER_STATIC] = "BTN_DEBUG_COLLIDER_STATIC",
-    [BTN_DEBUG_TRIGGERS] = "BTN_DEBUG_TRIGGERS",
-    [BTN_DEBUG_INSPECT] = "BTN_DEBUG_INSPECT",
-    [BTN_DEBUG_RELOAD_TMX] = "BTN_DEBUG_RELOAD_TMX",
-    [BTN_DEBUG_FPS] = "BTN_DEBUG_FPS",
-    [BTN_DEBUG_TRACE_START] = "BTN_DEBUG_TRACE_START",
-    [BTN_DEBUG_TRACE_STOP] = "BTN_DEBUG_TRACE_STOP",
+    [ACT_ASSET_DEBUG_PRINT] = "ACT_ASSET_DEBUG_PRINT",
+    [ACT_DEBUG_COLLIDER_ECS] = "ACT_DEBUG_COLLIDER_ECS",
+    [ACT_DEBUG_COLLIDER_PHYSICS] = "ACT_DEBUG_COLLIDER_PHYSICS",
+    [ACT_DEBUG_COLLIDER_STATIC] = "ACT_DEBUG_COLLIDER_STATIC",
+    [ACT_DEBUG_TRIGGERS] = "ACT_DEBUG_TRIGGERS",
+    [ACT_DEBUG_INSPECT] = "ACT_DEBUG_INSPECT",
+    [ACT_DEBUG_RELOAD_TMX] = "ACT_DEBUG_RELOAD_TMX",
+    [ACT_DEBUG_FPS] = "ACT_DEBUG_FPS",
+    [ACT_DEBUG_TRACE_START] = "ACT_DEBUG_TRACE_START",
+    [ACT_DEBUG_TRACE_STOP] = "ACT_DEBUG_TRACE_STOP",
+    [ACT_DEBUG_SCREENSHOT] = "ACT_DEBUG_SCREENSHOT",
 #endif
 };
 
 
-static int button_id_from_name(const char* name)
+static int action_id_from_name(const char* name)
 {
     if (!name) return -1;
-    for (int i = 0; i < BTN_COUNT; ++i) {
-        const char* n = k_button_names[i];
+    for (int i = 0; i < ACT_COUNT; ++i) {
+        const char* n = k_action_names[i];
         if (n && strcmp(n, name) == 0) return i;
     }
     return -1;
 }
 
 #if !DEBUG_BUILD
-static bool is_debug_button_name(const char* name)
+static bool is_debug_action_name(const char* name)
 {
     if (!name) return false;
-    if (strcmp(name, "BTN_ASSET_DEBUG_PRINT") == 0) return true;
-    return strncmp(name, "BTN_DEBUG_", 10) == 0;
+    if (strcmp(name, "ACT_ASSET_DEBUG_PRINT") == 0) return true;
+    return strncmp(name, "ACT_DEBUG_", 10) == 0;
 }
 #endif
 
-static const char* button_name_from_id(int id)
+static const char* action_name_from_id(int id)
 {
-    if (id < 0 || id >= BTN_COUNT) return NULL;
-    return k_button_names[id];
+    if (id < 0 || id >= ACT_COUNT) return NULL;
+    return k_action_names[id];
 }
 
 static char* trim_ws(char* s)
@@ -94,12 +95,12 @@ static char* trim_ws(char* s)
 }
 
 /*
-  Add a physical code to a logical button if there is space.
+  Add a physical code to a logical action if there is space.
 */
-static void bind_add(button_t b, int code){
-    if ((unsigned)b >= BTN_COUNT) return;
-    if (g_bindings[b].key_count < MAX_KEYS_PER_BTN) {
-        g_bindings[b].keys[g_bindings[b].key_count++] = code;
+static void bind_add(action_t a, int code){
+    if ((unsigned)a >= ACT_COUNT) return;
+    if (g_bindings[a].key_count < MAX_KEYS_PER_ACT) {
+        g_bindings[a].keys[g_bindings[a].key_count++] = code;
     }
 }
 
@@ -113,36 +114,7 @@ static void input_init_defaults(void){
     s_prev_down_bits   = 0;
     s_edges_available  = false;
 
-    /* Movement: Arrows + WASD */
-    bind_add(BTN_LEFT,  KEY_LEFT);   bind_add(BTN_LEFT,  KEY_A);
-    bind_add(BTN_RIGHT, KEY_RIGHT);  bind_add(BTN_RIGHT, KEY_D);
-    bind_add(BTN_UP,    KEY_UP);     bind_add(BTN_UP,    KEY_W);
-    bind_add(BTN_DOWN,  KEY_DOWN);   bind_add(BTN_DOWN,  KEY_S);
-
-    /* Interact: E */
-    bind_add(BTN_INTERACT, KEY_E);
-
-    /* Lift/Throw: C */
-    bind_add(BTN_LIFT, KEY_C);
-
-    /* Mouse buttons */
-    bind_add(BTN_MOUSE_L, MOUSE_LEFT_BUTTON);
-    bind_add(BTN_MOUSE_R, MOUSE_RIGHT_BUTTON);
-
-#if DEBUG_BUILD
-    bind_add(BTN_ASSET_DEBUG_PRINT, KEY_SPACE);
-
-    /* Debug toggles */
-    bind_add(BTN_DEBUG_COLLIDER_ECS,     KEY_ONE);
-    bind_add(BTN_DEBUG_COLLIDER_PHYSICS, KEY_TWO);
-    bind_add(BTN_DEBUG_COLLIDER_STATIC,  KEY_THREE);
-    bind_add(BTN_DEBUG_TRIGGERS,         KEY_FOUR);
-    bind_add(BTN_DEBUG_INSPECT,          KEY_FIVE);
-    bind_add(BTN_DEBUG_RELOAD_TMX,       KEY_R);
-    bind_add(BTN_DEBUG_FPS,              KEY_GRAVE);
-    bind_add(BTN_DEBUG_TRACE_START,      KEY_F9);
-    bind_add(BTN_DEBUG_TRACE_STOP,       KEY_F10);
-#endif
+    input_backend_bind_defaults();
 }
 
 static void input_save_bindings(void)
@@ -150,18 +122,18 @@ static void input_save_bindings(void)
     FILE* f = fopen(input_ini_path(), "w");
     if (!f) return;
     fprintf(f, "# inputs.ini\n");
-    fprintf(f, "# BTN_NAME=KEY_NAME[,KEY_NAME...]\n");
-    for (int b = 0; b < BTN_COUNT; ++b) {
-        const char* name = button_name_from_id(b);
-        if (!name || g_bindings[b].key_count <= 0) continue;
+    fprintf(f, "# ACT_NAME=KEY_NAME[,KEY_NAME...]\n");
+    for (int a = 0; a < ACT_COUNT; ++a) {
+        const char* name = action_name_from_id(a);
+        if (!name || g_bindings[a].key_count <= 0) continue;
         fprintf(f, "%s=", name);
-        for (int i = 0; i < g_bindings[b].key_count; ++i) {
+        for (int i = 0; i < g_bindings[a].key_count; ++i) {
             if (i > 0) fputc(',', f);
-            const char* key_name = key_name_from_code(g_bindings[b].keys[i]);
+            const char* key_name = key_name_from_code(g_bindings[a].keys[i]);
             if (key_name) {
                 fputs(key_name, f);
             } else {
-                fprintf(f, "%d", g_bindings[b].keys[i]);
+                fprintf(f, "%d", g_bindings[a].keys[i]);
             }
         }
         fputc('\n', f);
@@ -185,19 +157,19 @@ static bool input_load_bindings(void)
 
         char* eq = strchr(p, '=');
         if (!eq) {
-            LOGC(LOGCAT("INPUT"), LOG_LVL_FATAL, "inputs.ini:%d missing '='", line_no);
+            LOGC(LOGCAT(INPUT), LOG_LVL_FATAL, "inputs.ini:%d missing '='", line_no);
             abort();
         }
         *eq = '\0';
         char* name = trim_ws(p);
-        int btn = button_id_from_name(name);
-        if (btn < 0) {
+        int act = action_id_from_name(name);
+        if (act < 0) {
 #if !DEBUG_BUILD
-            if (is_debug_button_name(name)) {
+            if (is_debug_action_name(name)) {
                 continue;
             }
 #endif
-            LOGC(LOGCAT("INPUT"), LOG_LVL_FATAL, "inputs.ini:%d unknown button '%s'", line_no, name);
+            LOGC(LOGCAT(INPUT), LOG_LVL_FATAL, "inputs.ini:%d unknown action '%s'", line_no, name);
             abort();
         }
 
@@ -209,16 +181,16 @@ static bool input_load_bindings(void)
             char* key_str = trim_ws(tok);
             int key = 0;
             if (key_code_from_name(key_str, &key)) {
-                bind_add(btn, key);
+                bind_add(act, key);
             } else {
                 char* endp = NULL;
                 key = (int)strtol(key_str, &endp, 10);
                 if (!endp || *trim_ws(endp) != '\0') {
-                    LOGC(LOGCAT("INPUT"), LOG_LVL_FATAL,
+                    LOGC(LOGCAT(INPUT), LOG_LVL_FATAL,
                          "inputs.ini:%d unknown key '%s' for %s", line_no, key_str, name);
                     abort();
                 }
-                bind_add(btn, key);
+                bind_add(act, key);
             }
             if (!comma) break;
             tok = comma + 1;
@@ -226,7 +198,7 @@ static bool input_load_bindings(void)
     }
 
     if (ferror(f)) {
-        LOGC(LOGCAT("INPUT"), LOG_LVL_FATAL, "inputs.ini: read error");
+        LOGC(LOGCAT(INPUT), LOG_LVL_FATAL, "inputs.ini: read error");
         abort();
     }
     fclose(f);
@@ -244,36 +216,15 @@ void input_init(void)
 }
 
 /*
-  Public binding API: attach a Raylib key/mouse code to a logical button.
+  Public binding API: attach a Raylib key/mouse code to a logical action.
 */
-void input_bind(button_t btn, int keycode){
-    bind_add(btn, keycode);
-}
-
-/*
-  Physical polling helpers:
-  Raylib uses disjoint ranges for keyboard vs mouse.
-  We detect which family the code belongs to and query the proper function.
-*/
-static bool is_mouse_code(int code){
-    return code >= MOUSE_BUTTON_LEFT && code <= MOUSE_BUTTON_BACK;
-}
-
-static bool phys_is_down(int code){
-    if (is_mouse_code(code)) return IsMouseButtonDown(code);
-    if (code >= KEY_NULL && code <= KEY_KB_MENU) return IsKeyDown(code);
-    return false;
-}
-
-static bool phys_is_pressed(int code){
-    if (is_mouse_code(code)) return IsMouseButtonPressed(code);
-    if (code >= KEY_NULL && code <= KEY_KB_MENU) return IsKeyPressed(code);
-    return false;
+void input_bind(action_t act, int keycode){
+    bind_add(act, keycode);
 }
 
 /*
   Poll the OS once per render frame and compute:
-  - 'down' bitset for buttons that are held
+  - 'down' bitset for actions that are held
   - 'pressed' bitset for rising edges (including Raylib's own edge helpers)
   Also capture mouse position and wheel delta, and derive a normalized move axis.
 */
@@ -282,39 +233,39 @@ void input_begin_frame(void){
     memset(&in, 0, sizeof(in));
 
     uint64_t down_bits = 0;
-    for (int b = 0; b < BTN_COUNT; ++b){
-        for (int i = 0; i < g_bindings[b].key_count; ++i){
-            if (phys_is_down(g_bindings[b].keys[i])) { down_bits |= BUTTON_BIT(b); break; }
+    for (int a = 0; a < ACT_COUNT; ++a){
+        for (int i = 0; i < g_bindings[a].key_count; ++i){
+            if (input_backend_is_down(g_bindings[a].keys[i])) { down_bits |= ACTION_BIT(a); break; }
         }
     }
 
     // edges seen THIS render frame
     uint64_t pressed_now = down_bits & ~s_prev_down_bits;
-    for (int b = 0; b < BTN_COUNT; ++b){
+    for (int a = 0; a < ACT_COUNT; ++a){
         bool any_pressed = false;
-        for (int i = 0; i < g_bindings[b].key_count; ++i){
-            if (phys_is_pressed(g_bindings[b].keys[i])) { any_pressed = true; break; }
+        for (int i = 0; i < g_bindings[a].key_count; ++i){
+            if (input_backend_is_pressed(g_bindings[a].keys[i])) { any_pressed = true; break; }
         }
-        if (any_pressed) pressed_now |= BUTTON_BIT(b);
+        if (any_pressed) pressed_now |= ACTION_BIT(a);
     }
 
     // LATCH edges + wheel until a fixed tick consumes them
     s_latched_pressed |= pressed_now;
-    s_latched_wheel   += GetMouseWheelMove();
+    s_latched_wheel   += input_backend_mouse_wheel();
 
     s_prev_down_bits = down_bits;
 
-    Vector2 m = GetMousePosition();
+    input_vec2 m = input_backend_mouse_pos();
     in.down    = down_bits;
     in.pressed = s_latched_pressed;   // <- latched
     in.mouse.x = m.x;
     in.mouse.y = m.y;
     in.mouse_wheel = s_latched_wheel; // <- latched
 
-    in.moveX = ((down_bits & BUTTON_BIT(BTN_RIGHT)) ? 1.f : 0.f)
-             - ((down_bits & BUTTON_BIT(BTN_LEFT )) ? 1.f : 0.f);
-    in.moveY = ((down_bits & BUTTON_BIT(BTN_DOWN )) ? 1.f : 0.f)
-             - ((down_bits & BUTTON_BIT(BTN_UP   )) ? 1.f : 0.f);
+    in.moveX = ((down_bits & ACTION_BIT(ACT_RIGHT)) ? 1.f : 0.f)
+             - ((down_bits & ACTION_BIT(ACT_LEFT )) ? 1.f : 0.f);
+    in.moveY = ((down_bits & ACTION_BIT(ACT_DOWN )) ? 1.f : 0.f)
+             - ((down_bits & ACTION_BIT(ACT_UP   )) ? 1.f : 0.f);
     float mag = sqrtf(in.moveX*in.moveX + in.moveY*in.moveY);
     if (mag > 0.f){ in.moveX /= mag; in.moveY /= mag; }
 
@@ -338,4 +289,9 @@ input_t input_for_tick(void){
     s_latched_pressed = 0;
     s_latched_wheel   = 0.0f;
     return out;
+}
+
+const input_t* input_frame_snapshot(void)
+{
+    return &s_frame_input;
 }

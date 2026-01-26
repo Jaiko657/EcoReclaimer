@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/engine/core/engine.c");
+    nob_da_append(&sources, "src/engine/engine/engine_manager/engine_manager.c");
     nob_da_append(&sources, "tests/unit/core/engine/engine_stubs.c");
     nob_da_append(&sources, "tests/unit/core/engine/test_engine.c");
     nob_da_append(&sources, runner_path);

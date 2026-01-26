@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "engine/ecs/ecs.h"
-#include "engine/prefab/prefab.h"
+#include "engine/prefab/parser/prefab.h"
 #include "engine/tiled/tiled.h"
 
 typedef struct pf_override_ctx_t {
@@ -27,5 +27,5 @@ const char* pf_find_prop(const prefab_component_t* comp, const char* field);
 const char* pf_override_value(const prefab_component_t* comp, const pf_override_ctx_t* ovr, const char* field);
 const char* pf_combined_value(const prefab_component_t* comp, const pf_override_ctx_t* ovr, const char* field);
 
-v2f pf_object_position_default(const tiled_object_t* obj);
+gfx_vec2 pf_object_position_default(const tiled_object_t* obj);
 const char* pf_object_prop_only(const pf_override_ctx_t* ovr, const char* comp_name, const char* field);

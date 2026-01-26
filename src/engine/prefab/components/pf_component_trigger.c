@@ -1,4 +1,4 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
 
 #include <strings.h>
@@ -25,7 +25,7 @@ bool pf_component_trigger_build(const prefab_component_t* comp, const pf_overrid
     trigger_match_t match_mode = TRIGGER_MATCH_ALL;
     if (match && strcasecmp(match, "or") == 0) match_mode = TRIGGER_MATCH_ANY;
 
-    *out_trigger = (pf_component_trigger_t){ pad, mask, match_mode };
+    *out_trigger = (pf_component_trigger_t){ .pad = pad, .target_mask = mask, .match = match_mode };
     return true;
 }
 

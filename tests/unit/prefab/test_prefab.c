@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "engine/prefab/prefab.h"
+#include "engine/prefab/parser/prefab.h"
 
 #if !defined(_WIN32)
 #include <sys/stat.h>

@@ -1,7 +1,7 @@
 //==== FROM ecs_core.c ====
 #include "engine/ecs/ecs_engine.h"
-#include "engine/core/logger.h"
-#include "engine/core/debug_str/debug_str_engine.h"
+#include "engine/core/logger/logger.h"
+#include "engine/debug/debug_str/debug_str_engine.h"
 #include <math.h>
 #include <string.h>
 
@@ -26,11 +26,11 @@ static void try_create_phys_body(int i){
     }
 }
 
-bool ecs_get_position(ecs_entity_t e, v2f* out_pos){
+bool ecs_get_position(ecs_entity_t e, gfx_vec2* out_pos){
     int idx = ent_index_checked(e);
     if (idx < 0 || !(ecs_mask[idx] & CMP_POS)) return false;
     if (out_pos) {
-        *out_pos = v2f_make(cmp_pos[idx].x, cmp_pos[idx].y);
+        *out_pos = gfx_vec2_make(cmp_pos[idx].x, cmp_pos[idx].y);
     }
     return true;
 }
@@ -40,7 +40,7 @@ void cmp_add_position(ecs_entity_t e, float x, float y)
     int i = ent_index_checked(e);
     if (i < 0) return;
     ecs_mask[i] |= CMP_POS;
-    cmp_pos[i] = (cmp_position_t){ x, y };
+    cmp_pos[i] = (cmp_position_t){ .x = x, .y = y };
     try_create_phys_body(i);
 }
 
@@ -54,7 +54,7 @@ void cmp_add_velocity(ecs_entity_t e, float x, float y, facing_t direction)
         .candidateDir = direction,
         .candidateTime = 0.0f
     };
-    cmp_vel[i] = (cmp_velocity_t){ x, y, smoothed_dir };
+    cmp_vel[i] = (cmp_velocity_t){ .x = x, .y = y, .facing = smoothed_dir };
     ecs_mask[i] |= CMP_VEL;
 }
 
@@ -62,7 +62,7 @@ void cmp_add_trigger(ecs_entity_t e, float pad, ComponentMask target_mask, trigg
 {
     int i = ent_index_checked(e);
     if (i < 0) return;
-    cmp_trigger[i] = (cmp_trigger_t){ pad, target_mask, match };
+    cmp_trigger[i] = (cmp_trigger_t){ .pad = pad, .target_mask = target_mask, .match = match };
     ecs_mask[i] |= CMP_TRIGGER;
 }
 
@@ -86,7 +86,7 @@ void cmp_add_size(ecs_entity_t e, float hx, float hy)
 {
     int i = ent_index_checked(e);
     if (i < 0) return;
-    cmp_col[i] = (cmp_collider_t){ hx, hy };
+    cmp_col[i] = (cmp_collider_t){ .hx = hx, .hy = hy };
     ecs_mask[i] |= CMP_COL;
     try_create_phys_body(i);
 }
@@ -129,4 +129,3 @@ void ecs_engine_shutdown(void)
 {
     ecs_anim_shutdown_allocator();
 }
-

@@ -5,14 +5,15 @@
 #include <string.h>
 
 #include "engine/asset/asset.h"
-#include "engine/core/camera.h"
-#include "engine/core/engine.h"
-#include "game/ecs/ecs_storage.h"
+#include "engine/runtime/camera.h"
+#include "engine/engine/engine_manager/engine_manager.h"
+#include "game/ecs/ecs_storage_helpers.h"
 #include "game/ecs/ecs_game.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include "engine/renderer/renderer.h"
-#include "engine/core/toast.h"
+#include "engine/runtime/toast.h"
 #include "engine/world/world_query.h"
+#include "engine/input/input.h"
 
 int g_asset_reload_calls = 0;
 int g_asset_log_calls = 0;
@@ -218,6 +219,43 @@ void ecs_register_physics_component_hooks(void) {}
 void ecs_register_grav_gun_component_hooks(void) {}
 void ecs_register_liftable_component_hooks(void) {}
 void ecs_anim_reset_allocator(void) {}
+
+bool renderer_screen_to_world(float screen_x, float screen_y, float* out_x, float* out_y)
+{
+    if (out_x) *out_x = screen_x;
+    if (out_y) *out_y = screen_y;
+    return true;
+}
+
+const input_t* input_frame_snapshot(void)
+{
+    static input_t empty = {0};
+    return &empty;
+}
+
+bool platform_dir_exists(const char* path)
+{
+    (void)path;
+    return false;
+}
+
+bool platform_make_dir(const char* path)
+{
+    (void)path;
+    return false;
+}
+
+bool platform_file_exists(const char* path)
+{
+    (void)path;
+    return false;
+}
+
+bool platform_take_screenshot(const char* path)
+{
+    (void)path;
+    return false;
+}
 void ecs_anim_shutdown_allocator(void) {}
 
 // Delegate actual ECS globals/hooks to the real core implementation (linked for debug builds).

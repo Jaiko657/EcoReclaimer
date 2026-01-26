@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "engine/gfx/gfx_types.h"
 #include "engine/ecs/ecs_core.h"
 #include "engine/ecs/ecs_physics_types.h"
 #include "engine/asset/tex_handle.h"
@@ -13,15 +14,15 @@ typedef struct { float x, y; smoothed_facing_t facing; } cmp_velocity_t;
 
 typedef struct {
     bool highlighted;
-    colorf highlight_color;
-    colorf highlight_base_color;
+    gfx_color highlight_color;
+    gfx_color highlight_base_color;
     bool front;
     int highlight_thickness;
 } cmp_sprite_fx_t;
 
 typedef struct {
     tex_handle_t tex;
-    rectf src;
+    gfx_rect src;
     float ox, oy;
     cmp_sprite_fx_t fx;
 } cmp_sprite_t;

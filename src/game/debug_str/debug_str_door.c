@@ -1,4 +1,4 @@
-#include "engine/core/debug_str/debug_str_registry.h"
+#include "engine/debug/debug_str/debug_str_registry.h"
 
 #if DEBUG_BUILD
 

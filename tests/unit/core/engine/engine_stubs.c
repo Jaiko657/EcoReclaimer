@@ -9,11 +9,11 @@
 #include "game/ecs/ecs_game.h"
 #include "engine/ecs/ecs_physics.h"
 #include "engine/input/input.h"
-#include "engine/core/logger.h"
-#include "engine/core/logger_raylib_adapter.h"
-#include "engine/core/platform.h"
+#include "engine/core/logger/logger.h"
+#include "engine/core/logger/logger_raylib_adapter.h"
+#include "engine/core/platform/platform.h"
 #include "engine/renderer/renderer.h"
-#include "engine/core/toast.h"
+#include "engine/runtime/toast.h"
 #include "engine/world/world.h"
 #include "engine/world/world_query.h"
 
@@ -139,9 +139,18 @@ bool platform_should_close(void)
     return g_platform_should_close_calls > g_platform_should_close_after;
 }
 
+void platform_poll_events(void)
+{
+}
+
 void logger_use_raylib(void)
 {
     g_logger_use_raylib_calls++;
+}
+
+void logger_backend_init(void)
+{
+    logger_use_raylib();
 }
 
 void log_set_min_level(log_level_t lvl)

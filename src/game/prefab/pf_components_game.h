@@ -1,10 +1,8 @@
 #pragma once
 
-// Game-owned prefab component types and handlers.
-
 #include "engine/prefab/components/pf_component_helpers.h"
-#include "engine/prefab/pf_registry.h"
-#include "game/ecs/ecs_resource.h"
+#include "engine/prefab/registry/pf_registry.h"
+#include "game/ecs/helpers/ecs_resource_helpers.h"
 #include "engine/world/door_tiles.h"
 #include "shared/utils/dynarray.h"
 

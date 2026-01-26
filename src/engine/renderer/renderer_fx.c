@@ -1,12 +1,7 @@
 #include "engine/renderer/renderer_internal.h"
-#include "engine/core/effects.h"
+#include "engine/runtime/effects.h"
 
 #include <math.h>
-
-static Color color_from_colorf(colorf c)
-{
-    return (Color){ u8(c.r), u8(c.g), u8(c.b), u8(c.a) };
-}
 
 void draw_effect_lines(const render_view_t* view)
 {
@@ -23,15 +18,15 @@ void draw_effect_lines(const render_view_t* view)
         float miny = fminf(line->a.y, line->b.y);
         float maxx = fmaxf(line->a.x, line->b.x);
         float maxy = fmaxf(line->a.y, line->b.y);
-        Rectangle bounds = { minx, miny, maxx - minx, maxy - miny };
+        gfx_rect bounds = { minx, miny, maxx - minx, maxy - miny };
         if (!rects_intersect(bounds, view->padded_view)) continue;
 
         float width = (line->width > 0.0f) ? line->width : 1.0f;
-        DrawLineEx(
-            (Vector2){ line->a.x, line->a.y },
-            (Vector2){ line->b.x, line->b.y },
+        gfx_draw_line(
+            (gfx_vec2){ .x = line->a.x, .y = line->a.y  },
+            (gfx_vec2){ .x = line->b.x, .y = line->b.y  },
             width,
-            color_from_colorf(line->color)
+            line->color
         );
     }
 }

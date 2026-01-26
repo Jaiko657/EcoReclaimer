@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "engine/core/engine.h"
+#include "engine/engine/engine_manager/engine_manager.h"
 #include "engine_stubs.h"
 
 void setUp(void)

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
-#include "engine/core/engine_types.h"
+#include "engine/gfx/gfx.h"
 
 typedef enum {
     WORLD_TILE_VOID = 0,   // out of bounds / unknown

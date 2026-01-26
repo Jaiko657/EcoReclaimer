@@ -23,6 +23,9 @@
 #define KEY_FIVE 17
 #define KEY_R 18
 #define KEY_GRAVE 19
+#define KEY_F9 20
+#define KEY_F10 21
+#define KEY_PRINT_SCREEN 22
 
 #define MOUSE_BUTTON_LEFT 1000
 #define MOUSE_BUTTON_RIGHT 1001

@@ -7,7 +7,7 @@
 #include "engine/ecs/ecs_physics.h"
 #include "engine/world/world_map.h"
 #include "engine/world/world_query.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 #include <math.h>
 
 static void resolve_tile_penetration(int i)

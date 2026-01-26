@@ -5,9 +5,9 @@
 //==== FROM ecs_anim.c ====
 #include "engine/ecs/ecs_engine.h"
 #include "engine/input/input.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include "shared/utils/bump_alloc.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -294,7 +294,7 @@ static void sys_anim_sprite_impl(float dt)
         int x = fc.col * frame_w;
         int y = fc.row * frame_h;
 
-        s->src = rectf_xywh((float)x, (float)y, (float)frame_w, (float)frame_h);
+        s->src = gfx_rect_xywh((float)x, (float)y, (float)frame_w, (float)frame_h);
     }
 }
 

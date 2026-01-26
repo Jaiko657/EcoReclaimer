@@ -4,12 +4,12 @@
 
 #include "debug_hotkeys_stubs.h"
 #include "engine/input/input.h"
-#include "shared/buttons.h"
+#include "shared/actions.h"
 #include "game/ecs/ecs_game.h"
 
 void sys_debug_binds(const input_t* in);
 
-static input_t make_input_pressed(button_t b)
+static input_t make_input_pressed(action_t b)
 {
     input_t in = {0};
     in.pressed = (1ull << b);
@@ -27,7 +27,7 @@ void tearDown(void)
 
 void test_debug_hotkeys_asset_reload_path(void)
 {
-    input_t in = make_input_pressed(BTN_ASSET_DEBUG_PRINT);
+    input_t in = make_input_pressed(ACT_ASSET_DEBUG_PRINT);
     sys_debug_binds(&in);
 
     TEST_ASSERT_EQUAL_INT(1, g_asset_reload_calls);
@@ -38,22 +38,22 @@ void test_debug_hotkeys_asset_reload_path(void)
 
 void test_debug_hotkeys_renderer_toggles(void)
 {
-    input_t in = make_input_pressed(BTN_DEBUG_COLLIDER_ECS);
+    input_t in = make_input_pressed(ACT_DEBUG_COLLIDER_ECS);
     sys_debug_binds(&in);
     TEST_ASSERT_EQUAL_INT(1, g_renderer_ecs_calls);
     TEST_ASSERT_EQUAL_STRING("ECS colliders: on", g_last_toast);
 
-    in = make_input_pressed(BTN_DEBUG_COLLIDER_PHYSICS);
+    in = make_input_pressed(ACT_DEBUG_COLLIDER_PHYSICS);
     sys_debug_binds(&in);
     TEST_ASSERT_EQUAL_INT(1, g_renderer_phys_calls);
     TEST_ASSERT_EQUAL_STRING("Physics colliders: on", g_last_toast);
 
-    in = make_input_pressed(BTN_DEBUG_COLLIDER_STATIC);
+    in = make_input_pressed(ACT_DEBUG_COLLIDER_STATIC);
     sys_debug_binds(&in);
     TEST_ASSERT_EQUAL_INT(1, g_renderer_static_calls);
     TEST_ASSERT_EQUAL_STRING("Static colliders: on", g_last_toast);
 
-    in = make_input_pressed(BTN_DEBUG_TRIGGERS);
+    in = make_input_pressed(ACT_DEBUG_TRIGGERS);
     sys_debug_binds(&in);
     TEST_ASSERT_EQUAL_INT(1, g_renderer_triggers_calls);
     TEST_ASSERT_EQUAL_STRING("Triggers: on", g_last_toast);
@@ -65,7 +65,7 @@ void test_debug_hotkeys_reload_world_message(void)
     g_world_tiles_w = 10;
     g_world_tiles_h = 12;
 
-    input_t in = make_input_pressed(BTN_DEBUG_RELOAD_TMX);
+    input_t in = make_input_pressed(ACT_DEBUG_RELOAD_TMX);
     sys_debug_binds(&in);
 
     TEST_ASSERT_EQUAL_INT(1, g_toast_calls);
@@ -74,7 +74,7 @@ void test_debug_hotkeys_reload_world_message(void)
 
 void test_debug_hotkeys_inspect_toggle_toast(void)
 {
-    input_t in = make_input_pressed(BTN_DEBUG_INSPECT);
+    input_t in = make_input_pressed(ACT_DEBUG_INSPECT);
     sys_debug_binds(&in);
 
     TEST_ASSERT_EQUAL_INT(1, g_toast_calls);
@@ -83,7 +83,7 @@ void test_debug_hotkeys_inspect_toggle_toast(void)
 
 void test_debug_hotkeys_fps_toggle(void)
 {
-    input_t in = make_input_pressed(BTN_DEBUG_FPS);
+    input_t in = make_input_pressed(ACT_DEBUG_FPS);
     sys_debug_binds(&in);
 
     TEST_ASSERT_EQUAL_INT(1, g_renderer_fps_calls);
@@ -154,13 +154,13 @@ void test_debug_hotkeys_inspect_click_logs_components(void)
     g_game_storage_capacity = 5;
 
     input_t in = {0};
-    in.pressed = (1ull << BTN_DEBUG_INSPECT) | (1ull << BTN_MOUSE_L);
+    in.pressed = (1ull << ACT_DEBUG_INSPECT) | (1ull << ACT_MOUSE_L);
     in.mouse.x = 5.0f;
     in.mouse.y = 5.0f;
     sys_debug_binds(&in);
 
     TEST_ASSERT_TRUE(g_log_calls > 0);
 
-    input_t toggle_off = make_input_pressed(BTN_DEBUG_INSPECT);
+    input_t toggle_off = make_input_pressed(ACT_DEBUG_INSPECT);
     sys_debug_binds(&toggle_off);
 }

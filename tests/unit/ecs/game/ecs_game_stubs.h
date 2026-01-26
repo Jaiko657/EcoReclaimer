@@ -3,8 +3,8 @@
 #include <stddef.h>
 
 #include "engine/ecs/ecs.h"
-#include "game/ecs/ecs_proximity.h"
-#include "engine/systems/systems.h"
+#include "engine/ecs/ecs_proximity.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include "engine/tiled/tiled.h"
 
 void ecs_game_stub_set_player(ecs_entity_t e);

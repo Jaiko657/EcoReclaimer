@@ -1,12 +1,10 @@
 #pragma once
 
-#include "engine/core/engine_types.h"
+#include "engine/gfx/gfx.h"
 #include "engine/ecs/ecs.h"
 #include "engine/ecs/ecs_render.h"
 #include "shared/utils/dynarray.h"
 #include "engine/tiled/tiled.h"
-
-#include "raylib.h"
 
 typedef struct {
     ecs_sprite_view_t v;
@@ -22,9 +20,9 @@ typedef struct {
 } painter_queue_ctx_t;
 
 typedef struct render_view_t {
-    Camera2D cam;
-    Rectangle view;
-    Rectangle padded_view;
+    gfx_camera2d cam;
+    gfx_rect view;
+    gfx_rect padded_view;
 } render_view_t;
 
 typedef struct {
@@ -66,7 +64,7 @@ void renderer_ui(const render_view_t* view);
 void draw_screen_space_ui(const render_view_t* view);
 void draw_effect_lines(const render_view_t* view);
 bool visible_tile_range(const world_map_t* map,
-                        Rectangle padded_view,
+                        gfx_rect padded_view,
                         int* out_startX, int* out_startY,
                         int* out_endX, int* out_endY,
                         int* out_visible_tiles);
@@ -81,11 +79,10 @@ void flush_painter_queue(painter_queue_ctx_t* painter_ctx);
 void renderer_painter_prepare(renderer_ctx_t* ctx, int max_items);
 void renderer_painter_ensure_ready(renderer_ctx_t* ctx);
 unsigned char u8(float x);
-Rectangle expand_rect(Rectangle r, float margin);
-Rectangle intersect_rect(Rectangle a, Rectangle b);
-bool rects_intersect(Rectangle a, Rectangle b);
-Rectangle sprite_bounds(const ecs_sprite_view_t* v);
-rectf rectf_from_rect(Rectangle r);
+gfx_rect expand_rect(gfx_rect r, float margin);
+gfx_rect intersect_rect(gfx_rect a, gfx_rect b);
+bool rects_intersect(gfx_rect a, gfx_rect b);
+gfx_rect sprite_bounds(const ecs_sprite_view_t* v);
 bool painter_queue_push(painter_queue_ctx_t* ctx, Item item);
 void draw_debug_collision_overlays(const render_view_t* view);
 void draw_debug_trigger_overlays(const render_view_t* view);

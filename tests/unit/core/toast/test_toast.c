@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "engine/core/toast.h"
+#include "engine/runtime/toast.h"
 
 void test_toast_init_clears_state(void)
 {

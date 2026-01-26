@@ -5,7 +5,7 @@
 //==== FROM ecs_iterators.c ====
 #include "engine/ecs/ecs_engine.h"
 #include "engine/ecs/ecs_render.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>

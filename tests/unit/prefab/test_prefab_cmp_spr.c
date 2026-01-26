@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 
 static prefab_component_t make_comp(const char* type_name, prefab_kv_t* props, size_t prop_count)
 {

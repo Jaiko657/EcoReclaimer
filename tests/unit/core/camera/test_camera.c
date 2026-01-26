@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "engine/core/camera.h"
+#include "engine/runtime/camera.h"
 #include "ecs_stubs.h"
 
 void setUp(void)

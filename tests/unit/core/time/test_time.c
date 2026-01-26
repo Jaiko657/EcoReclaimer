@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "engine/core/time.h"
+#include "engine/core/time/time.h"
 #include "raylib.h"
 
 void setUp(void)
@@ -22,4 +22,10 @@ void test_time_frame_dt_uses_raylib_frame_time(void)
 {
     raylib_time_stub_set_frame(0.016f);
     TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.016f, time_frame_dt());
+}
+
+void test_time_fps_uses_raylib_fps(void)
+{
+    raylib_time_stub_set_fps(144);
+    TEST_ASSERT_EQUAL_INT(144, time_fps());
 }

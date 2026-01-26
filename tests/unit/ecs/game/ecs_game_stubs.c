@@ -6,9 +6,9 @@
 #include <string.h>
 
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_proximity.h"
-#include "engine/systems/systems.h"
-#include "engine/core/logger.h"
+#include "engine/ecs/ecs_proximity.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
+#include "engine/core/logger/logger.h"
 #include "engine/tiled/tiled.h"
 #include "engine/world/world.h"
 #include "engine/world/world_door.h"

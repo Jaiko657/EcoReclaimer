@@ -1,10 +1,8 @@
 #include "unity.h"
 
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_storage.h"
-#include "game/ecs/ecs_resource.h"
-#include "game/ecs/ecs_game.h"
-#include "engine/systems/systems_registration.h"
+#include "game/ecs/ecs_storage_helpers.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 #include "ecs_game_stubs.h"
 #include "engine/ecs/ecs_render.h"
 

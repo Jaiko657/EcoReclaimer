@@ -1,0 +1,28 @@
+#pragma once
+
+#include "shared/utils/build_config.h"
+
+typedef enum {
+    ACT_LEFT = 0,
+    ACT_RIGHT,
+    ACT_UP,
+    ACT_DOWN,
+    ACT_INTERACT,
+    ACT_LIFT,
+    ACT_MOUSE_L,
+    ACT_MOUSE_R,
+#if DEBUG_BUILD
+    ACT_ASSET_DEBUG_PRINT,
+    ACT_DEBUG_COLLIDER_ECS,
+    ACT_DEBUG_COLLIDER_PHYSICS,
+    ACT_DEBUG_COLLIDER_STATIC,
+    ACT_DEBUG_TRIGGERS,
+    ACT_DEBUG_INSPECT,
+    ACT_DEBUG_RELOAD_TMX,
+    ACT_DEBUG_FPS,
+    ACT_DEBUG_TRACE_START,
+    ACT_DEBUG_TRACE_STOP,
+    ACT_DEBUG_SCREENSHOT,
+#endif
+    ACT_COUNT
+} action_t;

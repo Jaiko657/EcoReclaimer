@@ -2,7 +2,7 @@
 
 #include "ecs_registration_stubs.h"
 #include "engine/ecs/ecs.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 
 static void assert_registration(int idx, systems_phase_t phase, int order, const char* name)
 {

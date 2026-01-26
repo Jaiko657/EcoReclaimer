@@ -9,42 +9,37 @@ unsigned char u8(float x)
     return (unsigned char)(x * 255.0f + 0.5f);
 }
 
-Rectangle expand_rect(Rectangle r, float margin)
+gfx_rect expand_rect(gfx_rect r, float margin)
 {
-    return (Rectangle){
+    return (gfx_rect){
         r.x - margin,
         r.y - margin,
-        r.width + 2.0f * margin,
-        r.height + 2.0f * margin
+        r.w + 2.0f * margin,
+        r.h + 2.0f * margin
     };
 }
 
-Rectangle intersect_rect(Rectangle a, Rectangle b)
+gfx_rect intersect_rect(gfx_rect a, gfx_rect b)
 {
     float nx = fmaxf(a.x, b.x);
     float ny = fmaxf(a.y, b.y);
-    float nw = fminf(a.x + a.width,  b.x + b.width)  - nx;
-    float nh = fminf(a.y + a.height, b.y + b.height) - ny;
+    float nw = fminf(a.x + a.w,  b.x + b.w)  - nx;
+    float nh = fminf(a.y + a.h, b.y + b.h) - ny;
     if (nw <= 0.0f || nh <= 0.0f) {
-        return (Rectangle){0};
+        return (gfx_rect){ .x = 0.0f, .y = 0.0f, .w = 0.0f, .h = 0.0f };
     }
-    return (Rectangle){ nx, ny, nw, nh };
+    return (gfx_rect){ .x = nx, .y = ny, .w = nw, .h = nh  };
 }
 
-bool rects_intersect(Rectangle a, Rectangle b)
+bool rects_intersect(gfx_rect a, gfx_rect b)
 {
-    return a.x < b.x + b.width && a.x + a.width > b.x &&
-           a.y < b.y + b.height && a.y + a.height > b.y;
+    return a.x < b.x + b.w && a.x + a.w > b.x &&
+           a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
-Rectangle sprite_bounds(const ecs_sprite_view_t* v)
+gfx_rect sprite_bounds(const ecs_sprite_view_t* v)
 {
     float w = fabsf(v->src.w);
     float h = fabsf(v->src.h);
-    return (Rectangle){ v->x - v->ox, v->y - v->oy, w, h };
-}
-
-rectf rectf_from_rect(Rectangle r)
-{
-    return (rectf){ r.x, r.y, r.width, r.height };
+    return (gfx_rect){ .x = v->x - v->ox, .y = v->y - v->oy, .w = w, .h = h  };
 }

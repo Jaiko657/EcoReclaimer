@@ -2,7 +2,7 @@
 
 #include "game/ecs/ecs_game.h"
 #include "engine/input/input.h"
-#include "shared/buttons.h"
+#include "shared/actions.h"
 #include "ecs_liftable_stubs.h"
 
 #include <string.h>
@@ -54,8 +54,8 @@ void test_grav_gun_grab_and_release(void)
     grav_gun_stub_set_player((ecs_entity_t){0, 1});
 
     input_t in = {0};
-    in.down = (1ull << BTN_MOUSE_L);
-    in.pressed = (1ull << BTN_MOUSE_L);
+    in.down = (1ull << ACT_MOUSE_L);
+    in.pressed = (1ull << ACT_MOUSE_L);
     in.mouse.x = 10.0f;
     in.mouse.y = 0.0f;
     sys_grav_gun_input_adapt(0.0f, &in);
@@ -99,7 +99,7 @@ void test_grav_gun_motion_updates_velocity(void)
     cmp_player[0].held_gun = (ecs_entity_t){2, 1};
 
     input_t in = {0};
-    in.down = (1ull << BTN_MOUSE_L);
+    in.down = (1ull << ACT_MOUSE_L);
     in.mouse.x = 20.0f;
     in.mouse.y = 0.0f;
     sys_grav_gun_motion_adapt(1.0f, &in);

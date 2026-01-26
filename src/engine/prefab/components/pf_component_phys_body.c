@@ -1,4 +1,4 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
 #include "engine/ecs/ecs_physics.h"
 
@@ -55,7 +55,7 @@ bool pf_component_phys_body_build(const prefab_component_t* comp, const pf_overr
         mask_bits = phys_parse_tag_list(mask_str);
     }
 
-    *out_body = (pf_component_phys_body_t){ type, mass, category_bits, mask_bits };
+    *out_body = (pf_component_phys_body_t){ .type = type, .mass = mass, .category_bits = category_bits, .mask_bits = mask_bits };
     return true;
 }
 

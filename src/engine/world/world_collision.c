@@ -1,7 +1,7 @@
 #include "engine/world/world_collision_internal.h"
 #include "engine/world/world_map.h"
 #include "engine/world/world_query.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 #include <math.h>
 #include <stdlib.h>

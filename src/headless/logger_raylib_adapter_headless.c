@@ -1,5 +1,6 @@
-#include "engine/core/logger_raylib_adapter.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger_raylib_adapter.h"
+#include "engine/core/logger/logger_backend.h"
+#include "engine/core/logger/logger.h"
 
 #include <stdio.h>
 
@@ -21,3 +22,7 @@ void logger_use_raylib(void)
     log_set_sink(stdout_sink);
 }
 
+void logger_backend_init(void)
+{
+    logger_use_raylib();
+}

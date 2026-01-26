@@ -2,6 +2,12 @@
 #include <stdbool.h>
 #include "shared/utils/build_config.h"
 
+typedef struct render_view_t render_view_t;
+typedef void (*renderer_ui_layer_fn)(const render_view_t* view, void* data);
+
+void renderer_ui_registry_init(void);
+void renderer_ui_register_layer(renderer_ui_layer_fn fn, void* data, int order);
+
 // Creates the window and sets target fps.
 bool renderer_init(int width, int height, const char* title, int target_fps);
 bool renderer_bind_world_map(void);

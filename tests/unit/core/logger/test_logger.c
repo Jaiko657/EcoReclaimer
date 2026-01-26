@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 typedef struct {
     int calls;

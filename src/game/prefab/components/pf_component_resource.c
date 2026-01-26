@@ -1,5 +1,5 @@
 #include "game/prefab/pf_components_game.h"
-#include "game/ecs/ecs_resource.h"
+#include "game/ecs/ecs_game.h"
 
 bool pf_component_resource_build(const prefab_component_t* comp, const pf_override_ctx_t* ovr, pf_component_resource_t* out_resource)
 {
@@ -10,7 +10,7 @@ bool pf_component_resource_build(const prefab_component_t* comp, const pf_overri
     if (value) {
         resource_type_from_string(value, &type);
     }
-    *out_resource = (pf_component_resource_t){ type };
+    *out_resource = (pf_component_resource_t){ .type = type };
     return true;
 }
 
@@ -20,6 +20,7 @@ static void pf_component_resource_apply(ecs_entity_t e, const void* component)
     cmp_add_resource(e, res->type);
 }
 
+// Returns a pointer to the static ops struct for this component type.
 const pf_component_ops_t* pf_component_resource_ops(void)
 {
     static const pf_component_ops_t ops = {

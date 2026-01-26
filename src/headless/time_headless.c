@@ -1,4 +1,4 @@
-#include "engine/core/time.h"
+#include "engine/core/time/time.h"
 
 #if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
 #include <time.h>
@@ -19,4 +19,9 @@ double time_now(void)
 float time_frame_dt(void)
 {
     return 1.0f / 60.0f;
+}
+
+int time_fps(void)
+{
+    return 60;
 }

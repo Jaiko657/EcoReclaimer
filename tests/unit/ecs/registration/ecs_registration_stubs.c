@@ -2,7 +2,7 @@
 
 #include <string.h>
 #include "game/ecs/ecs_game.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 ecs_component_hook_fn phys_body_create_hook = NULL;
 cmp_phys_body_t cmp_phys_body[ECS_MAX_ENTITIES];

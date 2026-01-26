@@ -1,9 +1,9 @@
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_proximity.h"
+#include "engine/ecs/ecs_proximity.h"
 #include "engine/renderer/renderer.h"
 #include "engine/world/world.h"
 #include "engine/asset/asset.h"
-#include "engine/core/toast.h"
+#include "engine/runtime/toast.h"
 
 ComponentMask   ecs_mask[ECS_MAX_ENTITIES];
 uint32_t        ecs_gen[ECS_MAX_ENTITIES];

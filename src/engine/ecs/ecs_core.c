@@ -1,5 +1,5 @@
 #include "engine/ecs/ecs_core.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include <string.h>
 
 // =============== ECS Storage =============
@@ -33,7 +33,7 @@ bool ecs_alive_idx(int i){ return ecs_gen[i] != 0; }
 bool ecs_alive_handle(ecs_entity_t e){ return ent_index_checked(e) >= 0; }
 
 ecs_entity_t handle_from_index(int i){
-    return (ecs_entity_t){ (uint32_t)i, ecs_gen[i] };
+    return (ecs_entity_t){ .idx = (uint32_t)i, .gen = ecs_gen[i] };
 }
 
 float clampf(float v, float a, float b){
@@ -114,7 +114,7 @@ ecs_entity_t ecs_create(void)
     if (g == 0) g = 1;
     ecs_gen[idx] = g;
     ecs_mask[idx] = 0;
-    return (ecs_entity_t){ (uint32_t)idx, g };
+    return (ecs_entity_t){ .idx = (uint32_t)idx, .gen = g };
 }
 
 void ecs_destroy(ecs_entity_t e)
@@ -161,21 +161,4 @@ void ecs_destroy_marked(void)
         }
         ecs_finalize_destroy(i);
     }
-}
-
-ecs_count_result_t ecs_count_entities(const ComponentMask* masks, int num_masks)
-{
-    ecs_count_result_t result = { .num = num_masks };
-    memset(result.count, 0, sizeof(result.count));
-
-    for (int i = 0; i < ECS_MAX_ENTITIES; ++i) {
-        if (!ecs_alive_idx(i)) continue;
-        ComponentMask mask = ecs_mask[i];
-        for (int j = 0; j < num_masks; ++j) {
-            if ((mask & masks[j]) == masks[j]) {
-                result.count[j]++;
-            }
-        }
-    }
-    return result;
 }

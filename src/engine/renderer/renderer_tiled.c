@@ -5,7 +5,7 @@
 
 bool tiled_renderer_init(tiled_renderer_t *r, const world_map_t *map) {
     if (!r || !map || map->tileset_count == 0) return false;
-    *r = (tiled_renderer_t){0};
+    *r = (tiled_renderer_t){ .texture_count = 0 };
     r->texture_count = map->tileset_count;
     r->tilesets = (tex_handle_t *)calloc(r->texture_count, sizeof(tex_handle_t));
     if (!r->tilesets) return false;
@@ -35,5 +35,5 @@ void tiled_renderer_shutdown(tiled_renderer_t *r) {
         }
     }
     free(r->tilesets);
-    *r = (tiled_renderer_t){0};
+    *r = (tiled_renderer_t){ .texture_count = 0 };
 }

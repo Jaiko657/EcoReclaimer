@@ -1,4 +1,4 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
 
 bool pf_component_vel_build(const prefab_component_t* comp, const pf_override_ctx_t* ovr, pf_component_vel_t* out_vel)
@@ -8,7 +8,7 @@ bool pf_component_vel_build(const prefab_component_t* comp, const pf_override_ct
     pf_parse_float(pf_combined_value(comp, ovr, "x"), &vx);
     pf_parse_float(pf_combined_value(comp, ovr, "y"), &vy);
     facing_t dir = pf_parse_facing(pf_combined_value(comp, ovr, "dir"), DIR_SOUTH);
-    *out_vel = (pf_component_vel_t){ vx, vy, dir };
+    *out_vel = (pf_component_vel_t){ .x = vx, .y = vy, .dir = dir };
     return true;
 }
 

@@ -12,9 +12,11 @@ screenshots/
 /nob_test.*
 /nob_tests
 /nob_tests.*
+/Doxyfile
 
 # Ignore everything in the build folder
 /build
+/docs
 .old_scratchpad_code/tiledparsing_tests/build/
 .old_scratchpad_code/tiledparsing_tests/nob
 /.vscode/

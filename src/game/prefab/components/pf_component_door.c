@@ -1,6 +1,6 @@
 #include "game/prefab/pf_components_game.h"
-#include "engine/core/logger.h"
-#include "game/ecs/ecs_doors.h"
+#include "engine/core/logger/logger.h"
+#include "game/ecs/ecs_game.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +37,7 @@ bool pf_component_door_build(const prefab_component_t* comp, const pf_override_c
     float prox_r = 0.0f;
     pf_parse_float(pf_combined_value(comp, ovr, "proximity_radius"), &prox_r);
 
-    *out_door = (pf_component_door_t){0};
+    *out_door = (pf_component_door_t){ .prox_radius = 0.0f };
     out_door->prox_radius = prox_r;
 
     int tile_count = 0;
@@ -62,7 +62,7 @@ void pf_component_door_free(pf_component_door_t* door)
 {
     if (!door) return;
     DA_FREE(&door->tiles);
-    *door = (pf_component_door_t){0};
+    *door = (pf_component_door_t){ .prox_radius = 0.0f };
 }
 
 static void pf_component_door_apply(ecs_entity_t e, const void* component)
@@ -77,6 +77,7 @@ static void pf_component_door_free_component(void* component)
     pf_component_door_free((pf_component_door_t*)component);
 }
 
+// Returns a pointer to the static ops struct for this component type.
 const pf_component_ops_t* pf_component_door_ops(void)
 {
     static const pf_component_ops_t ops = {

@@ -1,5 +1,5 @@
 #include "engine/tiled/tiled_internal.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 #include <ctype.h>
 #include <errno.h>

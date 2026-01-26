@@ -4,9 +4,18 @@
 #include <stdint.h>
 
 #include "engine/ecs/ecs_engine.h"
-#include "game/debug_str/debug_str_game.h"
+#include "engine/world/door_tiles.h"
 
-typedef struct render_view_t render_view_t;
+typedef enum {
+    GRAV_GUN_STATE_FREE = 0,
+    GRAV_GUN_STATE_HELD = 1
+} grav_gun_state_t;
+
+typedef enum {
+    RESOURCE_TYPE_PLASTIC = 0,
+    RESOURCE_TYPE_METAL,
+    RESOURCE_TYPE_COUNT,
+} resource_type_t;
 
 // ===== Game component storage types =====
 typedef struct {
@@ -90,6 +99,11 @@ typedef struct {
     ecs_entity_t spawned_entity;
 } cmp_unpacker_t;
 
+typedef struct {
+    int counts[RESOURCE_TYPE_COUNT];
+    int capacity;
+} cmp_storage_t;
+
 // ===== Game component storage =====
 extern cmp_player_t cmp_player[ECS_MAX_ENTITIES];
 extern cmp_conveyor_t cmp_conveyor[ECS_MAX_ENTITIES];
@@ -100,11 +114,20 @@ extern cmp_gun_charger_t cmp_gun_charger[ECS_MAX_ENTITIES];
 extern cmp_door_t cmp_door[ECS_MAX_ENTITIES];
 extern cmp_unloader_t cmp_unloader[ECS_MAX_ENTITIES];
 extern cmp_unpacker_t cmp_unpacker[ECS_MAX_ENTITIES];
+extern resource_type_t cmp_resource_type[ECS_MAX_ENTITIES];
+extern cmp_storage_t cmp_storage[ECS_MAX_ENTITIES];
 
-void game_init(void);
+void ecs_game_init(void);
 void ecs_game_shutdown(void);
 
-ecs_entity_t ecs_find_player(void);
-bool ecs_get_player_position(float* out_x, float* out_y);
-
-void ecs_game_render_ui(const render_view_t* view);
+void cmp_add_player(ecs_entity_t e);
+void cmp_add_conveyor(ecs_entity_t e, facing_t direction, float speed, bool block_player_input);
+void cmp_add_liftable(ecs_entity_t e);
+void cmp_add_grav_gun(ecs_entity_t e);
+void cmp_add_gun_charger(ecs_entity_t e);
+void cmp_add_unpacker(ecs_entity_t e);
+void cmp_add_unloader(ecs_entity_t e, ecs_entity_t unpacker_handle);
+void cmp_add_door(ecs_entity_t e, float prox_radius, int tile_count, const door_tile_xy_t* tile_xy);
+void cmp_add_resource(ecs_entity_t e, resource_type_t type);
+void cmp_add_storage(ecs_entity_t e, int capacity);
+void cmp_add_recycle_bin(ecs_entity_t e, resource_type_t type);

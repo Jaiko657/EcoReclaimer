@@ -1,4 +1,4 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
 
 bool pf_component_col_build(const prefab_component_t* comp, const pf_override_ctx_t* ovr, pf_component_col_t* out_col)
@@ -20,7 +20,7 @@ bool pf_component_col_build(const prefab_component_t* comp, const pf_override_ct
     if (!have_hx && obj && obj->w > 0.0f) hx = obj->w * 0.5f;
     if (!have_hy && obj && obj->h > 0.0f) hy = obj->h * 0.5f;
 
-    *out_col = (pf_component_col_t){ hx, hy };
+    *out_col = (pf_component_col_t){ .hx = hx, .hy = hy };
     return true;
 }
 
@@ -34,7 +34,7 @@ static void pf_component_col_override(const pf_override_ctx_t* ovr, void* compon
     const bool have_hy = pf_parse_float(pf_object_prop_only(ovr, "COL", "hy"), &hy);
     if (!have_hx && obj && obj->w > 0.0f) hx = obj->w * 0.5f;
     if (!have_hy && obj && obj->h > 0.0f) hy = obj->h * 0.5f;
-    *col = (pf_component_col_t){ hx, hy };
+    *col = (pf_component_col_t){ .hx = hx, .hy = hy };
 }
 
 static void pf_component_col_apply(ecs_entity_t e, const void* component)

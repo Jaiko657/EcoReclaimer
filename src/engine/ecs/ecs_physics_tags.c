@@ -1,6 +1,6 @@
 #include "engine/ecs/ecs_physics.h"
 
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 
 #include <ctype.h>
 #include <stdbool.h>
@@ -31,7 +31,7 @@ void phys_tag_reset_registry(void)
 {
     for (int i = 0; i < g_tag_count; ++i) {
         free(g_tags[i].name);
-        g_tags[i] = (phys_tag_entry_t){0};
+        g_tags[i] = (phys_tag_entry_t){ .name = NULL };
     }
     g_tag_count = 0;
 }

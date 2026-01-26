@@ -1,9 +1,8 @@
-#include "engine/core/debug_str/debug_str_registry.h"
+#include "engine/debug/debug_str/debug_str_registry.h"
 
 #if DEBUG_BUILD
 
-#include "game/ecs/ecs_resource.h"
-#include "game/ecs/ecs_storage.h"
+#include "game/ecs/helpers/ecs_storage_helpers.h"
 #include <stdio.h>
 
 static bool debug_str_storage(ecs_entity_t e, char* out, size_t cap)

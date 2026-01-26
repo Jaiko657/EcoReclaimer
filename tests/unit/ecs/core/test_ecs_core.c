@@ -2,11 +2,10 @@
 
 #include "engine/ecs/ecs.h"
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_doors.h"
 #include "engine/ecs/ecs_render.h"
 #include "ecs_core_stubs.h"
 #include "engine/input/input.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 
 void setUp(void)
 {
@@ -160,22 +159,6 @@ void test_ecs_mark_cleanup_and_destroy_pipeline(void)
 
     TEST_ASSERT_EQUAL_UINT32(0u, ecs_gen[e.idx]);
     TEST_ASSERT_EQUAL_INT(1, g_asset_release_calls);
-}
-
-void test_ecs_count_entities_counts_masks(void)
-{
-    ecs_entity_t a = ecs_create();
-    cmp_add_position(a, 1.0f, 1.0f);
-
-    ecs_entity_t b = ecs_create();
-    cmp_add_position(b, 2.0f, 2.0f);
-    cmp_add_velocity(b, 0.0f, 0.0f, DIR_SOUTH);
-
-    ComponentMask masks[2] = { CMP_POS, (CMP_POS | CMP_VEL) };
-    ecs_count_result_t result = ecs_count_entities(masks, 2);
-
-    TEST_ASSERT_EQUAL_INT(2, result.count[0]);
-    TEST_ASSERT_EQUAL_INT(1, result.count[1]);
 }
 
 void test_cmp_add_phys_body_creates_when_requirements_met(void)

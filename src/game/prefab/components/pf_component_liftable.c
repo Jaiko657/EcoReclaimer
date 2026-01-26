@@ -7,7 +7,7 @@ bool pf_component_grav_gun_build(const prefab_component_t* comp, const pf_overri
     if (!out_grav_gun) return false;
 
     float tmp = 0.0f;
-    *out_grav_gun = (pf_component_grav_gun_t){0};
+    *out_grav_gun = (pf_component_grav_gun_t){ .has_pickup_distance = false };
 
     if (pf_parse_float(pf_combined_value(comp, ovr, "pickup_distance"), &tmp)) { out_grav_gun->has_pickup_distance = true; out_grav_gun->pickup_distance = tmp; }
     if (pf_parse_float(pf_combined_value(comp, ovr, "pickup_radius"), &tmp)) { out_grav_gun->has_pickup_radius = true; out_grav_gun->pickup_radius = tmp; }
@@ -36,6 +36,7 @@ static void pf_component_liftable_apply(ecs_entity_t e, const void* component)
     }
 }
 
+// Returns a pointer to the static ops struct for this component type.
 const pf_component_ops_t* pf_component_liftable_ops(void)
 {
     static const pf_component_ops_t ops = {

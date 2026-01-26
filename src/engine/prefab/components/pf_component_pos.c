@@ -1,4 +1,4 @@
-#include "engine/prefab/pf_components_engine.h"
+#include "engine/prefab/components/pf_components_engine.h"
 #include "engine/ecs/ecs.h"
 
 bool pf_component_pos_build(const prefab_component_t* comp, const pf_override_ctx_t* ovr, pf_component_pos_t* out_pos)
@@ -10,7 +10,7 @@ bool pf_component_pos_build(const prefab_component_t* comp, const pf_override_ct
     const char* sy = pf_combined_value(comp, ovr, "y");
     bool have = pf_parse_float(sx, &x) && pf_parse_float(sy, &y);
     if (!have) {
-        v2f p = pf_object_position_default(obj);
+        gfx_vec2 p = pf_object_position_default(obj);
         x = p.x;
         y = p.y;
         const char* ox = pf_override_value(comp, ovr, "x");
@@ -18,7 +18,7 @@ bool pf_component_pos_build(const prefab_component_t* comp, const pf_override_ct
         if (ox) pf_parse_float(ox, &x);
         if (oy) pf_parse_float(oy, &y);
     }
-    *out_pos = (pf_component_pos_t){ x, y };
+    *out_pos = (pf_component_pos_t){ .x = x, .y = y };
     return true;
 }
 
@@ -31,7 +31,7 @@ static void pf_component_pos_override(const pf_override_ctx_t* ovr, void* compon
     float y = pf_object_position_default(obj).y;
     pf_parse_float(pf_object_prop_only(ovr, "POS", "x"), &x);
     pf_parse_float(pf_object_prop_only(ovr, "POS", "y"), &y);
-    *pos = (pf_component_pos_t){ x, y };
+    *pos = (pf_component_pos_t){ .x = x, .y = y };
 }
 
 static void pf_component_pos_apply(ecs_entity_t e, const void* component)

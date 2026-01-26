@@ -1,7 +1,7 @@
 #include "unity.h"
 
 #include "engine/asset/asset.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include "asset_backend_stub.h"
 #include "test_log_sink.h"
 

@@ -1,18 +1,28 @@
-#include "engine/core/engine.h"
-#include "game/ecs/ecs_game.h"
+#include "engine/engine/engine_manager/engine_manager.h"
+#include "engine/engine/engine_phases/engine_phase.h"
+#include "game/game.h"
+
+static void game_init_phase(engine_phase_t phase, void* data)
+{
+    (void)phase;
+    (void)data;
+    game_init();
+}
+
+static void game_shutdown_phase(engine_phase_t phase, void* data)
+{
+    (void)phase;
+    (void)data;
+    game_shutdown();
+}
 
 int main(void)
 {
-    //TODO: Replace this with Stage Based init (with registration of systems in central registry)
-    // IE: PreEcs Registration, ECS Registration, PostECS Registration, Post Spawn, etc.
-    engine_register_game_hooks((engine_game_hooks_t){
-        .game_init = game_init,
-        .ecs_game_shutdown = ecs_game_shutdown,
-        .ecs_find_player = ecs_find_player,
-        .render_game_ui = ecs_game_render_ui,
-    });
+    engine_phase_init();
+    engine_phase_register(ENGINE_PHASE_GAME_INIT, 0, game_init_phase, NULL, "game_init");
+    engine_phase_register(ENGINE_PHASE_PRE_SHUTDOWN, 0, game_shutdown_phase, NULL, "game_shutdown");
 
-    if (!engine_init("raylib + ECS: TARDAS MVP")) {
+    if (!engine_init("Eco Reclaimer: 0.3")) {
         return 1;
     }
 

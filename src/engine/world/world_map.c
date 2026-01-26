@@ -1,7 +1,7 @@
 #include "engine/world/world_map.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 #include "engine/world/world_collision_internal.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include "shared/utils/dynarray.h"
 #include "engine/tiled/tiled.h"
 

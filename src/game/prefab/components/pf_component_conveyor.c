@@ -1,5 +1,5 @@
 #include "game/prefab/pf_components_game.h"
-#include "engine/ecs/ecs.h"
+#include "game/ecs/ecs_game.h"
 
 bool pf_component_conveyor_build(const prefab_component_t* comp, const pf_override_ctx_t* ovr, pf_component_conveyor_t* out_conveyor)
 {
@@ -31,6 +31,7 @@ static void pf_component_conveyor_apply(ecs_entity_t e, const void* component)
     cmp_add_conveyor(e, conveyor->direction, conveyor->speed, conveyor->block_player_input);
 }
 
+// Returns a pointer to the static ops struct for this component type.
 const pf_component_ops_t* pf_component_conveyor_ops(void)
 {
     static const pf_component_ops_t ops = {

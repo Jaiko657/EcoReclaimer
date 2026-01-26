@@ -1,7 +1,8 @@
 #include "unity.h"
 
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_proximity.h"
+#include "game/ecs/ecs_billboards_filter.h"
+#include "engine/ecs/ecs_proximity.h"
 #include "engine/input/input.h"
 
 #include <string.h>
@@ -23,6 +24,7 @@ static void reset_storage(void)
 void setUp(void)
 {
     reset_storage();
+    ecs_billboards_register_game_filter();
 }
 
 void tearDown(void)

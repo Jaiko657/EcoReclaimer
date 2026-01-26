@@ -70,7 +70,22 @@ static bool gather_headless_sources(Nob_File_Paths *out_sources, Nob_File_Paths 
     return true;
 }
 
-static bool gather_module_sources_recursive(const char *parent, const Nob_File_Paths *replacement_bases, Nob_File_Paths *out_sources)
+typedef enum {
+    BACKEND_RAYLIB,
+    BACKEND_HEADLESS,
+    BACKEND_SDL,
+} build_backend_t;
+
+static bool filename_is_backend(const char *name, build_backend_t backend)
+{
+    if (!name) return false;
+    if (cstr_ends_with(name, "_raylib.c")) return backend == BACKEND_RAYLIB;
+    if (cstr_ends_with(name, "_headless.c")) return backend == BACKEND_HEADLESS;
+    if (cstr_ends_with(name, "_sdl.c")) return backend == BACKEND_SDL;
+    return true;
+}
+
+static bool gather_module_sources_recursive(const char *parent, const Nob_File_Paths *replacement_bases, build_backend_t backend, Nob_File_Paths *out_sources)
 {
     Nob_File_Paths children = {0};
     if (!nob_read_entire_dir(parent, &children)) return false;
@@ -82,12 +97,13 @@ static bool gather_module_sources_recursive(const char *parent, const Nob_File_P
         const char *full = nob_temp_sprintf("%s/%s", parent, name);
         Nob_File_Type type = nob_get_file_type(full);
         if (type == NOB_FILE_DIRECTORY) {
-            if (!gather_module_sources_recursive(full, replacement_bases, out_sources)) return false;
+            if (!gather_module_sources_recursive(full, replacement_bases, backend, out_sources)) return false;
             continue;
         }
 
         if (type != NOB_FILE_REGULAR) continue;
         if (!cstr_ends_with(name, ".c")) continue;
+        if (!filename_is_backend(name, backend)) continue;
 
         size_t n = strlen(name);
         size_t ext = strlen(".c");
@@ -101,11 +117,11 @@ static bool gather_module_sources_recursive(const char *parent, const Nob_File_P
     return true;
 }
 
-static bool gather_module_sources(Nob_File_Paths *out_sources, const Nob_File_Paths *replacement_bases)
+static bool gather_module_sources(Nob_File_Paths *out_sources, const Nob_File_Paths *replacement_bases, build_backend_t backend)
 {
-    if (!gather_module_sources_recursive("src/engine", replacement_bases, out_sources)) return false;
-    if (!gather_module_sources_recursive("src/game", replacement_bases, out_sources)) return false;
-    if (!gather_module_sources_recursive("src/shared", replacement_bases, out_sources)) return false;
+    if (!gather_module_sources_recursive("src/engine", replacement_bases, backend, out_sources)) return false;
+    if (!gather_module_sources_recursive("src/game", replacement_bases, backend, out_sources)) return false;
+    if (!gather_module_sources_recursive("src/shared", replacement_bases, backend, out_sources)) return false;
     return true;
 }
 
@@ -151,13 +167,13 @@ static const char *target_path(const char *name)
 static bool build_game(bool debug_build)
 {
     Nob_File_Paths module_sources = {0};
-    if (!gather_module_sources(&module_sources, NULL)) return false;
+    if (!gather_module_sources(&module_sources, NULL, BACKEND_RAYLIB)) return false;
 
     Nob_Cmd cmd = {0};
     nob_cmd_append(&cmd, "gcc");
     nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
     cmd_append_flags(&cmd, debug_build);
-    nob_cmd_append(&cmd, "-I", RAYLIB_INCLUDE_DIR, "-I", XML_INCLUDE_DIR, "-I", "src");
+    nob_cmd_append(&cmd, "-I", RAYLIB_INCLUDE_DIR, "-I", XML_INCLUDE_DIR, "-I", "third_party/stb", "-I", "src");
     nob_cmd_append(&cmd, "src/main.c");
     cmd_append_paths(&cmd, &module_sources);
     nob_cmd_append(&cmd, "-o", target_path(debug_build ? "game_debug" : "game"));
@@ -178,18 +194,39 @@ static bool build_headless(void)
     Nob_File_Paths replacement_bases = {0};
     Nob_File_Paths module_sources = {0};
     if (!gather_headless_sources(&headless_sources, &replacement_bases)) return false;
-    if (!gather_module_sources(&module_sources, &replacement_bases)) return false;
+    if (!gather_module_sources(&module_sources, &replacement_bases, BACKEND_HEADLESS)) return false;
 
     Nob_Cmd cmd = {0};
     nob_cmd_append(&cmd, "gcc");
     nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
     cmd_append_flags(&cmd, true);
     nob_cmd_append(&cmd, "-DHEADLESS=1");
-    nob_cmd_append(&cmd, "-I", XML_INCLUDE_DIR, "-I", "src");
+    nob_cmd_append(&cmd, "-I", XML_INCLUDE_DIR, "-I", "third_party/stb", "-I", "src");
     nob_cmd_append(&cmd, "src/main.c");
     cmd_append_paths(&cmd, &module_sources);
     cmd_append_paths(&cmd, &headless_sources);
     nob_cmd_append(&cmd, "-o", target_path("game_headless"));
+    nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
+#if !defined(_WIN32)
+    nob_cmd_append(&cmd, "-lm", "-lpthread", "-ldl", "-lrt");
+#endif
+
+    return nob_cmd_run_sync_and_reset(&cmd);
+}
+
+static bool build_sdl(bool debug_build)
+{
+    Nob_File_Paths module_sources = {0};
+    if (!gather_module_sources(&module_sources, NULL, BACKEND_SDL)) return false;
+
+    Nob_Cmd cmd = {0};
+    nob_cmd_append(&cmd, "gcc");
+    nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
+    cmd_append_flags(&cmd, debug_build);
+    nob_cmd_append(&cmd, "-I", XML_INCLUDE_DIR, "-I", "src");
+    nob_cmd_append(&cmd, "src/main.c");
+    cmd_append_paths(&cmd, &module_sources);
+    nob_cmd_append(&cmd, "-o", target_path(debug_build ? "game_sdl_debug" : "game_sdl"));
     nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
 #if !defined(_WIN32)
     nob_cmd_append(&cmd, "-lm", "-lpthread", "-ldl", "-lrt");
@@ -242,23 +279,64 @@ static bool copy_assets_to_build(void)
     return copy_dir_recursive("assets", "build/src/assets");
 }
 
+static bool ensure_doxyfile(void)
+{
+    static const char *default_doxyfile =
+        "PROJECT_NAME = \"Eco Reclaimer\"\n"
+        "OUTPUT_DIRECTORY = docs\n"
+        "INPUT = src\n"
+        "RECURSIVE = YES\n"
+        "EXTRACT_ALL = YES\n"
+        "GENERATE_HTML = YES\n"
+        "GENERATE_LATEX = NO\n"
+        "HAVE_DOT = YES\n"
+        "DOT_IMAGE_FORMAT = svg\n"
+        "INTERACTIVE_SVG = YES\n";
+
+    if (nob_file_exists("Doxyfile")) {
+        return true;
+    }
+
+    return nob_write_entire_file("Doxyfile", default_doxyfile, strlen(default_doxyfile));
+}
+
+static bool build_docs(void)
+{
+    if (!ensure_doxyfile()) return false;
+
+    Nob_Cmd cmd = {0};
+    nob_cmd_append(&cmd, "doxygen", "Doxyfile");
+    return nob_cmd_run_sync_and_reset(&cmd);
+}
+
 int main(int argc, char **argv)
 {
     NOB_GO_REBUILD_URSELF(argc, argv);
 
     bool do_headless = false;
+    bool do_sdl = false;
     bool debug_build = false;
+    bool do_docs = false;
 
     for (int i = 1; i < argc; ++i) {
         Nob_String_View arg = nob_sv_from_cstr(argv[i]);
         if (nob_sv_eq(arg, nob_sv_from_cstr("--headless"))) {
             do_headless = true;
             debug_build = true;
+        } else if (nob_sv_eq(arg, nob_sv_from_cstr("--sdl"))) {
+            do_sdl = true;
+        } else if (nob_sv_eq(arg, nob_sv_from_cstr("--docs"))) {
+            do_docs = true;
         } else if (nob_sv_eq(arg, nob_sv_from_cstr("--debug"))) {
             debug_build = true;
         } else if (nob_sv_eq(arg, nob_sv_from_cstr("--release"))) {
             debug_build = false;
         }
+    }
+
+    if (do_docs) {
+        if (!build_docs()) return 1;
+        return 0;
     }
 
     if (!nob_mkdir_if_not_exists("build")) return 1;
@@ -267,6 +345,8 @@ int main(int argc, char **argv)
 
     if (do_headless) {
         if (!build_headless()) return 1;
+    } else if (do_sdl) {
+        if (!build_sdl(debug_build)) return 1;
     } else {
         if (!build_game(debug_build)) return 1;
     }

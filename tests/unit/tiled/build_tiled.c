@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/engine/core/logger.c");
+    nob_da_append(&sources, "src/engine/core/logger/logger.c");
     nob_da_append(&sources, "src/shared/bump_alloc.c");
     nob_da_append(&sources, "src/engine/tiled/tiled.c");
     nob_da_append(&sources, "src/engine/tiled/tiled_layers.c");

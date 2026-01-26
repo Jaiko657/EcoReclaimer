@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "engine/ecs/ecs.h"
-#include "engine/systems/systems.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include "game/ecs/ecs_game.h"
 #include "engine/core/engine_types.h"
 #include "engine/world/world_door.h"

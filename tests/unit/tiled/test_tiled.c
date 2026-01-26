@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "engine/tiled/tiled.h"
-#include "engine/core/logger.h"
+#include "engine/core/logger/logger.h"
 #include "test_log_sink.h"
 
 #if !defined(_WIN32)

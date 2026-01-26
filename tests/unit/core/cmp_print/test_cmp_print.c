@@ -6,8 +6,8 @@
 
 #include "engine/core/cmp_print.h"
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_resource.h"
-#include "engine/core/logger.h"
+#include "game/ecs/ecs_resource_helpers.h"
+#include "engine/core/logger/logger.h"
 
 static char s_last_log[512];
 static log_level_t s_last_level;

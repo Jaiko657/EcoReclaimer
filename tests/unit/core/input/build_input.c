@@ -89,6 +89,8 @@ int main(int argc, char **argv)
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
     nob_da_append(&sources, "tests/unit/core/input/raylib_stubs.c");
     nob_da_append(&sources, "src/engine/input/input.c");
+    nob_da_append(&sources, "src/engine/input/input_raylib.c");
+    nob_da_append(&sources, "src/engine/input/input_tables_raylib.c");
     nob_da_append(&sources, "tests/unit/core/input/test_input.c");
     nob_da_append(&sources, runner_path);
 

@@ -1,11 +1,13 @@
 #include "engine/renderer/renderer.h"
 #include "engine/renderer/renderer_internal.h"
-#include "engine/core/logger.h"
-#include "engine/core/camera.h"
+#include "engine/core/logger/logger.h"
+#include "engine/runtime/camera.h"
+#include "engine/core/platform/platform.h"
 #include "engine/world/world_map.h"
 #include "engine/world/world_query.h"
 
 static renderer_ctx_t g_renderer = {0};
+static platform_window* g_window = NULL;
 
 renderer_ctx_t* renderer_ctx_get(void)
 {
@@ -14,17 +16,17 @@ renderer_ctx_t* renderer_ctx_get(void)
 
 bool renderer_init(int width, int height, const char* title, int target_fps)
 {
-    InitWindow(width, height, title ? title : "Game");
-    if (!IsWindowReady()) {
+    g_window = platform_window_create(width, height, title, target_fps);
+    if (!g_window) {
         LOGC(LOGCAT_REND, LOG_LVL_FATAL, "Renderer: window failed to init");
         return false;
     }
-    SetTargetFPS(target_fps >= 0 ? target_fps : 60);
-#if DEBUG_BUILD
-    SetTraceLogLevel(LOG_DEBUG);   // make Raylib print DEBUG+
-#else
-    SetTraceLogLevel(LOG_WARNING);
-#endif
+
+    if (!gfx_init_renderer(g_window)) {
+        platform_window_destroy(g_window);
+        g_window = NULL;
+        return false;
+    }
     return true;
 }
 
@@ -77,7 +79,11 @@ void renderer_shutdown(void)
     renderer_ctx_t* ctx = renderer_ctx_get();
     renderer_unload_tiled_map();
     DA_FREE(&ctx->painter_items);
-    if (IsWindowReady()) CloseWindow();
+    gfx_shutdown();
+    if (g_window) {
+        platform_window_destroy(g_window);
+        g_window = NULL;
+    }
 }
 
 bool renderer_screen_to_world(float screen_x, float screen_y, float* out_x, float* out_y)
@@ -85,23 +91,22 @@ bool renderer_screen_to_world(float screen_x, float screen_y, float* out_x, floa
     if (!out_x || !out_y) return false;
 
     camera_view_t logical = camera_get_view();
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    int sw = gfx_screen_width();
+    int sh = gfx_screen_height();
     if (sw <= 0 || sh <= 0) {
         *out_x = logical.center.x;
         *out_y = logical.center.y;
         return false;
     }
 
-    Camera2D cam = {
-        .target   = (Vector2){ logical.center.x, logical.center.y },
-        .offset   = (Vector2){ sw / 2.0f, sh / 2.0f },
+    gfx_camera2d cam = {
+        .target   = (gfx_vec2){ .x = logical.center.x, .y = logical.center.y  },
+        .offset   = (gfx_vec2){ .x = sw / 2.0f, .y = sh / 2.0f  },
         .rotation = 0.0f,
         .zoom     = logical.zoom > 0.0f ? logical.zoom : 1.0f
     };
 
-    Vector2 screen = { screen_x, screen_y };
-    Vector2 world = GetScreenToWorld2D(screen, cam);
+    gfx_vec2 world = gfx_screen_to_world((gfx_vec2){ .x = screen_x, .y = screen_y  }, &cam);
     *out_x = world.x;
     *out_y = world.y;
     return true;

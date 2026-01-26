@@ -1,8 +1,8 @@
 #include "engine/renderer/renderer_internal.h"
 #include "engine/renderer/renderer.h"
-#include "engine/core/debug_hotkeys.h"
-#include "engine/core/time.h"
-#include "engine/systems/systems_registration.h"
+#include "engine/debug/debug_hotkeys/debug_hotkeys.h"
+#include "engine/core/time/time.h"
+#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 #include "engine/world/world_map.h"
 
 static void renderer_world_base_adapt_impl(void)
@@ -54,13 +54,13 @@ SYSTEMS_ADAPT_VOID(sys_render_end_adapt, renderer_frame_end)
 void renderer_frame_begin(void)
 {
     renderer_ctx_t* ctx = renderer_ctx_get();
-    BeginDrawing();
-    ClearBackground((Color){ 51, 60, 87, 255 });
+    gfx_begin_frame();
+    gfx_clear(GFX_COLOR(51, 60, 87, 255));
     ctx->frame_view = build_camera_view();
-    ctx->world_cache = (render_world_cache_t){0};
+    ctx->world_cache = (render_world_cache_t){ .map = NULL };
     ctx->frame_active = true;
     ctx->painter_ready = false;
-    BeginMode2D(ctx->frame_view.cam);
+    gfx_begin_world(&ctx->frame_view.cam);
 }
 
 void renderer_world_prepare(const render_view_t* view)
@@ -156,7 +156,7 @@ void renderer_world_end(void)
 {
     renderer_ctx_t* ctx = renderer_ctx_get();
     if (!ctx->frame_active) return;
-    EndMode2D();
+    gfx_end_world();
 }
 
 void renderer_ui(const render_view_t* view)
@@ -170,7 +170,7 @@ void renderer_frame_end(void)
 {
     renderer_ctx_t* ctx = renderer_ctx_get();
     if (!ctx->frame_active) return;
-    EndDrawing();
+    gfx_end_frame();
     ctx->frame_active = false;
     debug_post_frame();
 }

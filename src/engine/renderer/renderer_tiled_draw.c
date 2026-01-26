@@ -10,7 +10,7 @@
 static const char* ENTITY_LAYER_NAME = "entities"; // TMX object layer used to spawn ECS entities (not rendered directly)
 
 bool visible_tile_range(const world_map_t* map,
-                        Rectangle padded_view,
+                        gfx_rect padded_view,
                         int* out_startX, int* out_startY,
                         int* out_endX, int* out_endY,
                         int* out_visible_tiles)
@@ -20,14 +20,14 @@ bool visible_tile_range(const world_map_t* map,
 
     int tw = map->tilewidth;
     int th = map->tileheight;
-    Rectangle map_rect = {0.0f, 0.0f, (float)(map->width * tw), (float)(map->height * th)};
-    Rectangle vis = intersect_rect(map_rect, padded_view);
-    if (vis.width <= 0.0f || vis.height <= 0.0f) return false;
+    gfx_rect map_rect = {0.0f, 0.0f, (float)(map->width * tw), (float)(map->height * th)};
+    gfx_rect vis = intersect_rect(map_rect, padded_view);
+    if (vis.w <= 0.0f || vis.h <= 0.0f) return false;
 
     int startX = (int)floorf(vis.x / (float)tw);
     int startY = (int)floorf(vis.y / (float)th);
-    int endX   = (int)ceilf((vis.x + vis.width) / (float)tw);
-    int endY   = (int)ceilf((vis.y + vis.height) / (float)th);
+    int endX   = (int)ceilf((vis.x + vis.w) / (float)tw);
+    int endY   = (int)ceilf((vis.y + vis.h) / (float)th);
 
     if (startX < 0) startX = 0;
     if (startY < 0) startY = 0;
@@ -49,8 +49,8 @@ typedef struct {
     const tiled_tileset_t* ts;
     size_t ts_idx;
     tex_handle_t tex_handle;
-    Texture2D tex_value;
-    Rectangle src;
+    const gfx_texture* tex_value;
+    gfx_rect src;
     int local_index;
     int draw_index;
 } resolved_gid_t;
@@ -126,8 +126,8 @@ static bool resolve_gid_draw(const world_map_t* map,
     if (ts_idx >= tr->texture_count) return false;
 
     tex_handle_t handle = tr->tilesets[ts_idx];
-    Texture2D tex = asset_backend_resolve_texture_value(handle);
-    if (tex.id == 0) return false;
+    const gfx_texture* tex = asset_lookup_texture(handle);
+    if (!tex) return false;
 
     int local = (int)gid - ts->first_gid;
     if (local < 0 || local >= ts->tilecount) return false;
@@ -137,12 +137,12 @@ static bool resolve_gid_draw(const world_map_t* map,
 
     int sx = (draw_index % columns) * ts->tilewidth;
     int sy = (draw_index / columns) * ts->tileheight;
-    Rectangle src = { (float)sx, (float)sy, (float)ts->tilewidth, (float)ts->tileheight };
+    gfx_rect src = { (float)sx, (float)sy, (float)ts->tilewidth, (float)ts->tileheight };
     if (flip_h) {
-        src.width = -src.width;
+        src.w = -src.w;
     }
     if (flip_v) {
-        src.height = -src.height;
+        src.h = -src.h;
     }
 
     *out = (resolved_gid_t){
@@ -160,7 +160,7 @@ static bool resolve_gid_draw(const world_map_t* map,
 }
 
 static void draw_or_enqueue_resolved(const resolved_gid_t* r,
-                                     Rectangle dst,
+                                     gfx_rect dst,
                                      float painter_key,
                                      bool painter_tile,
                                      painter_queue_ctx_t* painter_ctx)
@@ -170,7 +170,7 @@ static void draw_or_enqueue_resolved(const resolved_gid_t* r,
         int seq = (int)painter_ctx->queue->size;
         ecs_sprite_view_t v = {
             .tex = r->tex_handle,
-            .src = rectf_from_rect(r->src),
+            .src = r->src,
             .x   = dst.x,
             .y   = dst.y,
             .ox  = 0.0f,
@@ -179,7 +179,7 @@ static void draw_or_enqueue_resolved(const resolved_gid_t* r,
         Item item = { .v = v, .key = painter_key, .seq = seq };
         painter_queue_push(painter_ctx, item);
     } else {
-        DrawTexturePro(r->tex_value, r->src, dst, (Vector2){0.0f, 0.0f}, 0.0f, WHITE);
+        gfx_draw_texture_pro(r->tex_value, r->src, dst, (gfx_vec2){ .x = 0.0f, .y = 0.0f }, 0.0f, GFX_WHITE);
     }
 }
 
@@ -210,7 +210,7 @@ static void draw_tile_layer(const world_map_t* map,
             bool allow_anim = !world_tile_anim_is_disabled(layer_idx, x, y);
             if (!resolve_gid_draw(map, tr, raw_gid, allow_anim, now_ms, &r, NULL, NULL)) continue;
 
-            Rectangle dst = { (float)(x * tw), (float)(y * th), (float)tw, (float)th };
+            gfx_rect dst = { (float)(x * tw), (float)(y * th), (float)tw, (float)th };
 
             bool painter_tile = (r.ts->render_painters && r.draw_index >= 0 && r.draw_index < r.ts->tilecount)
                 ? r.ts->render_painters[r.draw_index]
@@ -246,7 +246,7 @@ static size_t draw_object_layer_at_z(const world_map_t* map,
 
         float dst_w = (obj->w > 0.0f) ? obj->w : (float)r.ts->tilewidth;
         float dst_h = (obj->h > 0.0f) ? obj->h : (float)r.ts->tileheight;
-        Rectangle dst = { obj->x, obj->y - dst_h, dst_w, dst_h }; // Tiled object y is bottom
+        gfx_rect dst = { obj->x, obj->y - dst_h, dst_w, dst_h }; // Tiled object y is bottom
 
         if (!rects_intersect(dst, view->padded_view)) continue;
 
@@ -301,14 +301,14 @@ void draw_world_fallback_tiles(const render_view_t* view)
     int tilesW = 0, tilesH = 0;
     if (!world_size_tiles(&tilesW, &tilesH)) return;
 
-    Rectangle worldRect = {0.0f, 0.0f, (float)(tilesW * tileSize), (float)(tilesH * tileSize)};
-    Rectangle visible = intersect_rect(worldRect, view->padded_view);
-    if (visible.width <= 0.0f || visible.height <= 0.0f) return;
+    gfx_rect worldRect = {0.0f, 0.0f, (float)(tilesW * tileSize), (float)(tilesH * tileSize)};
+    gfx_rect visible = intersect_rect(worldRect, view->padded_view);
+    if (visible.w <= 0.0f || visible.h <= 0.0f) return;
 
     int startX = (int)floorf(visible.x / tileSize);
     int startY = (int)floorf(visible.y / tileSize);
-    int endX   = (int)ceilf((visible.x + visible.width) / tileSize);
-    int endY   = (int)ceilf((visible.y + visible.height) / tileSize);
+    int endX   = (int)ceilf((visible.x + visible.w) / tileSize);
+    int endY   = (int)ceilf((visible.y + visible.h) / tileSize);
 
     if (startX < 0) startX = 0;
     if (startY < 0) startY = 0;
@@ -320,12 +320,12 @@ void draw_world_fallback_tiles(const render_view_t* view)
             world_tile_t t = world_tile_at(tx, ty);
             switch (t) {
                 case WORLD_TILE_WALKABLE: {
-                    Color c = ((tx + ty) % 2 == 0) ? LIGHTGRAY : DARKGRAY;
-                    DrawRectangle(tx * tileSize, ty * tileSize, tileSize, tileSize, c);
+                    gfx_color c = ((tx + ty) % 2 == 0) ? GFX_LIGHTGRAY : GFX_DARKGRAY;
+                    gfx_draw_rect((gfx_rect){ .x = (float)(tx * tileSize), .y = (float)(ty * tileSize), .w = (float)tileSize, .h = (float)tileSize  }, c);
                 } break;
                 case WORLD_TILE_SOLID: {
-                    Color c = BROWN;
-                    DrawRectangle(tx * tileSize, ty * tileSize, tileSize, tileSize, c);
+                    gfx_color c = GFX_BROWN;
+                    gfx_draw_rect((gfx_rect){ .x = (float)(tx * tileSize), .y = (float)(ty * tileSize), .w = (float)tileSize, .h = (float)tileSize  }, c);
                 } break;
                 default:
                     break;

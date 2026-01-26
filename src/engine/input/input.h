@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "shared/utils/build_config.h"
-#include "shared/buttons.h"
+#include "shared/actions.h"
 
 /*
   REFERENCES:
@@ -10,7 +10,7 @@
 */
 
 /*
-  Logical buttons are defined in shared/buttons.h.
+  Logical actions are defined in shared/actions.h.
 */
 
 /*
@@ -20,9 +20,9 @@ typedef struct { float x, y; } input_vec2;
 
 /*
   Snapshot of input for systems to read.
-  - 'down' is which buttons are held during the current frame.
+  - 'down' is which actions are held during the current frame.
   - 'pressed' captures rising edges (latched for the first fixed tick).
-  - 'moveX/moveY' is a normalized vector derived from arrow/WASD buttons.
+  - 'moveX/moveY' is a normalized vector derived from arrow/WASD actions.
   - 'mouse' is the current mouse position (pixels).
   - 'mouse_wheel' is the scroll delta reported this frame.
 */
@@ -40,10 +40,10 @@ typedef struct {
 void input_init(void);
 
 /*
-  Add a physical binding (Raylib key or mouse code) to a logical button.
-  Button IDs outside the configured count are ignored.
+  Add a physical binding (Raylib key or mouse code) to a logical action.
+  Action IDs outside the configured count are ignored.
 */
-void input_bind(button_t btn, int keycode);
+void input_bind(action_t act, int keycode);
 
 /*
   Poll OS input once per render frame and build an internal snapshot.
@@ -59,10 +59,16 @@ void input_begin_frame(void);
 input_t input_for_tick(void);
 
 /*
+  Snapshot of the most recent render-frame input.
+  Useful for systems that run outside the fixed tick (e.g., debug UI).
+*/
+const input_t* input_frame_snapshot(void);
+
+/*
   Convenience checks for systems that want simple queries.
 */
-static inline bool input_down(const input_t* in, button_t b)
-{ return (in->down    & (1ull << b)) != 0; }
+static inline bool input_down(const input_t* in, action_t a)
+{ return (in->down    & (1ull << a)) != 0; }
 
-static inline bool input_pressed(const input_t* in, button_t b)
-{ return (in->pressed & (1ull << b)) != 0; }
+static inline bool input_pressed(const input_t* in, action_t a)
+{ return (in->pressed & (1ull << a)) != 0; }
