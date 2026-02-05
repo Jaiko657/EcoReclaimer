@@ -6,8 +6,8 @@
 #include "engine/ecs/ecs_engine.h"
 #include "engine/input/input.h"
 #include "engine/core/logger/logger.h"
-#include "shared/utils/bump_alloc.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/utils/bump_alloc.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>

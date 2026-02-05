@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "shared/utils/build_config.h"
 
 #define PROF_TRACE_ENABLE_JSON  (1 << 0)
 

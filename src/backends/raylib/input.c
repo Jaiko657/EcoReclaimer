@@ -1,5 +1,4 @@
 #include "engine/input/input_backend.h"
-#include "shared/utils/build_config.h"
 
 #if !defined(HEADLESS)
 
@@ -29,7 +28,7 @@ void input_backend_bind_defaults(void)
     input_bind(ACT_MOUSE_R, MOUSE_RIGHT_BUTTON);
 
 #if DEBUG_BUILD
-    input_bind(ACT_ASSET_DEBUG_PRINT, KEY_SPACE);
+    input_bind(ACT_DEBUG_ASSET_PRINT, KEY_SPACE);
 
     /* Debug toggles */
     input_bind(ACT_DEBUG_COLLIDER_ECS,     KEY_ONE);

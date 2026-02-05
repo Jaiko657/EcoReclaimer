@@ -1,4 +1,3 @@
-#include "shared/utils/build_config.h"
 
 #if DEBUG_BUILD
 
@@ -16,7 +15,7 @@
 #include "engine/ecs/ecs_engine.h"
 #include "engine/debug/debug_str/debug_str_registry.h"
 #include "engine/world/world_query.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include "engine/core/platform/platform.h"
 #include <inttypes.h>
 #include <math.h>
@@ -49,7 +48,7 @@ static bool debug_trace_next_prefix(char* out_prefix, size_t cap)
 
 void sys_debug_binds(const input_t* in)
 {
-    if (input_pressed(in, ACT_ASSET_DEBUG_PRINT)) {
+    if (input_pressed(in, ACT_DEBUG_ASSET_PRINT)) {
         asset_reload_all();
         asset_log_debug();
         ui_toast(1.0f, "Assets reloaded");

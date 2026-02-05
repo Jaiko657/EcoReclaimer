@@ -24,12 +24,12 @@ void test_engine_init_success_calls_subsystems(void)
 
     g_world_px_w = 320;
     g_world_px_h = 240;
-    g_camera_view.center = (v2f){ 5.0f, 6.0f };
+    g_camera_view.center = (gfx_vec2){ 5.0f, 6.0f };
 
     TEST_ASSERT_TRUE(engine_init("UnitTest"));
 
     TEST_ASSERT_EQUAL_INT(1, g_platform_init_calls);
-    TEST_ASSERT_EQUAL_INT(1, g_logger_use_raylib_calls);
+    TEST_ASSERT_EQUAL_INT(1, g_logger_backend_init_calls);
     TEST_ASSERT_EQUAL_INT(1, g_log_set_min_level_calls);
     TEST_ASSERT_EQUAL_INT(1, g_ui_toast_init_calls);
     TEST_ASSERT_EQUAL_INT(1, g_input_init_calls);
@@ -49,7 +49,7 @@ void test_engine_init_success_calls_subsystems(void)
     TEST_ASSERT_EQUAL_INT(0, g_renderer_init_fps);
     TEST_ASSERT_EQUAL_STRING("UnitTest", g_renderer_init_title);
 
-    TEST_ASSERT_TRUE(g_camera_set_config_calls >= 2);
+    TEST_ASSERT_TRUE(g_camera_set_config_calls >= 1);
     TEST_ASSERT_FLOAT_WITHIN(0.001f, 3.0f, g_camera_cfg.zoom);
     TEST_ASSERT_FLOAT_WITHIN(0.001f, 16.0f, g_camera_cfg.deadzone_x);
     TEST_ASSERT_FLOAT_WITHIN(0.001f, 16.0f, g_camera_cfg.deadzone_y);
@@ -135,7 +135,7 @@ void test_engine_reload_world_success_clamps_camera_to_bounds(void)
     g_renderer_bind_result = true;
     g_world_px_w = 100;
     g_world_px_h = 50;
-    g_camera_view.center = (v2f){ 120.0f, -5.0f };
+    g_camera_view.center = (gfx_vec2){ 120.0f, -5.0f };
 
     TEST_ASSERT_TRUE(engine_reload_world_from_path("custom.tmx"));
     TEST_ASSERT_EQUAL_STRING("custom.tmx", g_world_load_last_path);

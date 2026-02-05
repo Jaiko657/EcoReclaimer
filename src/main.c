@@ -18,7 +18,6 @@ static void game_shutdown_phase(engine_phase_t phase, void* data)
 
 int main(void)
 {
-    engine_phase_init();
     engine_phase_register(ENGINE_PHASE_GAME_INIT, 0, game_init_phase, NULL, "game_init");
     engine_phase_register(ENGINE_PHASE_PRE_SHUTDOWN, 0, game_shutdown_phase, NULL, "game_shutdown");
 

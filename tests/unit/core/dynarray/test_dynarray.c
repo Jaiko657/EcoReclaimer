@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "shared/utils/dynarray.h"
+#include "engine/utils/dynarray.h"
 
 typedef struct {
     int v;

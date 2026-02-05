@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "shared/utils/bump_alloc.h"
+#include "engine/utils/bump_alloc.h"
 
 void test_bump_init_sets_fields(void)
 {

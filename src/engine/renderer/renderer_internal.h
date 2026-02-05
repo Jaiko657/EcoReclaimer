@@ -3,7 +3,7 @@
 #include "engine/gfx/gfx.h"
 #include "engine/ecs/ecs.h"
 #include "engine/ecs/ecs_render.h"
-#include "shared/utils/dynarray.h"
+#include "engine/utils/dynarray.h"
 #include "engine/tiled/tiled.h"
 
 typedef struct {

@@ -51,13 +51,19 @@ Useful for quick simulation/CI-style runs.
 
 ```bash
 ./nob --headless
-HEADLESS_MAX_FRAMES=600 ./build/src/game_headless
+HEADLESS_MAX_TICKS=600 ./build/src/game_headless
 ```
 
 Build flags:
 - `--debug` enables extra debug toggles/overlays
 - `--release` forces release flags
 - `--headless` builds `build/src/game_headless`
+- `--sdl` is currently unsupported and exits with a clear error
+
+Backend layout:
+- `src/backends/raylib/*` contains raylib implementations (`gfx.c`, `input.c`, `platform.c`, `time.c`, etc.)
+- `src/backends/headless/*` contains headless implementations for CI/simulation builds
+- `src/build.c` validates required backend modules at build time and selects one backend at compile time
 
 ### Unit tests
 
@@ -108,7 +114,7 @@ Content is authored in Tiled (`assets/maps/*.tmx`) and entity prefabs (`assets/p
 - Tile/world pipeline:
   - TMX parsing + tilesets via a small XML loader (`xml.c`) and a custom Tiled module.
   - Collision built from per-tile 4x4 subtile bitmasks; static colliders merged, with “dynamic” tiles (e.g. doors) kept separate.
-- Rendering + input via Raylib (kept behind engine modules so it can be swapped; there is also a headless backend).
+- Rendering/input/platform/time are implemented per backend in `src/backends/<backend>/`, with raylib as default and headless as an alternative.
 
 ## Portability notes
 

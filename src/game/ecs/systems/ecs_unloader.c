@@ -4,7 +4,6 @@
 #include "engine/ecs/ecs_proximity.h"
 #include "game/ecs/helpers/ecs_storage_helpers.h"
 #include "engine/engine/engine_scheduler/engine_scheduler.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 
 #include <float.h>
 

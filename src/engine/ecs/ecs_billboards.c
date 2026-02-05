@@ -2,8 +2,8 @@
 #include "engine/ecs/ecs_engine.h"
 #include "engine/ecs/ecs_billboards.h"
 #include "engine/ecs/ecs_proximity.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
-#include "shared/utils/dynarray.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
+#include "engine/utils/dynarray.h"
 
 typedef struct {
     ecs_billboard_filter_fn fn;

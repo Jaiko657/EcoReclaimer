@@ -4,7 +4,6 @@
 #include <stddef.h>
 
 #include "engine/ecs/ecs.h"
-#include "shared/utils/build_config.h"
 
 typedef bool (*debug_str_fn)(ecs_entity_t e, char* out, size_t cap);
 

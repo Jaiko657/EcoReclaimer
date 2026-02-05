@@ -10,15 +10,13 @@
 #include "engine/ecs/ecs_physics.h"
 #include "engine/input/input.h"
 #include "engine/core/logger/logger.h"
-#include "engine/core/logger/logger_raylib_adapter.h"
 #include "engine/core/platform/platform.h"
 #include "engine/renderer/renderer.h"
 #include "engine/runtime/toast.h"
-#include "engine/world/world.h"
 #include "engine/world/world_query.h"
 
 int g_platform_init_calls = 0;
-int g_logger_use_raylib_calls = 0;
+int g_logger_backend_init_calls = 0;
 int g_log_set_min_level_calls = 0;
 int g_ui_toast_init_calls = 0;
 int g_ui_toast_update_calls = 0;
@@ -74,7 +72,7 @@ camera_view_t g_camera_view = {0};
 void engine_stub_reset(void)
 {
     g_platform_init_calls = 0;
-    g_logger_use_raylib_calls = 0;
+    g_logger_backend_init_calls = 0;
     g_log_set_min_level_calls = 0;
     g_ui_toast_init_calls = 0;
     g_ui_toast_update_calls = 0;
@@ -143,14 +141,9 @@ void platform_poll_events(void)
 {
 }
 
-void logger_use_raylib(void)
-{
-    g_logger_use_raylib_calls++;
-}
-
 void logger_backend_init(void)
 {
-    logger_use_raylib();
+    g_logger_backend_init_calls++;
 }
 
 void log_set_min_level(log_level_t lvl)
@@ -337,22 +330,26 @@ input_t input_for_tick(void)
     return (input_t){0};
 }
 
-void systems_tick(float dt, const input_t* in)
+void engine_scheduler_tick(float dt, const input_t* in)
 {
     (void)dt;
     (void)in;
     g_systems_tick_calls++;
 }
 
-void systems_present(float dt)
+void engine_scheduler_present(float dt)
 {
     (void)dt;
     g_systems_present_calls++;
 }
 
-void systems_registration_init(void)
+void engine_register_systems(void)
 {
     g_systems_registration_init_calls++;
+}
+
+void game_register_systems(void)
+{
     ecs_register_game_systems();
 }
 

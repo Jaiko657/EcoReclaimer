@@ -1,7 +1,7 @@
 #include "engine/ecs/ecs_engine.h"
 #include "engine/runtime/effects.h"
 #include "engine/input/input.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 
 static void sys_effects_tick_begin_impl(void)
 {

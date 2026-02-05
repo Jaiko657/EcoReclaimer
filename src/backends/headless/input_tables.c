@@ -1,4 +1,5 @@
 #include "engine/input/input_tables.h"
+#include <stddef.h>
 
 const char* key_name_from_code(int code)
 {

@@ -1,8 +1,8 @@
 //==== FROM ecs_proximity.c ====
 #include "engine/ecs/ecs_engine.h"
 #include "engine/ecs/ecs_proximity.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
-#include "shared/utils/dynarray.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
+#include "engine/utils/dynarray.h"
 
 #include <math.h>
 #include <string.h>

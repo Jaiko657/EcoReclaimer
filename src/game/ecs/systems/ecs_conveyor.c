@@ -1,7 +1,7 @@
 //==== FROM ecs_conveyor.c ====
 #include "game/ecs/ecs_game.h"
 #include "engine/ecs/ecs_proximity.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 
 #include <math.h>
 

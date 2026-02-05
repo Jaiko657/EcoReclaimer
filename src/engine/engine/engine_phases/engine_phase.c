@@ -1,7 +1,6 @@
 #include "engine/engine/engine_phases/engine_phase.h"
 #include "engine/core/logger/logger.h"
-#include "shared/utils/build_config.h"
-#include "shared/utils/dynarray.h"
+#include "engine/utils/dynarray.h"
 
 typedef struct {
     engine_phase_fn fn;
@@ -12,6 +11,15 @@ typedef struct {
 
 static DA(engine_phase_entry_t) g_phase_registry[ENGINE_PHASE_COUNT];
 static bool g_phase_initialized = false;
+
+static inline void engine_phase_ensure_initialized(void)
+{
+    if (g_phase_initialized) return;
+    for (int i = 0; i < ENGINE_PHASE_COUNT; ++i) {
+        DA_CLEAR(&g_phase_registry[i]);
+    }
+    g_phase_initialized = true;
+}
 
 #if ENGINE_PHASE_LOGGING
 static const char* engine_phase_name(engine_phase_t phase)
@@ -65,15 +73,12 @@ static void sort_phase(engine_phase_t phase)
 
 void engine_phase_init(void)
 {
-    if (g_phase_initialized) return;
-    for (int i = 0; i < ENGINE_PHASE_COUNT; ++i) {
-        DA_CLEAR(&g_phase_registry[i]);
-    }
-    g_phase_initialized = true;
+    engine_phase_ensure_initialized();
 }
 
 void engine_phase_shutdown(void)
 {
+    if (!g_phase_initialized) return;
     for (int i = 0; i < ENGINE_PHASE_COUNT; ++i) {
         DA_FREE(&g_phase_registry[i]);
     }
@@ -82,6 +87,7 @@ void engine_phase_shutdown(void)
 
 void engine_phase_register(engine_phase_t phase, int order, engine_phase_fn fn, void* data, const char* name)
 {
+    engine_phase_ensure_initialized();
     if (!fn) return;
     if (phase < 0 || phase >= ENGINE_PHASE_COUNT) {
         engine_phase_log_warn("engine_phase_register: invalid phase %d for %s", phase, name);
@@ -100,6 +106,7 @@ void engine_phase_register(engine_phase_t phase, int order, engine_phase_fn fn, 
 
 void engine_phase_run(engine_phase_t phase)
 {
+    engine_phase_ensure_initialized();
     if (phase < 0 || phase >= ENGINE_PHASE_COUNT) return;
     engine_phase_log_debug("engine_phase_run: %s order=%d name=%s count=%zu", phase, 0, NULL, g_phase_registry[phase].size);
     for (size_t i = 0; i < g_phase_registry[phase].size; ++i) {

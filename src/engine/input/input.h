@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
-#include "shared/utils/build_config.h"
 #include "shared/actions.h"
 
 /*

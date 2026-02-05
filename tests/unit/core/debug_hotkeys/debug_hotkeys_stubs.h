@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "engine/ecs/ecs.h"
-#include "game/ecs/ecs_resource_helpers.h"
+#include "game/ecs/helpers/ecs_resource_helpers.h"
 
 extern int g_asset_reload_calls;
 extern int g_asset_log_calls;

@@ -5,6 +5,7 @@
 #include "game/ecs/helpers/ecs_resource_helpers.h"
 #include "engine/engine/engine_phases/engine_phase.h"
 #include "engine/runtime/camera.h"
+#include "engine/world/world_query.h"
 #include "engine/core/logger/logger.h"
 
 // =============== ECS Storage =============
@@ -25,7 +26,25 @@ static void game_post_entities(engine_phase_t phase, void* data)
 {
     (void)phase;
     (void)data;
-    camera_set_target(ecs_find_player());
+
+    ecs_entity_t player = ecs_find_player();
+    camera_set_target(player);
+
+    camera_config_t cfg = camera_get_config();
+    int world_w = 0, world_h = 0;
+    if (world_size_px(&world_w, &world_h)) {
+        cfg.bounds = gfx_rect_xywh(0.0f, 0.0f, (float)world_w, (float)world_h);
+    }
+
+    gfx_vec2 player_pos = {0};
+    if (ecs_get_position(player, &player_pos)) {
+        cfg.position = player_pos;
+    }
+
+    cfg.zoom = 3.0f;
+    cfg.deadzone_x = 16.0f;
+    cfg.deadzone_y = 16.0f;
+    camera_set_config(&cfg);
 }
 
 // inits the ecs game related systems, components and hooks

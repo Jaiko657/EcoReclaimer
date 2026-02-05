@@ -218,7 +218,7 @@ int world_door_primary_animation_duration(world_door_handle_t handle)
     return g_world_door_primary_duration;
 }
 
-void systems_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
+void engine_scheduler_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
 {
     (void)phase; (void)order; (void)fn; (void)name;
     g_ecs_register_system_calls++;
@@ -230,8 +230,8 @@ void systems_register(systems_phase_t phase, int order, systems_fn fn, const cha
     }
 }
 
-void systems_registration_init(void)
+void game_register_systems(void)
 {
-    systems_register(PHASE_SIM_POST, 120, sys_storage_deposit_adapt, "storage_deposit");
-    systems_register(PHASE_SIM_POST, 400, sys_doors_tick_adapt, "doors_tick");
+    engine_scheduler_register(PHASE_SIM_POST, 120, sys_storage_deposit_adapt, "storage_deposit");
+    engine_scheduler_register(PHASE_SIM_POST, 295, sys_doors_tick_adapt, "doors_tick");
 }

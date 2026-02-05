@@ -1,6 +1,6 @@
 #include "unity.h"
 
-#include "engine/core/logger/logger_raylib_adapter.h"
+#include "engine/core/logger/logger_backend.h"
 #include "logger_adapter_stubs.h"
 #include "raylib.h"
 
@@ -14,16 +14,16 @@ void tearDown(void)
 {
 }
 
-void test_logger_use_raylib_installs_sink(void)
+void test_logger_backend_init_installs_sink(void)
 {
     TEST_ASSERT_NULL(logger_adapter_stub_sink());
-    logger_use_raylib();
+    logger_backend_init();
     TEST_ASSERT_NOT_NULL(logger_adapter_stub_sink());
 }
 
 void test_raylib_sink_maps_levels_and_formats_category(void)
 {
-    logger_use_raylib();
+    logger_backend_init();
 
     log_cat_t cat = { "ECS" };
     logger_adapter_stub_invoke(LOG_LVL_WARN, &cat, "x=%d", 3);
@@ -34,7 +34,7 @@ void test_raylib_sink_maps_levels_and_formats_category(void)
 
 void test_raylib_sink_handles_null_category(void)
 {
-    logger_use_raylib();
+    logger_backend_init();
 
     logger_adapter_stub_invoke(LOG_LVL_ERROR, NULL, "oops");
 
@@ -44,7 +44,7 @@ void test_raylib_sink_handles_null_category(void)
 
 void test_raylib_sink_maps_trace_level(void)
 {
-    logger_use_raylib();
+    logger_backend_init();
 
     log_cat_t cat = { "SYS" };
     logger_adapter_stub_invoke(LOG_LVL_TRACE, &cat, "trace");

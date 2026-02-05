@@ -2,7 +2,7 @@
 #include "game/ecs/ecs_game.h"
 #include "game/ecs/helpers/ecs_player_helpers.h"
 #include "engine/core/logger/logger.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 
 static void sys_anim_controller_impl(void)
 {

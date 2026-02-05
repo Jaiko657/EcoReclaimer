@@ -1,5 +1,6 @@
 #define NOB_IMPLEMENTATION
 #include "../third_party/nob.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -19,6 +20,106 @@
 #define EXE_EXT ""
 #endif
 
+typedef enum {
+    BACKEND_RAYLIB,
+    BACKEND_HEADLESS,
+} build_backend_t;
+
+typedef struct {
+    build_backend_t id;
+    const char *name;
+    const char *source_root;
+    const char *target_base;
+    bool force_debug;
+    bool define_headless;
+    const char *inputs_ini_filename;
+    const char **include_dirs;
+    size_t include_dir_count;
+    const char **link_flags;
+    size_t link_flag_count;
+} backend_config_t;
+
+static const char *REQUIRED_BACKEND_FILES[] = {
+    "gfx.c",
+    "input.c",
+    "input_tables.c",
+    "platform.c",
+    "time.c",
+    "logger_backend.c",
+};
+
+static const char *RAYLIB_INCLUDE_DIRS[] = {
+    RAYLIB_INCLUDE_DIR,
+    XML_INCLUDE_DIR,
+    "third_party/stb",
+    "src",
+};
+
+static const char *HEADLESS_INCLUDE_DIRS[] = {
+    XML_INCLUDE_DIR,
+    "third_party/stb",
+    "src",
+};
+
+#if defined(_WIN32)
+static const char *RAYLIB_LINK_FLAGS[] = {
+    "-L", RAYLIB_LIB_DIR,
+    "-lraylib",
+    "-lgdi32",
+    "-lwinmm",
+};
+
+static const char *HEADLESS_LINK_FLAGS[] = {
+};
+#else
+static const char *RAYLIB_LINK_FLAGS[] = {
+    "-L", RAYLIB_LIB_DIR,
+    "-lraylib",
+    "-lGL",
+    "-lm",
+    "-lpthread",
+    "-ldl",
+    "-lrt",
+    "-lX11",
+};
+
+static const char *HEADLESS_LINK_FLAGS[] = {
+    "-lm",
+    "-lpthread",
+    "-ldl",
+    "-lrt",
+};
+#endif
+
+static const backend_config_t BACKEND_CONFIGS[] = {
+    {
+        .id = BACKEND_RAYLIB,
+        .name = "raylib",
+        .source_root = "src/backends/raylib",
+        .target_base = "game",
+        .force_debug = false,
+        .define_headless = false,
+        .inputs_ini_filename = "inputs_raylib.ini",
+        .include_dirs = RAYLIB_INCLUDE_DIRS,
+        .include_dir_count = sizeof(RAYLIB_INCLUDE_DIRS) / sizeof(RAYLIB_INCLUDE_DIRS[0]),
+        .link_flags = RAYLIB_LINK_FLAGS,
+        .link_flag_count = sizeof(RAYLIB_LINK_FLAGS) / sizeof(RAYLIB_LINK_FLAGS[0]),
+    },
+    {
+        .id = BACKEND_HEADLESS,
+        .name = "headless",
+        .source_root = "src/backends/headless",
+        .target_base = "game_headless",
+        .force_debug = true,
+        .define_headless = true,
+        .inputs_ini_filename = "inputs_headless.ini",
+        .include_dirs = HEADLESS_INCLUDE_DIRS,
+        .include_dir_count = sizeof(HEADLESS_INCLUDE_DIRS) / sizeof(HEADLESS_INCLUDE_DIRS[0]),
+        .link_flags = HEADLESS_LINK_FLAGS,
+        .link_flag_count = sizeof(HEADLESS_LINK_FLAGS) / sizeof(HEADLESS_LINK_FLAGS[0]),
+    },
+};
+
 static bool cstr_ends_with(const char *s, const char *suffix)
 {
     if (!s || !suffix) return false;
@@ -33,96 +134,11 @@ static bool is_dot_entry(const char *name)
     return name && (strcmp(name, ".") == 0 || strcmp(name, "..") == 0);
 }
 
-static bool list_contains_cstr(const Nob_File_Paths *xs, const char *s)
+static bool is_legacy_backend_file(const char *name)
 {
-    if (!xs || !s) return false;
-    for (size_t i = 0; i < xs->count; ++i) {
-        if (xs->items[i] && strcmp(xs->items[i], s) == 0) return true;
-    }
-    return false;
-}
-
-static bool gather_headless_sources(Nob_File_Paths *out_sources, Nob_File_Paths *out_replacement_bases)
-{
-    Nob_File_Paths children = {0};
-    if (!nob_read_entire_dir("src/headless", &children)) return false;
-
-    for (size_t i = 0; i < children.count; ++i) {
-        const char *name = children.items[i];
-        if (is_dot_entry(name)) continue;
-        if (!cstr_ends_with(name, ".c")) continue;
-
-        const char *full = nob_temp_sprintf("src/headless/%s", name);
-        nob_da_append(out_sources, full);
-
-        if (cstr_ends_with(name, "_headless.c")) {
-            size_t n = strlen(name);
-            size_t suffix = strlen("_headless.c");
-            size_t base_len = (n > suffix) ? (n - suffix) : 0;
-            if (base_len == 0) continue;
-            const char *base = nob_temp_sprintf("%.*s", (int)base_len, name);
-            if (!list_contains_cstr(out_replacement_bases, base)) {
-                nob_da_append(out_replacement_bases, base);
-            }
-        }
-    }
-
-    return true;
-}
-
-typedef enum {
-    BACKEND_RAYLIB,
-    BACKEND_HEADLESS,
-    BACKEND_SDL,
-} build_backend_t;
-
-static bool filename_is_backend(const char *name, build_backend_t backend)
-{
-    if (!name) return false;
-    if (cstr_ends_with(name, "_raylib.c")) return backend == BACKEND_RAYLIB;
-    if (cstr_ends_with(name, "_headless.c")) return backend == BACKEND_HEADLESS;
-    if (cstr_ends_with(name, "_sdl.c")) return backend == BACKEND_SDL;
-    return true;
-}
-
-static bool gather_module_sources_recursive(const char *parent, const Nob_File_Paths *replacement_bases, build_backend_t backend, Nob_File_Paths *out_sources)
-{
-    Nob_File_Paths children = {0};
-    if (!nob_read_entire_dir(parent, &children)) return false;
-
-    for (size_t i = 0; i < children.count; ++i) {
-        const char *name = children.items[i];
-        if (is_dot_entry(name)) continue;
-
-        const char *full = nob_temp_sprintf("%s/%s", parent, name);
-        Nob_File_Type type = nob_get_file_type(full);
-        if (type == NOB_FILE_DIRECTORY) {
-            if (!gather_module_sources_recursive(full, replacement_bases, backend, out_sources)) return false;
-            continue;
-        }
-
-        if (type != NOB_FILE_REGULAR) continue;
-        if (!cstr_ends_with(name, ".c")) continue;
-        if (!filename_is_backend(name, backend)) continue;
-
-        size_t n = strlen(name);
-        size_t ext = strlen(".c");
-        size_t base_len = (n > ext) ? (n - ext) : n;
-        const char *base = nob_temp_sprintf("%.*s", (int)base_len, name);
-        if (replacement_bases && list_contains_cstr(replacement_bases, base)) continue;
-
-        nob_da_append(out_sources, full);
-    }
-
-    return true;
-}
-
-static bool gather_module_sources(Nob_File_Paths *out_sources, const Nob_File_Paths *replacement_bases, build_backend_t backend)
-{
-    if (!gather_module_sources_recursive("src/engine", replacement_bases, backend, out_sources)) return false;
-    if (!gather_module_sources_recursive("src/game", replacement_bases, backend, out_sources)) return false;
-    if (!gather_module_sources_recursive("src/shared", replacement_bases, backend, out_sources)) return false;
-    return true;
+    return cstr_ends_with(name, "_raylib.c")
+        || cstr_ends_with(name, "_headless.c")
+        || cstr_ends_with(name, "_sdl.c");
 }
 
 static void cmd_append_paths(Nob_Cmd *cmd, const Nob_File_Paths *paths)
@@ -132,20 +148,21 @@ static void cmd_append_paths(Nob_Cmd *cmd, const Nob_File_Paths *paths)
     }
 }
 
+static void cmd_append_cstr_array(Nob_Cmd *cmd, const char **items, size_t count)
+{
+    for (size_t i = 0; i < count; ++i) {
+        nob_cmd_append(cmd, items[i]);
+    }
+}
+
 static void cmd_append_flags(Nob_Cmd *cmd, bool debug_build)
 {
     const char *debug_flags[] = {
         "-DDEBUG_BUILD=1",
-        "-DDEBUG_COLLISION=1",
-        "-DDEBUG_TRIGGERS=1",
-        "-DDEBUG_FPS=1",
         "-g",
     };
     const char *release_flags[] = {
         "-DDEBUG_BUILD=0",
-        "-DDEBUG_COLLISION=0",
-        "-DDEBUG_TRIGGERS=0",
-        "-DDEBUG_FPS=0",
         "-DNDEBUG",
     };
 
@@ -164,73 +181,133 @@ static const char *target_path(const char *name)
     return nob_temp_sprintf("build/src/%s%s", name, EXE_EXT);
 }
 
-static bool build_game(bool debug_build)
+static bool gather_backend_sources_recursive(const char *parent, Nob_File_Paths *out_sources)
 {
-    Nob_File_Paths module_sources = {0};
-    if (!gather_module_sources(&module_sources, NULL, BACKEND_RAYLIB)) return false;
+    Nob_File_Paths children = {0};
+    if (!nob_read_entire_dir(parent, &children)) return false;
 
-    Nob_Cmd cmd = {0};
-    nob_cmd_append(&cmd, "gcc");
-    nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
-    cmd_append_flags(&cmd, debug_build);
-    nob_cmd_append(&cmd, "-I", RAYLIB_INCLUDE_DIR, "-I", XML_INCLUDE_DIR, "-I", "third_party/stb", "-I", "src");
-    nob_cmd_append(&cmd, "src/main.c");
-    cmd_append_paths(&cmd, &module_sources);
-    nob_cmd_append(&cmd, "-o", target_path(debug_build ? "game_debug" : "game"));
-    nob_cmd_append(&cmd, "-L", RAYLIB_LIB_DIR, "-lraylib");
-#if defined(_WIN32)
-    nob_cmd_append(&cmd, "-lgdi32", "-lwinmm");
-#else
-    nob_cmd_append(&cmd, "-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11");
-#endif
-    nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
+    for (size_t i = 0; i < children.count; ++i) {
+        const char *name = children.items[i];
+        if (is_dot_entry(name)) continue;
 
-    return nob_cmd_run_sync_and_reset(&cmd);
+        const char *full = nob_temp_sprintf("%s/%s", parent, name);
+        Nob_File_Type type = nob_get_file_type(full);
+
+        if (type == NOB_FILE_DIRECTORY) {
+            if (!gather_backend_sources_recursive(full, out_sources)) return false;
+            continue;
+        }
+
+        if (type != NOB_FILE_REGULAR) continue;
+        if (!cstr_ends_with(name, ".c")) continue;
+
+        nob_da_append(out_sources, full);
+    }
+
+    return true;
 }
 
-static bool build_headless(void)
+static bool gather_common_sources_recursive(const char *parent, Nob_File_Paths *out_sources)
 {
-    Nob_File_Paths headless_sources = {0};
-    Nob_File_Paths replacement_bases = {0};
-    Nob_File_Paths module_sources = {0};
-    if (!gather_headless_sources(&headless_sources, &replacement_bases)) return false;
-    if (!gather_module_sources(&module_sources, &replacement_bases, BACKEND_HEADLESS)) return false;
+    Nob_File_Paths children = {0};
+    if (!nob_read_entire_dir(parent, &children)) return false;
 
-    Nob_Cmd cmd = {0};
-    nob_cmd_append(&cmd, "gcc");
-    nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
-    cmd_append_flags(&cmd, true);
-    nob_cmd_append(&cmd, "-DHEADLESS=1");
-    nob_cmd_append(&cmd, "-I", XML_INCLUDE_DIR, "-I", "third_party/stb", "-I", "src");
-    nob_cmd_append(&cmd, "src/main.c");
-    cmd_append_paths(&cmd, &module_sources);
-    cmd_append_paths(&cmd, &headless_sources);
-    nob_cmd_append(&cmd, "-o", target_path("game_headless"));
-    nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
-#if !defined(_WIN32)
-    nob_cmd_append(&cmd, "-lm", "-lpthread", "-ldl", "-lrt");
-#endif
+    for (size_t i = 0; i < children.count; ++i) {
+        const char *name = children.items[i];
+        if (is_dot_entry(name)) continue;
 
-    return nob_cmd_run_sync_and_reset(&cmd);
+        const char *full = nob_temp_sprintf("%s/%s", parent, name);
+        Nob_File_Type type = nob_get_file_type(full);
+        if (type == NOB_FILE_DIRECTORY) {
+            if (strcmp(full, "src/backends") == 0) continue;
+            if (!gather_common_sources_recursive(full, out_sources)) return false;
+            continue;
+        }
+
+        if (type != NOB_FILE_REGULAR) continue;
+        if (!cstr_ends_with(name, ".c")) continue;
+        if (is_legacy_backend_file(name)) continue;
+
+        nob_da_append(out_sources, full);
+    }
+
+    return true;
 }
 
-static bool build_sdl(bool debug_build)
+static bool gather_common_sources(Nob_File_Paths *out_sources)
 {
-    Nob_File_Paths module_sources = {0};
-    if (!gather_module_sources(&module_sources, NULL, BACKEND_SDL)) return false;
+    if (!gather_common_sources_recursive("src/engine", out_sources)) return false;
+    if (!gather_common_sources_recursive("src/game", out_sources)) return false;
+    if (!gather_common_sources_recursive("src/shared", out_sources)) return false;
+    return true;
+}
+
+static bool validate_backend_modules(const backend_config_t *cfg)
+{
+    bool ok = true;
+    for (size_t i = 0; i < sizeof(REQUIRED_BACKEND_FILES) / sizeof(REQUIRED_BACKEND_FILES[0]); ++i) {
+        const char *name = REQUIRED_BACKEND_FILES[i];
+        const char *path = nob_temp_sprintf("%s/%s", cfg->source_root, name);
+        if (nob_get_file_type(path) != NOB_FILE_REGULAR) {
+            if (ok) {
+                nob_log(NOB_ERROR, "backend '%s' is missing required module files:", cfg->name);
+            }
+            nob_log(NOB_ERROR, "  - %s", path);
+            ok = false;
+        }
+    }
+    return ok;
+}
+
+static const backend_config_t *find_backend_config(build_backend_t id)
+{
+    for (size_t i = 0; i < sizeof(BACKEND_CONFIGS) / sizeof(BACKEND_CONFIGS[0]); ++i) {
+        if (BACKEND_CONFIGS[i].id == id) return &BACKEND_CONFIGS[i];
+    }
+    return NULL;
+}
+
+static bool build_backend_target(build_backend_t backend, bool debug_build)
+{
+    const backend_config_t *cfg = find_backend_config(backend);
+    if (!cfg) {
+        nob_log(NOB_ERROR, "unknown backend id: %d", (int)backend);
+        return false;
+    }
+
+    if (!validate_backend_modules(cfg)) return false;
+
+    Nob_File_Paths backend_sources = {0};
+    Nob_File_Paths common_sources = {0};
+
+    if (!gather_backend_sources_recursive(cfg->source_root, &backend_sources)) return false;
+    if (!gather_common_sources(&common_sources)) return false;
+
+    bool effective_debug = cfg->force_debug ? true : debug_build;
+    const char *target_name = cfg->force_debug
+        ? cfg->target_base
+        : (debug_build ? nob_temp_sprintf("%s_debug", cfg->target_base) : cfg->target_base);
 
     Nob_Cmd cmd = {0};
     nob_cmd_append(&cmd, "gcc");
     nob_cmd_append(&cmd, "-std=c99", "-Wall", "-Wextra", "-fno-fast-math", "-fno-finite-math-only");
-    cmd_append_flags(&cmd, debug_build);
-    nob_cmd_append(&cmd, "-I", XML_INCLUDE_DIR, "-I", "src");
+    cmd_append_flags(&cmd, effective_debug);
+    if (cfg->define_headless) {
+        nob_cmd_append(&cmd, "-DHEADLESS=1");
+    }
+    nob_cmd_append(&cmd, nob_temp_sprintf("-DINPUTS_INI_FILENAME=\"%s\"", cfg->inputs_ini_filename));
+
+    for (size_t i = 0; i < cfg->include_dir_count; ++i) {
+        nob_cmd_append(&cmd, "-I", cfg->include_dirs[i]);
+    }
+
     nob_cmd_append(&cmd, "src/main.c");
-    cmd_append_paths(&cmd, &module_sources);
-    nob_cmd_append(&cmd, "-o", target_path(debug_build ? "game_sdl_debug" : "game_sdl"));
+    cmd_append_paths(&cmd, &common_sources);
+    cmd_append_paths(&cmd, &backend_sources);
+
+    nob_cmd_append(&cmd, "-o", target_path(target_name));
+    cmd_append_cstr_array(&cmd, cfg->link_flags, cfg->link_flag_count);
     nob_cmd_append(&cmd, "-L", XML_LIB_DIR, "-l:" XML_LIB_NAME);
-#if !defined(_WIN32)
-    nob_cmd_append(&cmd, "-lm", "-lpthread", "-ldl", "-lrt");
-#endif
 
     return nob_cmd_run_sync_and_reset(&cmd);
 }
@@ -288,6 +365,9 @@ static bool ensure_doxyfile(void)
         "RECURSIVE = YES\n"
         "EXTRACT_ALL = YES\n"
         "GENERATE_HTML = YES\n"
+        "HTML_OUTPUT = html\n"
+        "GENERATE_XML = YES\n"
+        "XML_OUTPUT = xml\n"
         "GENERATE_LATEX = NO\n"
         "HAVE_DOT = YES\n"
         "DOT_IMAGE_FORMAT = svg\n"
@@ -322,7 +402,6 @@ int main(int argc, char **argv)
         Nob_String_View arg = nob_sv_from_cstr(argv[i]);
         if (nob_sv_eq(arg, nob_sv_from_cstr("--headless"))) {
             do_headless = true;
-            debug_build = true;
         } else if (nob_sv_eq(arg, nob_sv_from_cstr("--sdl"))) {
             do_sdl = true;
         } else if (nob_sv_eq(arg, nob_sv_from_cstr("--docs"))) {
@@ -334,6 +413,11 @@ int main(int argc, char **argv)
         }
     }
 
+    if (do_sdl) {
+        nob_log(NOB_ERROR, "--sdl is not supported in the backend-directory build. Available: default(raylib), --headless");
+        return 1;
+    }
+
     if (do_docs) {
         if (!build_docs()) return 1;
         return 0;
@@ -343,13 +427,8 @@ int main(int argc, char **argv)
     if (!nob_mkdir_if_not_exists("build/src")) return 1;
     if (!copy_assets_to_build()) return 1;
 
-    if (do_headless) {
-        if (!build_headless()) return 1;
-    } else if (do_sdl) {
-        if (!build_sdl(debug_build)) return 1;
-    } else {
-        if (!build_game(debug_build)) return 1;
-    }
+    build_backend_t backend = do_headless ? BACKEND_HEADLESS : BACKEND_RAYLIB;
+    if (!build_backend_target(backend, debug_build)) return 1;
 
     return 0;
 }

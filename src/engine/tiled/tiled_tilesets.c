@@ -1,5 +1,5 @@
 #include "engine/tiled/tiled_internal.h"
-#include "shared/utils/bump_alloc.h"
+#include "engine/utils/bump_alloc.h"
 #include "engine/core/logger/logger.h"
 
 #include <stdlib.h>

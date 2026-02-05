@@ -1,7 +1,7 @@
 #include "engine/renderer/renderer_internal.h"
 #include "engine/runtime/toast.h"
 #include "engine/renderer/renderer.h"
-#include "shared/utils/dynarray.h"
+#include "engine/utils/dynarray.h"
 
 typedef struct {
     renderer_ui_layer_fn fn;
@@ -11,9 +11,27 @@ typedef struct {
 
 static DA(renderer_ui_layer_t) g_ui_layers = {0};
 
+static void renderer_ui_layer_toast(const render_view_t* view, void* data)
+{
+    (void)view;
+    (void)data;
+
+    if (!ecs_toast_is_active()) return;
+    const char* t = ecs_toast_get_text();
+    const int fs = 20;
+    int sw = gfx_screen_width();
+    int tw = gfx_measure_text(t, fs);
+    int x = (sw - tw) / 2;
+    int y = 10;
+
+    gfx_draw_rect((gfx_rect){ .x = (float)(x - 8), .y = (float)(y - 4), .w = (float)(tw + 16), .h = 28.0f  }, GFX_COLOR(0, 0, 0, 180));
+    gfx_draw_text(t, x, y, fs, GFX_RAYWHITE);
+}
+
 void renderer_ui_registry_init(void)
 {
     DA_CLEAR(&g_ui_layers);
+    renderer_ui_register_layer(renderer_ui_layer_toast, NULL, -100);
 }
 
 static void sort_ui_layers(void)
@@ -49,19 +67,6 @@ static void renderer_ui_run_layers(const render_view_t* view)
 void draw_screen_space_ui(const render_view_t* view)
 {
     renderer_debug_draw_ui(view);
-    int sw = gfx_screen_width();
-
-    // ===== toast =====
-    if (ecs_toast_is_active()) {
-        const char* t = ecs_toast_get_text();
-        const int fs = 20;
-        int tw = gfx_measure_text(t, fs);
-        int x = (sw - tw)/2;
-        int y = 10;
-
-        gfx_draw_rect((gfx_rect){ .x = (float)(x - 8), .y = (float)(y - 4), .w = (float)(tw + 16), .h = 28.0f  }, GFX_COLOR(0, 0, 0, 180));
-        gfx_draw_text(t, x, y, fs, GFX_RAYWHITE);
-    }
 
     // ===== floating billboards (from proximity) =====
     {

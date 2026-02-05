@@ -2,7 +2,7 @@
 #include "engine/renderer/renderer.h"
 #include "engine/debug/debug_hotkeys/debug_hotkeys.h"
 #include "engine/core/time/time.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include "engine/world/world_map.h"
 
 static void renderer_world_base_adapt_impl(void)

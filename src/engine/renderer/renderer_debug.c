@@ -1,4 +1,3 @@
-#include "shared/utils/build_config.h"
 #include "engine/renderer/renderer.h"
 #include "engine/renderer/renderer_internal.h"
 #include "engine/world/world_query.h"
@@ -9,21 +8,21 @@
 
 #if DEBUG_BUILD
 
-#if DEBUG_COLLISION
+#if DEBUG_BUILD
 static bool g_draw_ecs_colliders = false;
 static bool g_draw_phys_colliders = false;
 static bool g_draw_static_colliders = false;
 #endif
 
-#if DEBUG_TRIGGERS
+#if DEBUG_BUILD
 static bool g_draw_triggers = false;
 #endif
 
-#if DEBUG_FPS
+#if DEBUG_BUILD
 static bool g_show_fps = false;
 #endif
 
-#if DEBUG_COLLISION
+#if DEBUG_BUILD
 bool renderer_toggle_ecs_colliders(void)
 {
     g_draw_ecs_colliders = !g_draw_ecs_colliders;
@@ -47,7 +46,7 @@ bool renderer_toggle_phys_colliders(void) { return false; }
 bool renderer_toggle_static_colliders(void) { return false; }
 #endif
 
-#if DEBUG_TRIGGERS
+#if DEBUG_BUILD
 bool renderer_toggle_triggers(void)
 {
     g_draw_triggers = !g_draw_triggers;
@@ -57,7 +56,7 @@ bool renderer_toggle_triggers(void)
 bool renderer_toggle_triggers(void) { return false; }
 #endif
 
-#if DEBUG_FPS
+#if DEBUG_BUILD
 bool renderer_toggle_fps_overlay(void)
 {
     g_show_fps = !g_show_fps;
@@ -69,7 +68,7 @@ bool renderer_toggle_fps_overlay(void) { return false; }
 
 #endif
 
-#if DEBUG_BUILD && DEBUG_COLLISION
+#if DEBUG_BUILD
 static gfx_rect collider_bounds_at(float x, float y, float hx, float hy)
 {
     return (gfx_rect){ .x = x - hx, .y = y - hy, .w = 2.f * hx, .h = 2.f * hy  };
@@ -162,7 +161,7 @@ static void draw_dynamic_colliders(const render_view_t* view, gfx_color color)
 
 void draw_debug_collision_overlays(const render_view_t* view)
 {
-#if DEBUG_BUILD && DEBUG_COLLISION
+#if DEBUG_BUILD
     if (!g_draw_ecs_colliders && !g_draw_phys_colliders && !g_draw_static_colliders) return;
     gfx_color ecs_color = GFX_RED;
     gfx_color phys_color = GFX_BLUE;
@@ -196,7 +195,7 @@ void draw_debug_collision_overlays(const render_view_t* view)
 
 void draw_debug_trigger_overlays(const render_view_t* view)
 {
-#if DEBUG_BUILD && DEBUG_TRIGGERS
+#if DEBUG_BUILD
     if (!g_draw_triggers) return;
     for (ecs_trigger_iter_t it = ecs_triggers_begin(); ; ) {
         ecs_trigger_view_t c;
@@ -213,7 +212,7 @@ void draw_debug_trigger_overlays(const render_view_t* view)
 
 void renderer_debug_draw_ui(const render_view_t* view)
 {
-#if DEBUG_BUILD && DEBUG_FPS
+#if DEBUG_BUILD
     (void)view;
     if (!g_show_fps) return;
 

@@ -1,8 +1,8 @@
 #include "unity.h"
 
 #include "game/ecs/ecs_game.h"
-#include "game/ecs/ecs_storage_helpers.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "game/ecs/helpers/ecs_storage_helpers.h"
+#include "game/ecs/game_register_systems.h"
 #include "ecs_game_stubs.h"
 #include "engine/ecs/ecs_render.h"
 
@@ -31,7 +31,7 @@ void test_init_entities_requires_loaded_map(void)
 
 void test_systems_registration_registers_storage_callbacks(void)
 {
-    systems_registration_init();
+    game_register_systems();
     TEST_ASSERT_TRUE(g_ecs_register_system_calls > 0);
     TEST_ASSERT_NOT_NULL(g_ecs_sys_storage);
 }
@@ -52,7 +52,7 @@ void test_sys_storage_deposit_moves_plastic_into_tardas(void)
     ecs_prox_view_t stay = { .trigger_owner = tardas, .matched_entity = plastic };
     ecs_game_stub_set_prox_stay(&stay, 1);
 
-    systems_registration_init();
+    game_register_systems();
     TEST_ASSERT_NOT_NULL(g_ecs_sys_storage);
     g_ecs_sys_storage(0.0f, NULL);
 
@@ -79,7 +79,7 @@ void test_sys_doors_intent_and_present_updates_state(void)
     ecs_prox_view_t stay = { .trigger_owner = door, .matched_entity = ecs_null() };
     ecs_game_stub_set_prox_stay(&stay, 1);
 
-    systems_registration_init();
+    game_register_systems();
     g_world_door_primary_duration = 100;
     TEST_ASSERT_NOT_NULL(g_ecs_sys_doors_tick);
     g_ecs_sys_doors_tick(0.05f, NULL);

@@ -2,7 +2,7 @@
 
 #include "engine/ecs/ecs.h"
 #include "game/ecs/ecs_game.h"
-#include "shared/utils/bump_alloc.h"
+#include "engine/utils/bump_alloc.h"
 #include "engine/input/input.h"
 
 #include <string.h>

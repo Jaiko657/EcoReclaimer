@@ -4,7 +4,7 @@
 #include "engine/prefab/registry/pf_registry.h"
 #include "game/ecs/helpers/ecs_resource_helpers.h"
 #include "engine/world/door_tiles.h"
-#include "shared/utils/dynarray.h"
+#include "engine/utils/dynarray.h"
 
 typedef struct {
     resource_type_t type;

@@ -32,10 +32,20 @@ typedef enum {
 // Signature for any registered system.
 typedef void (*systems_fn)(float dt, const input_t* in);
 
+// Adapter helpers to register systems with signatures other than (float, input_t*).
+#define SYSTEMS_ADAPT_DT(name, fn) \
+    void name(float dt, const input_t* in) { (void)in; fn(dt); }
+#define SYSTEMS_ADAPT_VOID(name, fn) \
+    void name(float dt, const input_t* in) { (void)dt; (void)in; fn(); }
+#define SYSTEMS_ADAPT_INPUT(name, fn) \
+    void name(float dt, const input_t* in) { (void)dt; fn(in); }
+#define SYSTEMS_ADAPT_BOTH(name, fn) \
+    void name(float dt, const input_t* in) { fn(dt, in); }
+
 // Registry API.
-void systems_init(void);
-void systems_register(systems_phase_t phase, int order, systems_fn fn, const char* name);
-void systems_run_phase(systems_phase_t phase, float dt, const input_t* in);
+void engine_scheduler_init(void);
+void engine_scheduler_register(systems_phase_t phase, int order, systems_fn fn, const char* name);
+void engine_scheduler_run_phase(systems_phase_t phase, float dt, const input_t* in);
 
 typedef struct {
     const char* name;
@@ -43,7 +53,7 @@ typedef struct {
     systems_fn fn;
 } systems_info_t;
 
-bool systems_get_phase_systems(systems_phase_t phase, const systems_info_t** out_list, size_t* out_count);
+bool engine_scheduler_get_phase_systems(systems_phase_t phase, const systems_info_t** out_list, size_t* out_count);
 
-void systems_tick(float dt, const input_t* in);
-void systems_present(float frame_dt);
+void engine_scheduler_tick(float dt, const input_t* in);
+void engine_scheduler_present(float frame_dt);

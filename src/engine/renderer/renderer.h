@@ -1,6 +1,5 @@
 #pragma once
 #include <stdbool.h>
-#include "shared/utils/build_config.h"
 
 typedef struct render_view_t render_view_t;
 typedef void (*renderer_ui_layer_fn)(const render_view_t* view, void* data);

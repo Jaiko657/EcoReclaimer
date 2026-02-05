@@ -1,6 +1,5 @@
 #include "engine/gfx/gfx.h"
 #include "engine/core/logger/logger.h"
-#include "shared/utils/build_config.h"
 
 #include "raylib.h"
 

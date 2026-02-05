@@ -27,12 +27,12 @@ void ecs_registration_stubs_reset(void)
     g_call_seq = 0;
 }
 
-void systems_init(void)
+void engine_scheduler_init(void)
 {
     g_systems_init_seq = ++g_call_seq;
 }
 
-void systems_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
+void engine_scheduler_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
 {
     int seq = ++g_call_seq;
     if (g_systems_registration_call_count < (int)(sizeof(g_systems_registration_calls) /

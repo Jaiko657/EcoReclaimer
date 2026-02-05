@@ -1,7 +1,7 @@
 #include "engine/asset/asset.h"
 #include "engine/asset/asset_backend.h"
 #include "engine/core/logger/logger.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 
 #include <stdlib.h>
 #include <string.h>

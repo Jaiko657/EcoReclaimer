@@ -7,7 +7,8 @@
 #include "engine/runtime/camera.h"
 #include "engine/runtime/toast.h"
 #include "engine/engine/engine_scheduler/engine_scheduler.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_register_systems.h"
+#include "game/ecs/game_register_systems.h"
 #include "engine/core/logger/logger.h"
 #include "engine/world/world.h"
 
@@ -105,11 +106,11 @@ void ecs_phys_body_destroy_for_entity(int idx)
     cmp_phys_body[idx].created = false;
 }
 
-void systems_init(void)
+void engine_scheduler_init(void)
 {
 }
 
-void systems_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
+void engine_scheduler_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
 {
     (void)phase;
     (void)order;
@@ -118,7 +119,7 @@ void systems_register(systems_phase_t phase, int order, systems_fn fn, const cha
     g_ecs_register_system_calls++;
 }
 
-void systems_run_phase(systems_phase_t phase, float dt, const input_t* in)
+void engine_scheduler_run_phase(systems_phase_t phase, float dt, const input_t* in)
 {
     (void)dt;
     (void)in;
@@ -130,62 +131,63 @@ void systems_run_phase(systems_phase_t phase, float dt, const input_t* in)
     }
 }
 
-void systems_tick(float dt, const input_t* in)
+void engine_scheduler_tick(float dt, const input_t* in)
 {
-    systems_run_phase(PHASE_INPUT, dt, in);
-    systems_run_phase(PHASE_SIM_PRE, dt, in);
-    systems_run_phase(PHASE_PHYSICS, dt, in);
-    systems_run_phase(PHASE_SIM_POST, dt, in);
-    systems_run_phase(PHASE_DEBUG, dt, in);
+    engine_scheduler_run_phase(PHASE_INPUT, dt, in);
+    engine_scheduler_run_phase(PHASE_SIM_PRE, dt, in);
+    engine_scheduler_run_phase(PHASE_PHYSICS, dt, in);
+    engine_scheduler_run_phase(PHASE_SIM_POST, dt, in);
+    engine_scheduler_run_phase(PHASE_DEBUG, dt, in);
 }
 
-void systems_present(float frame_dt)
+void engine_scheduler_present(float frame_dt)
 {
-    systems_run_phase(PHASE_PRESENT, frame_dt, NULL);
-    systems_run_phase(PHASE_RENDER, frame_dt, NULL);
+    engine_scheduler_run_phase(PHASE_PRE_RENDER, frame_dt, NULL);
+    engine_scheduler_run_phase(PHASE_RENDER, frame_dt, NULL);
 }
 
-void systems_registration_init(void)
+void engine_register_systems(void)
 {
-    systems_init();
-    ecs_register_component_destroy_hook(ENUM_PHYS_BODY, ecs_phys_body_destroy_for_entity);
-    ecs_register_phys_body_create_hook(ecs_phys_body_create_for_entity);
-    ecs_register_render_component_hooks();
-    ecs_register_grav_gun_component_hooks();
-    ecs_register_liftable_component_hooks();
-    systems_register(PHASE_INPUT,    -100, NULL, "effects_tick_begin");
-    systems_register(PHASE_INPUT,    0,   NULL, "input");
-    systems_register(PHASE_INPUT,    50,  NULL, "grav_gun_input");
-
-    systems_register(PHASE_PHYSICS,  90,  NULL, "grav_gun_motion");
-    systems_register(PHASE_SIM_PRE,  200, NULL, "animation_controller");
-
-    systems_register(PHASE_PHYSICS,  100, NULL, "physics");
-
-    systems_register(PHASE_SIM_POST, 100, NULL, "proximity_view");
-    systems_register(PHASE_SIM_POST, 175, NULL, "grav_gun_charger");
-    systems_register(PHASE_SIM_POST, 200, NULL, "billboards");
-    systems_register(PHASE_SIM_POST, 250, NULL, "grav_gun_fx");
-    systems_register(PHASE_SIM_POST, 900, NULL, "world_apply_edits");
-
-    systems_register(PHASE_PRESENT,   10,  NULL, "toast_update");
-    systems_register(PHASE_PRESENT,   20,  NULL, "camera_tick");
-    systems_register(PHASE_PRESENT,  100, NULL, "sprite_anim");
-    systems_register(PHASE_RENDER,     10, NULL, "render_begin");
-    systems_register(PHASE_RENDER,     20, NULL, "render_world_base");
-    systems_register(PHASE_RENDER,     30, NULL, "render_world_fx");
-    systems_register(PHASE_RENDER,     40, NULL, "render_world_sprites");
-    systems_register(PHASE_RENDER,     50, NULL, "render_world_overlays");
-    systems_register(PHASE_RENDER,     60, NULL, "render_world_end");
-    systems_register(PHASE_RENDER,     70, NULL, "render_ui");
-    systems_register(PHASE_RENDER,     80, NULL, "render_end");
-    systems_register(PHASE_RENDER,   1000, NULL, "asset_collect");
+    engine_scheduler_register(PHASE_INPUT, -100, NULL, "effects_tick_begin");
+    engine_scheduler_register(PHASE_PHYSICS, 100, NULL, "physics");
+    engine_scheduler_register(PHASE_SIM_POST, 100, NULL, "proximity_view");
+    engine_scheduler_register(PHASE_SIM_POST, 200, NULL, "billboards");
+    engine_scheduler_register(PHASE_SIM_POST, 300, NULL, "world_apply_edits");
+    engine_scheduler_register(PHASE_PRE_RENDER, 100, NULL, "toast_update");
+    engine_scheduler_register(PHASE_PRE_RENDER, 200, NULL, "camera_tick");
+    engine_scheduler_register(PHASE_PRE_RENDER, 300, NULL, "sprite_anim");
+    engine_scheduler_register(PHASE_RENDER, 100, NULL, "render_begin");
+    engine_scheduler_register(PHASE_RENDER, 200, NULL, "render_world_prepare");
+    engine_scheduler_register(PHASE_RENDER, 300, NULL, "render_world_base");
+    engine_scheduler_register(PHASE_RENDER, 400, NULL, "render_world_fx");
+    engine_scheduler_register(PHASE_RENDER, 500, NULL, "render_world_sprites");
+    engine_scheduler_register(PHASE_RENDER, 600, NULL, "render_world_overlays");
+    engine_scheduler_register(PHASE_RENDER, 700, NULL, "render_world_end");
+    engine_scheduler_register(PHASE_RENDER, 800, NULL, "render_ui");
+    engine_scheduler_register(PHASE_RENDER, 900, NULL, "render_end");
+    engine_scheduler_register(PHASE_RENDER, 1000, NULL, "asset_collect");
 
 #if DEBUG_BUILD
-    systems_register(PHASE_DEBUG,    100, NULL, "debug_binds");
+    engine_scheduler_register(PHASE_DEBUG, 100, NULL, "debug_binds");
 #endif
+}
 
-    ecs_register_component_destroy_hook(ENUM_DOOR, ecs_door_on_destroy);
+void game_register_systems(void)
+{
+    engine_scheduler_register(PHASE_INPUT, -95, NULL, "input");
+    engine_scheduler_register(PHASE_INPUT, -90, NULL, "grav_gun_input");
+    engine_scheduler_register(PHASE_SIM_PRE, 100, NULL, "animation_controller");
+    engine_scheduler_register(PHASE_PHYSICS, 90, NULL, "grav_gun_motion");
+    engine_scheduler_register(PHASE_PHYSICS, 95, NULL, "conveyor_apply");
+    engine_scheduler_register(PHASE_SIM_POST, 105, NULL, "conveyor_update");
+    engine_scheduler_register(PHASE_SIM_POST, 110, NULL, "recycle_bins");
+    engine_scheduler_register(PHASE_SIM_POST, 115, NULL, "recycle_anim");
+    engine_scheduler_register(PHASE_SIM_POST, 120, NULL, "storage_deposit");
+    engine_scheduler_register(PHASE_SIM_POST, 130, NULL, "unloader_tick");
+    engine_scheduler_register(PHASE_SIM_POST, 150, NULL, "grav_gun_tool");
+    engine_scheduler_register(PHASE_SIM_POST, 175, NULL, "grav_gun_charger");
+    engine_scheduler_register(PHASE_SIM_POST, 250, NULL, "grav_gun_fx");
+    engine_scheduler_register(PHASE_SIM_POST, 295, NULL, "doors_tick");
 }
 
 void ecs_register_grav_gun_component_hooks(void)

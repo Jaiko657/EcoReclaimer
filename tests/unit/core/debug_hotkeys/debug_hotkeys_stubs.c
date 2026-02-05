@@ -7,7 +7,7 @@
 #include "engine/asset/asset.h"
 #include "engine/runtime/camera.h"
 #include "engine/engine/engine_manager/engine_manager.h"
-#include "game/ecs/ecs_storage_helpers.h"
+#include "game/ecs/helpers/ecs_storage_helpers.h"
 #include "game/ecs/ecs_game.h"
 #include "engine/core/logger/logger.h"
 #include "engine/renderer/renderer.h"

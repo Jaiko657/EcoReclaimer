@@ -4,7 +4,6 @@
 #include "engine/input/input.h"
 #include "shared/actions.h"
 #include "engine/engine/engine_scheduler/engine_scheduler.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
 #include "engine/world/world_map.h"
 
 static void sys_doors_tick(float dt);

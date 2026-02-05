@@ -27,7 +27,7 @@ void tearDown(void)
 
 void test_debug_hotkeys_asset_reload_path(void)
 {
-    input_t in = make_input_pressed(ACT_ASSET_DEBUG_PRINT);
+    input_t in = make_input_pressed(ACT_DEBUG_ASSET_PRINT);
     sys_debug_binds(&in);
 
     TEST_ASSERT_EQUAL_INT(1, g_asset_reload_calls);

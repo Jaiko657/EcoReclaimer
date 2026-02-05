@@ -5,13 +5,15 @@
 #include "engine/ecs/ecs_render.h"
 #include "ecs_core_stubs.h"
 #include "engine/input/input.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_register_systems.h"
+#include "game/ecs/game_register_systems.h"
 
 void setUp(void)
 {
     ecs_core_stub_reset();
     ecs_init();
-    systems_registration_init();
+    engine_register_systems();
+    game_register_systems();
 }
 
 void tearDown(void)
@@ -37,14 +39,14 @@ void test_ecs_create_destroy_reuses_slot_and_gen(void)
 void test_ecs_init_registers_systems_and_tick_runs_phases(void)
 {
 #if DEBUG_BUILD
-    const int expected_registers = 24;
+    const int expected_registers = 33;
 #else
-    const int expected_registers = 23;
+    const int expected_registers = 32;
 #endif
     TEST_ASSERT_EQUAL_INT(expected_registers, g_ecs_register_system_calls);
 
     input_t in = {0};
-    systems_tick(0.016f, &in);
+    engine_scheduler_tick(0.016f, &in);
 
     TEST_ASSERT_EQUAL_INT(1, g_ecs_phase_calls[PHASE_INPUT]);
     TEST_ASSERT_EQUAL_INT(1, g_ecs_phase_calls[PHASE_SIM_PRE]);
@@ -59,8 +61,8 @@ void test_ecs_init_registers_systems_and_tick_runs_phases(void)
     TEST_ASSERT_EQUAL_INT(PHASE_SIM_POST, g_ecs_phase_order[3]);
     TEST_ASSERT_EQUAL_INT(PHASE_DEBUG, g_ecs_phase_order[4]);
 
-    systems_present(0.1f);
-    TEST_ASSERT_EQUAL_INT(1, g_ecs_phase_calls[PHASE_PRESENT]);
+    engine_scheduler_present(0.1f);
+    TEST_ASSERT_EQUAL_INT(1, g_ecs_phase_calls[PHASE_PRE_RENDER]);
     TEST_ASSERT_EQUAL_INT(1, g_ecs_phase_calls[PHASE_RENDER]);
 }
 

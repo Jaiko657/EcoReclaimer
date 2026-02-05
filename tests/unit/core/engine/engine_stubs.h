@@ -2,12 +2,11 @@
 
 #include <stdbool.h>
 
-#include "engine/core/engine_types.h"
 #include "engine/ecs/ecs.h"
 #include "engine/runtime/camera.h"
 
 extern int g_platform_init_calls;
-extern int g_logger_use_raylib_calls;
+extern int g_logger_backend_init_calls;
 extern int g_log_set_min_level_calls;
 extern int g_ui_toast_init_calls;
 extern int g_ui_toast_update_calls;

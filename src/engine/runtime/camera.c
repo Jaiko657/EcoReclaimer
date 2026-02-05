@@ -1,6 +1,5 @@
 #include "engine/runtime/camera.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
-#include "engine/core/logger/logger.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 
 #include <math.h>
 #include <float.h>
@@ -12,8 +11,6 @@ typedef struct {
 } camera_state_t;
 
 static camera_state_t g_camera;
-static ecs_entity_t g_camera_pending_target = {0};
-static bool g_camera_has_pending_target = false;
 
 static float clampf(float v, float lo, float hi) {
     if (v < lo) return lo;
@@ -46,23 +43,16 @@ static void camera_reset_state(void) {
 
 void camera_init(void) {
     camera_reset_state();
-    if (g_camera_has_pending_target) {
-        g_camera.config.target = g_camera_pending_target;
-        g_camera_has_pending_target = false;
-    }
 }
 
 void camera_shutdown(void) {
     camera_reset_state();
+    g_camera.initialized = false;
 }
 
 void camera_set_target(ecs_entity_t target) {
-    if (g_camera.initialized) {
-        g_camera.config.target = target;
-    } else {
-        g_camera_pending_target = target;
-        g_camera_has_pending_target = true;
-    }
+    if (!g_camera.initialized) return;
+    g_camera.config.target = target;
 }
 
 camera_config_t camera_get_config(void) {
@@ -70,14 +60,13 @@ camera_config_t camera_get_config(void) {
 }
 
 void camera_set_config(const camera_config_t* cfg) {
-    if (!cfg) return;
+    if (!g_camera.initialized || !cfg) return;
     g_camera.config = *cfg;
     if (g_camera.config.zoom <= 0.0f) g_camera.config.zoom = 1.0f;
     if (g_camera.config.padding < 0.0f) g_camera.config.padding = 0.0f;
     if (g_camera.config.deadzone_x < 0.0f) g_camera.config.deadzone_x = 0.0f;
     if (g_camera.config.deadzone_y < 0.0f) g_camera.config.deadzone_y = 0.0f;
     g_camera.current = g_camera.config.position;
-    g_camera.initialized = true;
 }
 
 static gfx_vec2 camera_target_position(void) {
@@ -94,9 +83,7 @@ static gfx_vec2 camera_target_position(void) {
 
 void camera_tick(float dt) {
     (void)dt;
-    if (!g_camera.initialized) {
-        camera_reset_state();
-    }
+    if (!g_camera.initialized) return;
 
     gfx_vec2 desired = camera_target_position();
     float dzx = g_camera.config.deadzone_x;

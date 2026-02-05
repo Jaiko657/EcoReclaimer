@@ -2,7 +2,7 @@
 #include "game/ecs/ecs_game.h"
 #include "engine/input/input.h"
 #include "shared/actions.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 
 static facing_t dir_from_input(const input_t* in, facing_t fallback)
 {

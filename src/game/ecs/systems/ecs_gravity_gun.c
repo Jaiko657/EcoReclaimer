@@ -6,7 +6,7 @@
 #include "engine/input/input.h"
 #include "shared/actions.h"
 #include "engine/runtime/toast.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include "engine/runtime/effects.h"
 #include "engine/asset/asset.h"
 #include "engine/renderer/renderer.h"

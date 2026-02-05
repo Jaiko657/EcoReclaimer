@@ -123,8 +123,8 @@ int main(int argc, char **argv)
     if (!build_tool(cc, "tests/unit/core/time/build_time.c", "build/tests/bin/build_time")) return 1;
     if (!run_tool("build/tests/bin/build_time", coverage ? "--coverage" : NULL)) return 1;
 
-    if (!build_tool(cc, "tests/unit/core/logger_raylib_adapter/build_logger_raylib_adapter.c", "build/tests/bin/build_logger_raylib_adapter")) return 1;
-    if (!run_tool("build/tests/bin/build_logger_raylib_adapter", coverage ? "--coverage" : NULL)) return 1;
+    if (!build_tool(cc, "tests/unit/core/logger_backend/build_logger_backend.c", "build/tests/bin/build_logger_backend")) return 1;
+    if (!run_tool("build/tests/bin/build_logger_backend", coverage ? "--coverage" : NULL)) return 1;
 
     if (!build_tool(cc, "tests/unit/ecs/build_ecs.c", "build/tests/bin/build_ecs")) return 1;
     if (!run_tool("build/tests/bin/build_ecs", coverage ? "--coverage" : NULL)) return 1;

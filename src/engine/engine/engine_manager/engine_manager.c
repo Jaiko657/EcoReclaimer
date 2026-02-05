@@ -10,20 +10,17 @@
 #include "engine/renderer/renderer.h"
 #include "engine/runtime/camera.h"
 #include "engine/world/world_map.h"
-#include "engine/world/world_query.h"
 #include "engine/engine/engine_scheduler/engine_scheduler.h"
-#include "engine/engine/engine_scheduler/engine_scheduler_registration.h"
+#include "engine/engine/engine_scheduler/engine_register_systems.h"
 #include "engine/core/platform/platform.h"
 #include "engine/core/time/time.h"
 #include "engine/engine/engine_phases/engine_phase.h"
 #include "engine/prefab/registry/pf_registry.h"
 #include "engine/prefab/loading/pf_loading.h"
-#include "shared/utils/build_config.h"
 
 #include <string.h>
-#include <math.h>
 
-static char g_current_tmx_path[256] = "assets/maps/start.tmx";
+static char g_current_tmx_path[256] = {0};
 
 static void remember_tmx_path(const char* path)
 {
@@ -43,31 +40,13 @@ static bool engine_init_entities(const char* tmx_path)
     return true;
 }
 
-static void sync_camera_to_world(bool snap_to_center)
-{
-    int world_w = 0, world_h = 0;
-    if (!world_size_px(&world_w, &world_h)) {
-        LOGC(LOGCAT_WORLD, LOG_LVL_WARN, "sync_camera_to_world: world size unavailable");
-    }
-    float center_x = (float)world_w * 0.5f;
-    float center_y = (float)world_h * 0.5f;
-
-    camera_config_t cam_cfg = camera_get_config();
-    cam_cfg.bounds   = gfx_rect_xywh(0.0f, 0.0f, (float)world_w, (float)world_h);
-    if (snap_to_center) {
-        cam_cfg.position = gfx_vec2_make(center_x, center_y);
-    } else {
-        // Preserve current camera position when hot reloading; clamp to new bounds.
-        gfx_vec2 current = camera_get_view().center;
-        cam_cfg.position.x = fmaxf(0.0f, fminf(current.x, (float)world_w));
-        cam_cfg.position.y = fmaxf(0.0f, fminf(current.y, (float)world_h));
-    }
-    camera_set_config(&cam_cfg);
-}
-
 static bool reload_world_from_path(const char* tmx_path)
 {
     if (!tmx_path) tmx_path = g_current_tmx_path;
+    if (!tmx_path || tmx_path[0] == '\0') {
+        LOGC(LOGCAT_MAIN, LOG_LVL_ERROR, "reload_world_from_path: no TMX path configured");
+        return false;
+    }
 
     char previous_path[sizeof(g_current_tmx_path)];
     strncpy(previous_path, g_current_tmx_path, sizeof(previous_path));
@@ -84,13 +63,26 @@ static bool reload_world_from_path(const char* tmx_path)
                 LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "Failed to revert world to previous TMX '%s'", previous_path);
             }
         }
-        sync_camera_to_world(true);
         return false;
     }
 
-    sync_camera_to_world(false);
     remember_tmx_path(tmx_path);
     return true;
+}
+
+bool engine_set_world_tmx_path(const char* tmx_path)
+{
+    if (!tmx_path || tmx_path[0] == '\0') {
+        LOGC(LOGCAT_MAIN, LOG_LVL_ERROR, "engine_set_world_tmx_path: empty TMX path");
+        return false;
+    }
+
+    if (!world_has_map()) {
+        remember_tmx_path(tmx_path);
+        return true;
+    }
+
+    return reload_world_from_path(tmx_path);
 }
 
 static bool engine_init_subsystems(const char *title)
@@ -100,21 +92,24 @@ static bool engine_init_subsystems(const char *title)
     log_set_min_level(LOG_LVL_DEBUG);
 
     ui_toast_init();
-
+    engine_scheduler_init();
     input_init();
     asset_init();
     ecs_init();
     ecs_engine_init();
-    pf_register_engine_components();
-    engine_phase_init();
+    camera_init();
+    pf_register_engine_components(); // adds the handlers for engine components to prefab module
     renderer_ui_registry_init();
+    engine_register_systems();
     engine_phase_run(ENGINE_PHASE_GAME_INIT);
-    systems_registration_init();
+    if (!g_current_tmx_path[0]) {
+        LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "No startup TMX configured. Call engine_set_world_tmx_path() in game init.");
+        return false;
+    }
     if (!world_load_from_tmx(g_current_tmx_path, "walls")) {
         LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "Failed to load world collision");
         return false;
     }
-    camera_init();
 
     if (!renderer_init(1280, 720, title, 0)) {
         LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "renderer_init failed");
@@ -132,15 +127,7 @@ static bool engine_init_subsystems(const char *title)
         LOGC(LOGCAT_MAIN, LOG_LVL_FATAL, "init_entities failed");
         return false;
     }
-
     engine_phase_run(ENGINE_PHASE_POST_ENTITIES);
-
-    sync_camera_to_world(true);
-    camera_config_t cam_cfg = camera_get_config();
-    cam_cfg.zoom       = 3.0f;
-    cam_cfg.deadzone_x = 16.0f;
-    cam_cfg.deadzone_y = 16.0f;
-    camera_set_config(&cam_cfg);
 
     return true;
 }
@@ -148,14 +135,7 @@ static bool engine_init_subsystems(const char *title)
 bool engine_init(const char *title)
 {
     if (!engine_init_subsystems(title)) {
-        engine_phase_run(ENGINE_PHASE_PRE_SHUTDOWN);
-        engine_phase_shutdown();
-        ecs_engine_shutdown();
-        ecs_shutdown();
-        asset_shutdown();
-        renderer_shutdown();
-        camera_shutdown();
-        world_shutdown();
+        engine_shutdown();
         return false;
     }
     return true;
@@ -176,10 +156,10 @@ int engine_run(void)
 
         while (acc >= FIXED_DT) {
             input_t in = input_for_tick();
-            systems_tick(FIXED_DT, &in);
+            engine_scheduler_tick(FIXED_DT, &in);
             acc -= FIXED_DT;
         }
-        systems_present(frame);
+        engine_scheduler_present(frame);
     }
 
     return 0;

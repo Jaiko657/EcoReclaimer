@@ -12,3 +12,4 @@ int engine_run(void);
 void engine_shutdown(void);
 bool engine_reload_world(void);
 bool engine_reload_world_from_path(const char* tmx_path);
+bool engine_set_world_tmx_path(const char* tmx_path);

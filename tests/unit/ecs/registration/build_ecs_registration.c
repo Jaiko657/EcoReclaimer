@@ -109,7 +109,8 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/engine/engine/engine_scheduler/engine_scheduler_registration.c");
+    nob_da_append(&sources, "src/engine/engine/engine_scheduler/engine_register_systems.c");
+    nob_da_append(&sources, "src/game/ecs/game_register_systems.c");
     nob_da_append(&sources, "src/engine/ecs/ecs_core.c");
     nob_da_append(&sources, "src/game/ecs/ecs_game.c");
     nob_da_append(&sources, "src/game/ecs/components/ecs_component_player.c");

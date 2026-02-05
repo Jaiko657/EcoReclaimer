@@ -1,6 +1,5 @@
 #include "engine/core/logger/logger.h"
 #include "engine/core/logger/logger_backend.h"
-#include "engine/core/logger/logger_raylib_adapter.h"
 #include "raylib.h"
 #include <stdio.h>
 #include <stddef.h>
@@ -23,11 +22,7 @@ static void raylib_sink(log_level_t lvl, const log_cat_t* cat, const char* fmt, 
     TraceLog(rl, "%s", msg);
 }
 
-void logger_use_raylib(void){
-    log_set_sink(raylib_sink);
-}
-
 void logger_backend_init(void)
 {
-    logger_use_raylib();
+    log_set_sink(raylib_sink);
 }

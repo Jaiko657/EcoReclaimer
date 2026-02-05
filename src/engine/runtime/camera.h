@@ -19,6 +19,7 @@ typedef struct {
     float padding;
 } camera_view_t;
 
+// Camera module requires explicit engine-owned initialization via camera_init().
 void camera_init(void);
 void camera_shutdown(void);
 void camera_set_target(ecs_entity_t target);

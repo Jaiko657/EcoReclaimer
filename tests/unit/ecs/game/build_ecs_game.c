@@ -123,7 +123,7 @@ int main(int argc, char **argv)
     nob_da_append(&sources, "src/game/ecs/systems/ecs_conveyor.c");
     nob_da_append(&sources, "src/game/ecs/systems/ecs_anim_controller.c");
     nob_da_append(&sources, "src/game/ecs/systems/ecs_input_system.c");
-    nob_da_append(&sources, "tests/unit/ecs/game/ecs_game_stubs.c");
+    nob_da_append(&sources, "tests/unit/ecs/game/ecs/ecs_game_stubs.c");
     nob_da_append(&sources, "tests/unit/ecs/game/test_ecs_game.c");
     nob_da_append(&sources, runner_path);
 

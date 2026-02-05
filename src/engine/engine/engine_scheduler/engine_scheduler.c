@@ -1,12 +1,9 @@
 #include "engine/engine/engine_scheduler/engine_scheduler.h"
 #include "engine/core/logger/logger.h"
 #include "engine/debug/profile_trace/profiler_trace.h"
+#include "engine/utils/dynarray.h"
 #include <stdbool.h>
 #include <string.h>
-
-#ifndef ECS_MAX_SYSTEMS_PER_PHASE
-#define ECS_MAX_SYSTEMS_PER_PHASE 64
-#endif
 
 typedef struct {
     const char* name;
@@ -14,7 +11,7 @@ typedef struct {
     systems_fn fn;
 } sys_rec_t;
 
-static sys_rec_t g_systems[PHASE_COUNT][ECS_MAX_SYSTEMS_PER_PHASE];
+static DA(sys_rec_t) g_systems[PHASE_COUNT] = {0};
 static size_t    g_counts[PHASE_COUNT];
 static uint32_t  g_frame_id = 0;
 static bool      g_frame_open = false;
@@ -38,7 +35,7 @@ static const char* phase_name(systems_phase_t phase)
     }
 }
 
-static uint32_t systems_frame_begin_if_needed(void)
+static uint32_t engine_scheduler_frame_begin_if_needed(void)
 {
     if (!g_frame_open) {
         ++g_frame_id;
@@ -52,43 +49,39 @@ static void sort_phase(systems_phase_t phase)
 {
     size_t n = g_counts[phase];
     for (size_t i = 1; i < n; ++i) {
-        sys_rec_t key = g_systems[phase][i];
+        sys_rec_t key = g_systems[phase].data[i];
         size_t j = i;
-        while (j > 0 && g_systems[phase][j-1].order > key.order) {
-            g_systems[phase][j] = g_systems[phase][j-1];
+        while (j > 0 && g_systems[phase].data[j - 1].order > key.order) {
+            g_systems[phase].data[j] = g_systems[phase].data[j - 1];
             --j;
         }
-        g_systems[phase][j] = key;
+        g_systems[phase].data[j] = key;
     }
 }
 
-void systems_init(void)
+void engine_scheduler_init(void)
 {
     for (int p = 0; p < (int)PHASE_COUNT; ++p) {
+        DA_CLEAR(&g_systems[p]);
         g_counts[p] = 0;
     }
     g_frame_id = 0;
     g_frame_open = false;
 }
 
-void systems_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
+void engine_scheduler_register(systems_phase_t phase, int order, systems_fn fn, const char* name)
 {
     if ((int)phase < 0 || phase >= PHASE_COUNT) {
         LOGC(LOGCAT(SYS), LOG_LVL_WARN, "systems: invalid phase %d for %s", phase, name ? name : "(unnamed)");
         return;
     }
     size_t* cnt = &g_counts[phase];
-    if (*cnt >= ECS_MAX_SYSTEMS_PER_PHASE) {
-        LOGC(LOGCAT(SYS), LOG_LVL_ERROR, "systems: phase %d full; can't register %s", phase, name ? name : "(unnamed)");
-        return;
-    }
-
-    g_systems[phase][*cnt] = (sys_rec_t){ .name = name, .order = order, .fn = fn };
-    (*cnt)++;
+    DA_APPEND(&g_systems[phase], ((sys_rec_t){ .name = name, .order = order, .fn = fn }));
+    *cnt = g_systems[phase].size;
     sort_phase(phase);
 }
 
-void systems_run_phase(systems_phase_t phase, float dt, const input_t* in)
+void engine_scheduler_run_phase(systems_phase_t phase, float dt, const input_t* in)
 {
     if ((int)phase < 0 || phase >= PHASE_COUNT) return;
     size_t n = g_counts[phase];
@@ -96,9 +89,9 @@ void systems_run_phase(systems_phase_t phase, float dt, const input_t* in)
     uint32_t frame = g_frame_id;
     prof_trace_phase_begin(tid, frame, phase_name(phase));
     for (size_t i = 0; i < n; ++i) {
-        systems_fn fn = g_systems[phase][i].fn;
+        systems_fn fn = g_systems[phase].data[i].fn;
         if (fn) {
-            const char* sys_name = g_systems[phase][i].name;
+            const char* sys_name = g_systems[phase].data[i].name;
             if (!sys_name) sys_name = "(unnamed)";
             prof_trace_system_begin(tid, frame, sys_name);
             fn(dt, in);
@@ -108,41 +101,41 @@ void systems_run_phase(systems_phase_t phase, float dt, const input_t* in)
     prof_trace_phase_end(tid, frame);
 }
 
-bool systems_get_phase_systems(systems_phase_t phase, const systems_info_t** out_list, size_t* out_count)
+bool engine_scheduler_get_phase_systems(systems_phase_t phase, const systems_info_t** out_list, size_t* out_count)
 {
     if (out_list) *out_list = NULL;
     if (out_count) *out_count = 0;
     if (!out_list || !out_count) {
-        LOGC(LOGCAT(SYS), LOG_LVL_WARN, "systems_get_phase_systems: missing out params");
+        LOGC(LOGCAT(SYS), LOG_LVL_WARN, "engine_scheduler_get_phase_systems: missing out params");
         return false;
     }
     if ((int)phase < 0 || phase >= PHASE_COUNT) {
-        LOGC(LOGCAT(SYS), LOG_LVL_WARN, "systems_get_phase_systems: invalid phase %d", phase);
+        LOGC(LOGCAT(SYS), LOG_LVL_WARN, "engine_scheduler_get_phase_systems: invalid phase %d", phase);
         return false;
     }
-    *out_list = (const systems_info_t*)g_systems[phase];
+    *out_list = (const systems_info_t*)g_systems[phase].data;
     *out_count = g_counts[phase];
     return true;
 }
 
-void systems_tick(float dt, const input_t* in)
+void engine_scheduler_tick(float dt, const input_t* in)
 {
-    uint32_t frame = systems_frame_begin_if_needed();
+    uint32_t frame = engine_scheduler_frame_begin_if_needed();
     prof_trace_tick_begin(frame);
-    systems_run_phase(PHASE_INPUT,    dt, in);
-    systems_run_phase(PHASE_SIM_PRE,  dt, in);
-    systems_run_phase(PHASE_PHYSICS,  dt, in);
-    systems_run_phase(PHASE_SIM_POST, dt, in);
-    systems_run_phase(PHASE_DEBUG,    dt, in);
+    engine_scheduler_run_phase(PHASE_INPUT,    dt, in);
+    engine_scheduler_run_phase(PHASE_SIM_PRE,  dt, in);
+    engine_scheduler_run_phase(PHASE_PHYSICS,  dt, in);
+    engine_scheduler_run_phase(PHASE_SIM_POST, dt, in);
+    engine_scheduler_run_phase(PHASE_DEBUG,    dt, in);
     prof_trace_tick_end(frame);
 }
 
-void systems_present(float frame_dt)
+void engine_scheduler_present(float frame_dt)
 {
-    uint32_t frame = systems_frame_begin_if_needed();
+    uint32_t frame = engine_scheduler_frame_begin_if_needed();
     prof_trace_present_begin(frame);
-    systems_run_phase(PHASE_PRE_RENDER, frame_dt, NULL);
-    systems_run_phase(PHASE_RENDER, frame_dt, NULL);
+    engine_scheduler_run_phase(PHASE_PRE_RENDER, frame_dt, NULL);
+    engine_scheduler_run_phase(PHASE_RENDER, frame_dt, NULL);
     prof_trace_present_end_frame(frame);
     g_frame_open = false;
 }

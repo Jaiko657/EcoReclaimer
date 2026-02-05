@@ -63,14 +63,14 @@ int main(int argc, char **argv)
     if (!nob_mkdir_if_not_exists("build/tests")) return 1;
     if (!nob_mkdir_if_not_exists("build/tests/gen")) return 1;
     if (!nob_mkdir_if_not_exists("build/tests/obj")) return 1;
-    if (!nob_mkdir_if_not_exists("build/tests/obj/logger_raylib_adapter")) return 1;
+    if (!nob_mkdir_if_not_exists("build/tests/obj/logger_backend")) return 1;
     if (!nob_mkdir_if_not_exists("build/tests/plugins")) return 1;
 
     Nob_File_Paths test_sources = {0};
-    nob_da_append(&test_sources, "tests/unit/core/logger_raylib_adapter/test_logger_raylib_adapter.c");
+    nob_da_append(&test_sources, "tests/unit/core/logger_backend/test_logger_backend.c");
 
-    const char *runner_path = "build/tests/gen/tests_logger_raylib_adapter_runner.c";
-    if (!generate_unity_runner("logger_raylib_adapter", &test_sources, runner_path)) return 1;
+    const char *runner_path = "build/tests/gen/tests_logger_backend_runner.c";
+    if (!generate_unity_runner("logger_backend", &test_sources, runner_path)) return 1;
 
     const char *cc = getenv("CC");
     if (!cc || cc[0] == '\0') cc = "cc";
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         "-I third_party/Unity/src "
         "-I src "
         ""
-        "-I tests/unit/core/logger_raylib_adapter "
+        "-I tests/unit/core/logger_backend "
         "-I tests/unit/test_runner";
     const char *cflags = coverage
         ? "-std=c99 -Wall -Wextra -O0 -g -fPIC --coverage "
@@ -87,17 +87,17 @@ int main(int argc, char **argv)
 
     Nob_File_Paths sources = {0};
     nob_da_append(&sources, "third_party/Unity/src/unity.c");
-    nob_da_append(&sources, "src/engine/core/logger/logger_raylib_adapter_raylib.c");
-    nob_da_append(&sources, "tests/unit/core/logger_raylib_adapter/logger_adapter_stubs.c");
-    nob_da_append(&sources, "tests/unit/core/logger_raylib_adapter/raylib_stubs.c");
-    nob_da_append(&sources, "tests/unit/core/logger_raylib_adapter/test_logger_raylib_adapter.c");
+    nob_da_append(&sources, "src/backends/raylib/logger_backend.c");
+    nob_da_append(&sources, "tests/unit/core/logger_backend/logger_adapter_stubs.c");
+    nob_da_append(&sources, "tests/unit/core/logger_backend/raylib_stubs.c");
+    nob_da_append(&sources, "tests/unit/core/logger_backend/test_logger_backend.c");
     nob_da_append(&sources, runner_path);
 
     Nob_File_Paths objs = {0};
     for (size_t i = 0; i < sources.count; ++i) {
         const char *src = sources.items[i];
         const char *stem = sanitize_path_for_obj(src);
-        const char *obj = nob_temp_sprintf("build/tests/obj/logger_raylib_adapter/%s.o", stem);
+        const char *obj = nob_temp_sprintf("build/tests/obj/logger_backend/%s.o", stem);
         nob_da_append(&objs, obj);
         if (!compile_obj(cc, cflags, includes, src, obj)) return 1;
     }
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
         nob_sb_appendf(&link, "%s -shared ", cc);
         sb_append_paths(&link, &objs);
         if (coverage) nob_sb_append_cstr(&link, "--coverage ");
-        nob_sb_append_cstr(&link, "-o build/tests/plugins/tests_logger_raylib_adapter.so -lm");
+        nob_sb_append_cstr(&link, "-o build/tests/plugins/tests_logger_backend.so -lm");
         nob_sb_append_null(&link);
         nob_cmd_append(&cmd, "sh", "-lc", link.items);
         if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;

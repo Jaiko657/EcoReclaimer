@@ -1,4 +1,3 @@
-#include "shared/utils/build_config.h"
 
 #if DEBUG_BUILD
 

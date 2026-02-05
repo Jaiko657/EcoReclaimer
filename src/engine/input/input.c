@@ -8,6 +8,10 @@
 #include "engine/input/input_tables.h"
 #include "engine/core/logger/logger.h"
 
+#ifndef INPUTS_INI_FILENAME
+#define INPUTS_INI_FILENAME "inputs.ini"
+#endif
+
 #define MAX_KEYS_PER_ACT 6
 
 /*
@@ -44,7 +48,7 @@ static const char* k_action_names[ACT_COUNT] = {
     [ACT_MOUSE_L] = "ACT_MOUSE_L",
     [ACT_MOUSE_R] = "ACT_MOUSE_R",
 #if DEBUG_BUILD
-    [ACT_ASSET_DEBUG_PRINT] = "ACT_ASSET_DEBUG_PRINT",
+    [ACT_DEBUG_ASSET_PRINT] = "ACT_DEBUG_ASSET_PRINT",
     [ACT_DEBUG_COLLIDER_ECS] = "ACT_DEBUG_COLLIDER_ECS",
     [ACT_DEBUG_COLLIDER_PHYSICS] = "ACT_DEBUG_COLLIDER_PHYSICS",
     [ACT_DEBUG_COLLIDER_STATIC] = "ACT_DEBUG_COLLIDER_STATIC",
@@ -73,7 +77,6 @@ static int action_id_from_name(const char* name)
 static bool is_debug_action_name(const char* name)
 {
     if (!name) return false;
-    if (strcmp(name, "ACT_ASSET_DEBUG_PRINT") == 0) return true;
     return strncmp(name, "ACT_DEBUG_", 10) == 0;
 }
 #endif
@@ -106,7 +109,7 @@ static void bind_add(action_t a, int code){
 
 static const char* input_ini_path(void)
 {
-    return "inputs.ini";
+    return INPUTS_INI_FILENAME;
 }
 
 static void input_init_defaults(void){
@@ -205,11 +208,19 @@ static bool input_load_bindings(void)
     return true;
 }
 
+static bool input_has_any_binding(void)
+{
+    for (int a = 0; a < ACT_COUNT; ++a) {
+        if (g_bindings[a].key_count > 0) return true;
+    }
+    return false;
+}
+
 void input_init(void)
 {
     s_prev_down_bits   = 0;
     s_edges_available  = false;
-    if (!input_load_bindings()) {
+    if (!input_load_bindings() || !input_has_any_binding()) {
         input_init_defaults();
         input_save_bindings();
     }
