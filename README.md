@@ -1,6 +1,6 @@
 # final-year-project
 
-Final year project: a small 2D tile-based game built on a custom C99 engine (ECS + custom 2D collision/physics-lite) with Raylib used as the platform/renderer backend.
+Final year project: a small 2D tile-based game built on a custom C99 engine (ECS + custom 2D collision/physics-lite). Uses Raylib for full support at the moment; an OpenGL+GLFW backend is in development (no text rendering yet, bugs expected). Other backends: headless (CI/simulation).
 
 ## Quick start (Linux)
 
@@ -58,12 +58,21 @@ Build flags:
 - `--debug` enables extra debug toggles/overlays
 - `--release` forces release flags
 - `--headless` builds `build/src/game_headless`
+- `--opengl` builds `build/src/game_gl` (GLFW + OpenGL 3.3, no raylib dependency)
 - `--sdl` is currently unsupported and exits with a clear error
 
+**OpenGL backend (Linux):** Install GLFW and OpenGL dev packages (e.g. `sudo apt install libglfw3-dev libgl1-mesa-dev` on Debian/Ubuntu, or `sudo dnf install glfw-devel mesa-libGL-devel` on Fedora). Then:
+```bash
+./nob --opengl
+./build/src/game_gl
+```
+If the linker reports "cannot find -lglfw", install the GLFW library package for your distro.
+
 Backend layout:
-- `src/backends/raylib/*` contains raylib implementations (`gfx.c`, `input.c`, `platform.c`, `time.c`, etc.)
-- `src/backends/headless/*` contains headless implementations for CI/simulation builds
-- `src/build.c` validates required backend modules at build time and selects one backend at compile time
+- `src/backends/raylib/*` – raylib implementations (default)
+- `src/backends/headless/*` – headless for CI/simulation
+- `src/backends/opengl/*` – GLFW + OpenGL 3.3 (no raylib)
+- `src/build.c` validates required backend modules and selects one at compile time
 
 ### Unit tests
 

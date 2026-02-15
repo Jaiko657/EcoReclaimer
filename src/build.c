@@ -23,6 +23,7 @@
 typedef enum {
     BACKEND_RAYLIB,
     BACKEND_HEADLESS,
+    BACKEND_OPENGL,
 } build_backend_t;
 
 typedef struct {
@@ -62,6 +63,25 @@ static const char *HEADLESS_INCLUDE_DIRS[] = {
 };
 
 #if defined(_WIN32)
+#define GLFW_INCLUDE_DIR "third_party/glfw/include"
+#define GLFW_LIB_DIR "third_party/glfw/build/src"
+#else
+/* System GLFW (e.g. libglfw3-dev on Debian/Ubuntu) */
+#define GLFW_INCLUDE_DIR ""
+#define GLFW_LIB_DIR ""
+#endif
+
+/* Use raylib's bundled GLFW for headers when building opengl backend (link with -lglfw). */
+#define GLFW_INCLUDE_PATH "third_party/raylib/src/external/glfw/include"
+
+static const char *OPENGL_INCLUDE_DIRS[] = {
+    GLFW_INCLUDE_PATH,
+    XML_INCLUDE_DIR,
+    "third_party/stb",
+    "src",
+};
+
+#if defined(_WIN32)
 static const char *RAYLIB_LINK_FLAGS[] = {
     "-L", RAYLIB_LIB_DIR,
     "-lraylib",
@@ -89,6 +109,24 @@ static const char *HEADLESS_LINK_FLAGS[] = {
     "-ldl",
     "-lrt",
 };
+
+#if defined(_WIN32)
+static const char *OPENGL_LINK_FLAGS[] = {
+    "-L", GLFW_LIB_DIR,
+    "-lglfw3",
+    "-lopengl32",
+};
+#else
+static const char *OPENGL_LINK_FLAGS[] = {
+    "-lglfw",
+    "-lGL",
+    "-lm",
+    "-lpthread",
+    "-ldl",
+    "-lrt",
+    "-lX11",
+};
+#endif
 #endif
 
 static const backend_config_t BACKEND_CONFIGS[] = {
@@ -117,6 +155,19 @@ static const backend_config_t BACKEND_CONFIGS[] = {
         .include_dir_count = sizeof(HEADLESS_INCLUDE_DIRS) / sizeof(HEADLESS_INCLUDE_DIRS[0]),
         .link_flags = HEADLESS_LINK_FLAGS,
         .link_flag_count = sizeof(HEADLESS_LINK_FLAGS) / sizeof(HEADLESS_LINK_FLAGS[0]),
+    },
+    {
+        .id = BACKEND_OPENGL,
+        .name = "opengl",
+        .source_root = "src/backends/opengl",
+        .target_base = "game_gl",
+        .force_debug = false,
+        .define_headless = false,
+        .inputs_ini_filename = "inputs_opengl.ini",
+        .include_dirs = OPENGL_INCLUDE_DIRS,
+        .include_dir_count = sizeof(OPENGL_INCLUDE_DIRS) / sizeof(OPENGL_INCLUDE_DIRS[0]),
+        .link_flags = OPENGL_LINK_FLAGS,
+        .link_flag_count = sizeof(OPENGL_LINK_FLAGS) / sizeof(OPENGL_LINK_FLAGS[0]),
     },
 };
 
@@ -295,6 +346,9 @@ static bool build_backend_target(build_backend_t backend, bool debug_build)
     if (cfg->define_headless) {
         nob_cmd_append(&cmd, "-DHEADLESS=1");
     }
+    if (cfg->id == BACKEND_OPENGL) {
+        nob_cmd_append(&cmd, "-DGLFW_INCLUDE_NONE");
+    }
     nob_cmd_append(&cmd, nob_temp_sprintf("-DINPUTS_INI_FILENAME=\"%s\"", cfg->inputs_ini_filename));
 
     for (size_t i = 0; i < cfg->include_dir_count; ++i) {
@@ -395,6 +449,7 @@ int main(int argc, char **argv)
 
     bool do_headless = false;
     bool do_sdl = false;
+    bool do_opengl = false;
     bool debug_build = false;
     bool do_docs = false;
 
@@ -402,6 +457,8 @@ int main(int argc, char **argv)
         Nob_String_View arg = nob_sv_from_cstr(argv[i]);
         if (nob_sv_eq(arg, nob_sv_from_cstr("--headless"))) {
             do_headless = true;
+        } else if (nob_sv_eq(arg, nob_sv_from_cstr("--opengl"))) {
+            do_opengl = true;
         } else if (nob_sv_eq(arg, nob_sv_from_cstr("--sdl"))) {
             do_sdl = true;
         } else if (nob_sv_eq(arg, nob_sv_from_cstr("--docs"))) {
@@ -414,7 +471,11 @@ int main(int argc, char **argv)
     }
 
     if (do_sdl) {
-        nob_log(NOB_ERROR, "--sdl is not supported in the backend-directory build. Available: default(raylib), --headless");
+        nob_log(NOB_ERROR, "--sdl is not supported in the backend-directory build. Available: default(raylib), --headless, --opengl");
+        return 1;
+    }
+    if (do_headless && do_opengl) {
+        nob_log(NOB_ERROR, "cannot use both --headless and --opengl");
         return 1;
     }
 
@@ -427,7 +488,9 @@ int main(int argc, char **argv)
     if (!nob_mkdir_if_not_exists("build/src")) return 1;
     if (!copy_assets_to_build()) return 1;
 
-    build_backend_t backend = do_headless ? BACKEND_HEADLESS : BACKEND_RAYLIB;
+    build_backend_t backend = BACKEND_RAYLIB;
+    if (do_headless) backend = BACKEND_HEADLESS;
+    else if (do_opengl) backend = BACKEND_OPENGL;
     if (!build_backend_target(backend, debug_build)) return 1;
 
     return 0;

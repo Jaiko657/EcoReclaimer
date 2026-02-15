@@ -2,9 +2,7 @@
 #include "engine/core/logger/logger.h"
 #include "engine/gfx/gfx.h"
 
-#if defined(HEADLESS)
 #define STB_IMAGE_IMPLEMENTATION
-#endif
 #include "stb_image.h"
 
 #include <stdbool.h>
